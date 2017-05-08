@@ -2,13 +2,25 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Web;
+using System.Net;
+using TransacaoRest.Models;
 
 namespace TransacaoRest.DAO
 {
     public class TransacaoDAO
     {
+
+        #region Constantes Credito CPF
+
+        private string DadosNaoEncontrados = "Não foram encontrados registros";
+        private string CodigoCampanhaInvalido = "Código da campanha não é valido.";
+        private string CampanhaInvalida = "Campanha não está mais válida";
+        private string ErroBancoDeDados = "Não foi possível gerar os creditos para a campanha";
+        private string TipoCampanhaInvalido = "Campanha informada não é gatilho por ticket";
+
+        #endregion
+
+
         SqlServer sqlServer;
         string NomeClienteWs;
         public TransacaoDAO(string sNomeCliente)
@@ -19,12 +31,12 @@ namespace TransacaoRest.DAO
         
 
         /// <summary>
-        /// Metodo retorna as ultimos 6 meses de compra do cliente
+        /// Metodo retorna as compras do mês informado
         /// </summary>
         /// <returns></returns>
-        public List<TransacaoRest.Models.DadosTransacao> ConsultaUltimasTransacao(long cod_pessoa)
+        public DadosConsultaTransacao ConsultaUltimasTransacao(long cod_pessoa,string anoMes)
         {
-            List<TransacaoRest.Models.DadosTransacao> listaTransacao = new List<Models.DadosTransacao>();
+            DadosConsultaTransacao retornoConsulta = new DadosConsultaTransacao();
 
             try
             {
@@ -32,7 +44,10 @@ namespace TransacaoRest.DAO
                 sqlServer.StartConnection();
 
                 //Verifica se o usuario e a senha informado esta correto
-                sqlServer.Command.CommandText = @"select cod_transacao,cod_pessoa,dat_compra,vlr_compra,cod_loja,qtd_itens_compra,cupom from tab_transacao with(nolock) where dat_compra >=  dateadd(mm,-6,cast(getdate() as date)) and cod_pessoa = @cod_pessoa order by dat_compra desc";
+                sqlServer.Command.CommandText = @"select cod_transacao,cod_pessoa,dat_compra,vlr_compra,cod_loja,qtd_itens_compra,cupom 
+                                                  from tab_transacao with(nolock) 
+                                                  where dat_compra between '" + anoMes+"01 00:00:01' and '" +anoMes + DateTime.DaysInMonth(Convert.ToInt32(anoMes.Substring(0,4)), Convert.ToInt32(anoMes.Substring(4, 2))).ToString() + " 23:59:59' and " +
+                                                  "     cod_pessoa = @cod_pessoa order by dat_compra desc";
 
                 // **********************************************************************************
                 //Monta os parametros
@@ -48,26 +63,155 @@ namespace TransacaoRest.DAO
                 //Executa a consulta
                 sqlServer.Reader = sqlServer.Command.ExecuteReader();
 
-                listaTransacao = new Izio.Biblioteca.ModuloClasse().PreencheClassePorDataReader<TransacaoRest.Models.DadosTransacao>(sqlServer.Reader);
-
-                if (listaTransacao != null && listaTransacao.Count > 0)
+                if (sqlServer.Reader.HasRows)
                 {
-                    return listaTransacao;
+                    //Cria o payload de retorno
+                    retornoConsulta.payload = new Payload();
+
+                    retornoConsulta.payload.listaTransacao = new Izio.Biblioteca.ModuloClasse().PreencheClassePorDataReader<TransacaoRest.Models.DadosTransacao>(sqlServer.Reader);
                 }
                 else
                 {
-                    throw new TransacaoRest.Exception.ApiException.ExceptionClienteSemCompras();
+                    if (retornoConsulta.errors == null)
+                    {
+                        retornoConsulta.errors = new List<Erros>();
+                    }
+
+                    retornoConsulta.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.NotFound).ToString(), message = DadosNaoEncontrados + "." });
+                }
+            }
+            catch (System.Exception ex)
+            {
+                if (sqlServer.Reader != null && !sqlServer.Reader.IsClosed)
+                {
+                    sqlServer.Reader.Close();
                 }
 
-            }
-            catch (TransacaoRest.Exception.ApiException.ExceptionClienteSemCompras)
-            {
-                throw;
+                sqlServer.Rollback();
+
+                if (retornoConsulta.errors == null)
+                {
+                    retornoConsulta.errors = new List<Erros>();
+                }
+
+                //Adiciona o erro de negocio
+                retornoConsulta.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ErroBancoDeDados + ". Favor contactar o Administrador." });
             }
             finally
             {
-                sqlServer.CloseConnection();
+                if (sqlServer != null)
+                {
+                    if (sqlServer.Reader != null && !sqlServer.Reader.IsClosed)
+                    {
+                        sqlServer.Reader.Close();
+                        sqlServer.Reader.Dispose();
+                    }
+
+                    sqlServer.CloseConnection();
+
+                }
             }
+                return retornoConsulta;
+        }
+
+
+        /// <summary>
+        /// Metodo retorna os itens de uma compra
+        /// </summary>
+        /// <returns></returns>
+        public DadosConsultaItensTransacao ConsultaItensTransacao(long codigoTransacao)
+        {
+            DadosConsultaItensTransacao retornoConsulta = new DadosConsultaItensTransacao();
+
+            try
+            {
+                //Abre a conexao com o banco da dados
+                sqlServer.StartConnection();
+
+                //Verifica se o usuario e a senha informado esta correto
+                sqlServer.Command.CommandText = @"select 
+                                                     tri.cod_transacao,
+                                                     tri.cod_produto cod_plu,
+                                                     tri.cod_nsu cod_ean,
+                                                     coalesce(tpl.des_produto , tri.des_produto) des_produto,
+                                                     tri.vlr_item_compra,
+                                                     sum(tri.qtd_item_compra) qtd_item_compra
+                                                  from 
+                                                     tab_transacao_itens tri with(nolock)
+                                                  left join
+                                                     tab_produto_plu tpl with(nolock) on tpl.cod_plu = tri.cod_produto
+                                                  where 
+                                                     tri.cod_transacao = @cod_transacao 
+                                                  group by
+                                                     tri.cod_transacao,
+                                                     tri.cod_produto,
+                                                     tri.cod_nsu,
+                                                     coalesce(tpl.des_produto , tri.des_produto),
+                                                     tri.vlr_item_compra ";
+
+                // **********************************************************************************
+                //Monta os parametros
+                //Codigo da transacao
+                IDbDataParameter pcod_transacao = sqlServer.Command.CreateParameter();
+                pcod_transacao.ParameterName = "@cod_transacao";
+                pcod_transacao.Value = codigoTransacao;
+                sqlServer.Command.Parameters.Add(pcod_transacao);
+
+                // **********************************************************************************
+                // **********************************************************************************
+
+                //Executa a consulta
+                sqlServer.Reader = sqlServer.Command.ExecuteReader();
+
+                if (sqlServer.Reader.HasRows)
+                {
+                    //Cria o payload de retorno
+                    retornoConsulta.payload = new PayloadItensTransacao();
+
+                    retornoConsulta.payload.listaItensTransacao = new Izio.Biblioteca.ModuloClasse().PreencheClassePorDataReader<DadosItensTransacao>(sqlServer.Reader);
+                }
+                else
+                {
+                    if (retornoConsulta.errors == null)
+                    {
+                        retornoConsulta.errors = new List<Erros>();
+                    }
+
+                    retornoConsulta.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.NotFound).ToString(), message = DadosNaoEncontrados + "." });
+                }
+            }
+            catch (System.Exception ex)
+            {
+                if (sqlServer.Reader != null && !sqlServer.Reader.IsClosed)
+                {
+                    sqlServer.Reader.Close();
+                }
+
+                sqlServer.Rollback();
+
+                if (retornoConsulta.errors == null)
+                {
+                    retornoConsulta.errors = new List<Erros>();
+                }
+
+                //Adiciona o erro de negocio
+                retornoConsulta.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ErroBancoDeDados + ". Favor contactar o Administrador." });
+            }
+            finally
+            {
+                if (sqlServer != null)
+                {
+                    if (sqlServer.Reader != null && !sqlServer.Reader.IsClosed)
+                    {
+                        sqlServer.Reader.Close();
+                        sqlServer.Reader.Dispose();
+                    }
+
+                    sqlServer.CloseConnection();
+
+                }
+            }
+            return retornoConsulta;
         }
 
     }
