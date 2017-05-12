@@ -40,6 +40,7 @@
         public DateTime dat_compra { get; set; }
         public decimal vlr_compra	 { get; set; }
         public long cod_loja	 { get; set; }
+        public string des_loja { get; set; }
         public Int32 qtd_itens_compra	 { get; set; }
         public string cupom	 { get; set; }
     }
@@ -85,6 +86,7 @@
         public string des_produto { get; set; }
         public decimal vlr_item_compra { get; set; }
         public decimal qtd_item_compra { get; set; }
+        public string img_produto { get; set; }
     }
 
     #endregion

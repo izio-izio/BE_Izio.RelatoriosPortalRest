@@ -13,9 +13,11 @@ namespace TransacaoRest.DAO
         #region Constantes Credito CPF
 
         private string DadosNaoEncontrados = "Não foram encontrados registros";
+        private string DadosNaoEncontradosItens = "Não foram encontrados registros";
         private string CodigoCampanhaInvalido = "Código da campanha não é valido.";
         private string CampanhaInvalida = "Campanha não está mais válida";
-        private string ErroBancoDeDados = "Não foi possível gerar os creditos para a campanha";
+        private string ErroBancoDeDados = "Não foi possível realizar consulta das transações";
+        private string ErroBancoDeDadosItens = "Não foi possível realizar consulta dos itens da venda";
         private string TipoCampanhaInvalido = "Campanha informada não é gatilho por ticket";
 
         #endregion
@@ -44,8 +46,11 @@ namespace TransacaoRest.DAO
                 sqlServer.StartConnection();
 
                 //Verifica se o usuario e a senha informado esta correto
-                sqlServer.Command.CommandText = @"select cod_transacao,cod_pessoa,dat_compra,vlr_compra,cod_loja,qtd_itens_compra,cupom 
-                                                  from tab_transacao with(nolock) 
+                sqlServer.Command.CommandText = @"select trs.cod_transacao,trs.cod_pessoa,trs.dat_compra,trs.vlr_compra,trs.cod_loja, tlj.razao_social des_loja, trs.qtd_itens_compra,trs.cupom 
+                                                  from 
+                                                     tab_transacao trs with(nolock) 
+                                                  left join
+                                                     tab_loja tlj with(nolock) on tlj.cod_loja = trs.cod_loja 
                                                   where dat_compra between '" + anoMes+"01 00:00:01' and '" +anoMes + DateTime.DaysInMonth(Convert.ToInt32(anoMes.Substring(0,4)), Convert.ToInt32(anoMes.Substring(4, 2))).ToString() + " 23:59:59' and " +
                                                   "     cod_pessoa = @cod_pessoa order by dat_compra desc";
 
@@ -133,21 +138,37 @@ namespace TransacaoRest.DAO
                                                      tri.cod_transacao,
                                                      tri.cod_produto cod_plu,
                                                      tri.cod_nsu cod_ean,
-                                                     coalesce(tpl.des_produto , tri.des_produto) des_produto,
-                                                     tri.vlr_item_compra,
+                                                     tri.des_produto des_produto,
+                                                     round(tri.vlr_item_compra * tri.qtd_item_compra,2) vlr_item_compra,
                                                      sum(tri.qtd_item_compra) qtd_item_compra
+                                                  into 
+                                                     #tmp_transacao
                                                   from 
                                                      tab_transacao_itens tri with(nolock)
-                                                  left join
-                                                     tab_produto_plu tpl with(nolock) on tpl.cod_plu = tri.cod_produto
                                                   where 
-                                                     tri.cod_transacao = @cod_transacao 
+                                                     tri.cod_transacao =  @cod_transacao
                                                   group by
                                                      tri.cod_transacao,
                                                      tri.cod_produto,
                                                      tri.cod_nsu,
-                                                     coalesce(tpl.des_produto , tri.des_produto),
-                                                     tri.vlr_item_compra ";
+                                                     tri.des_produto,
+                                                     tri.vlr_item_compra,
+                                                     round(tri.vlr_item_compra * tri.qtd_item_compra,2)
+                                                  
+                                                  select
+                                                     tmp.cod_transacao,
+                                                     tmp.cod_plu,
+                                                     tmp.cod_ean,
+                                                     coalesce(tpl.des_produto,tmp.des_produto) des_produto,
+                                                     tmp.vlr_item_compra,
+                                                     tmp.qtd_item_compra,
+                                                     tpl.img_produto
+                                                  from
+                                                     #tmp_transacao tmp
+                                                  left join
+                                                     tab_produto_plu tpl with(nolock) on tpl.cod_plu = tmp.cod_plu
+                                                  
+                                                  drop table #tmp_transacao  ";
 
                 // **********************************************************************************
                 //Monta os parametros
@@ -177,7 +198,7 @@ namespace TransacaoRest.DAO
                         retornoConsulta.errors = new List<Erros>();
                     }
 
-                    retornoConsulta.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.NotFound).ToString(), message = DadosNaoEncontrados + "." });
+                    retornoConsulta.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.NotFound).ToString(), message = DadosNaoEncontradosItens + "." });
                 }
             }
             catch (System.Exception ex)
@@ -195,7 +216,7 @@ namespace TransacaoRest.DAO
                 }
 
                 //Adiciona o erro de negocio
-                retornoConsulta.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ErroBancoDeDados + ". Favor contactar o Administrador." });
+                retornoConsulta.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ErroBancoDeDadosItens + ". Favor contactar o Administrador." });
             }
             finally
             {
