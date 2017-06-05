@@ -10,7 +10,6 @@ C:\github_izio\BE_Izio.TransacaoRest\BE_Izio.TransacaoRest\bin\roslyn\System.Ref
 C:\github_izio\BE_Izio.TransacaoRest\BE_Izio.TransacaoRest\bin\roslyn\vbc.exe
 C:\github_izio\BE_Izio.TransacaoRest\BE_Izio.TransacaoRest\bin\roslyn\VBCSCompiler.exe
 C:\github_izio\BE_Izio.TransacaoRest\BE_Izio.TransacaoRest\bin\roslyn\VBCSCompiler.exe.config
-C:\github_izio\BE_Izio.TransacaoRest\BE_Izio.TransacaoRest\bin\TransacaoRest.dll.config
 C:\github_izio\BE_Izio.TransacaoRest\BE_Izio.TransacaoRest\bin\TransacaoRest.dll
 C:\github_izio\BE_Izio.TransacaoRest\BE_Izio.TransacaoRest\bin\TransacaoRest.pdb
 C:\github_izio\BE_Izio.TransacaoRest\BE_Izio.TransacaoRest\bin\Izio.Biblioteca.dll
