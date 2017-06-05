@@ -1,4 +1,4 @@
-﻿namespace TransacaoRest.Models
+﻿namespace TransacaoIzioRest.Models
 {
     using System;
     using System.Collections.Generic;

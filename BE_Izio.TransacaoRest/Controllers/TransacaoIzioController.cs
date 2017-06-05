@@ -1,4 +1,4 @@
-﻿namespace TransacaoRest.Controllers
+﻿namespace TransacaoIzioRest.Controllers
 {
     using System;
     using System.Net;
@@ -8,7 +8,7 @@
     using System.Collections.Generic;
     using Models;
 
-    public class TransacaoController : ApiController
+    public class TransacaoIzioController : ApiController
     {
         /// <summary>
         /// Metodo para retonar as compras dos ultimos 6 meses do cliente
@@ -19,7 +19,7 @@
         /// <returns></returns>
         // POST: api/Pessoa/Autenticar
         [HttpGet]
-        [Route("api/Transacao/ConsultaUltimasCompras/{tokenAutenticacao}/{codigoPessoa}/{anoMes}")]
+        [Route("api/TransacaoIzio/ConsultaUltimasCompras/{tokenAutenticacao}/{codigoPessoa}/{anoMes}")]
         public HttpResponseMessage ConsultaUltimasCompras([FromUri]string tokenAutenticacao,[FromUri] string codigoPessoa, [FromUri] string anoMes)
         {
             string sNomeCliente = "";
@@ -87,7 +87,7 @@
         /// <returns></returns>
         // POST: api/Pessoa/Autenticar
         [HttpGet]
-        [Route("api/Transacao/ConsultaItensCompra/{tokenAutenticacao}/{codigoTransacao}")]
+        [Route("api/TransacaoIzio/ConsultaItensCompra/{tokenAutenticacao}/{codigoTransacao}")]
         public HttpResponseMessage ConsultaItensCompra([FromUri]string tokenAutenticacao, [FromUri] string codigoTransacao)
         {
             string sNomeCliente = "";

@@ -196,13 +196,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\WebApiConfig.cs" />
-    <Compile Include="Controllers\TransacaoController.cs" />
+    <Compile Include="Controllers\TransacaoIzioController.cs" />
     <Compile Include="DAO\TransacaoDAO.cs" />
     <Compile Include="Exception\ApiException.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Models\Transacao.cs" />
+    <Compile Include="Models\TransacaoIzio.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

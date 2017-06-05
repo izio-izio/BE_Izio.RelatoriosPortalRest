@@ -3,9 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Net;
-using TransacaoRest.Models;
+using TransacaoIzioRest.Models;
 
-namespace TransacaoRest.DAO
+namespace TransacaoIzioRest.DAO
 {
     public class TransacaoDAO
     {
@@ -73,7 +73,7 @@ namespace TransacaoRest.DAO
                     //Cria o payload de retorno
                     retornoConsulta.payload = new Payload();
 
-                    retornoConsulta.payload.listaTransacao = new Izio.Biblioteca.ModuloClasse().PreencheClassePorDataReader<TransacaoRest.Models.DadosTransacao>(sqlServer.Reader);
+                    retornoConsulta.payload.listaTransacao = new Izio.Biblioteca.ModuloClasse().PreencheClassePorDataReader<TransacaoIzioRest.Models.DadosTransacao>(sqlServer.Reader);
                 }
                 else
                 {

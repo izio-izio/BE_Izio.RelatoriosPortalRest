@@ -2,7 +2,7 @@
 using System.Web.Routing;
 using NSwag.AspNet.Owin;
 
-namespace TransacaoRest
+namespace TransacaoIzioRest
 {
     public class WebApiApplication : System.Web.HttpApplication
     {
