@@ -29,6 +29,7 @@ namespace TransacaoRest.Models
         /// <summary>
         /// Codigo do CPF preenchido no PDV no inicio da compra
         /// </summary>
+        [Required]
         public string cod_cpf { get; set; }
         /// <summary>
         /// Codigo da equipe (enviar 100)
@@ -43,21 +44,25 @@ namespace TransacaoRest.Models
         /// <summary>
         /// Data e hora da realização da compra
         /// </summary>
+        [Required]
         public DateTime dat_compra { get; set; }
 
         /// <summary>
         /// Valor da compra
         /// </summary>
+        [Required]
         public decimal vlr_compra { get; set; }
 
         /// <summary>
         /// Meios de pagamentos utilizados na compra (quando tiver mais de 1, separar eles por ";". Ex: Cartão Visa; Cartão Master; Dinheiro)
         /// </summary>
+        [Required]
         public string nom_tipo_pagamento { get; set; }
 
         /// <summary>
         /// Codigo da loja que foi realizado a compra
         /// </summary>
+        [Required]
         public long cod_loja { get; set; }
 
         /// <summary>
@@ -68,11 +73,13 @@ namespace TransacaoRest.Models
         /// <summary>
         /// Quantidade de itens da compra
         /// </summary>
+        [Required]
         public Int32 qtd_itens_compra { get; set; }
 
         /// <summary>
         /// Numero do cupom fiscal 
         /// </summary>
+        [Required]
         public string cupom { get; set; }
 
         /// <summary>
@@ -88,6 +95,7 @@ namespace TransacaoRest.Models
         /// <summary>
         /// Lista com os itens da compra
         /// </summary>
+        [Required]
         public List<DadosItensTransacao> ListaItens { get; set; }
     }
 
@@ -99,26 +107,31 @@ namespace TransacaoRest.Models
         /// <summary>
         /// Codigo interno do produto
         /// </summary>
+        [Required]
         public long cod_produto { get; set; }
 
         /// <summary>
         /// Nome completo do produto
         /// </summary>
+        [Required]
         public string des_produto { get; set; }
 
         /// <summary>
         /// Codigo de barras do produto, quando não tiver enviar o mesmo do codigo do produto
         /// </summary>
+        [Required]
         public string cod_ean { get; set; }
 
         /// <summary>
         /// Valor de venda do produto
         /// </summary>
+        [Required]
         public decimal vlr_item_compra { get; set; }
 
         /// <summary>
         /// Quantidade de produtos comprados
         /// </summary>
+        [Required]
         public decimal qtd_item_compra { get; set; }
     }
 

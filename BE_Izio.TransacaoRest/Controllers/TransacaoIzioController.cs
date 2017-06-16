@@ -156,7 +156,7 @@
         /// <param name="tokenAutenticacao">Token de autorizacao para utilizacao da api</param>
         /// <returns></returns>
         [HttpPost]
-        [Route("api/ProcessamentosTransacoes/ImportaTransacao/{tokenAutenticacao}")]
+        [Route("api/TransacaoIzio/ImportaTransacao/{tokenAutenticacao}")]
         public HttpResponseMessage ImportaTransacao([FromBody] DadosTransacaoOnline objTransacao, [FromUri] string tokenAutenticacao)
         {
             //Nome do cliente que esta executando a API, gerado após validação do Token
@@ -227,7 +227,7 @@
         /// <param name="tokenAutenticacao">Token de autorizacao para utilizacao da api</param>
         /// <returns></returns>
         [HttpPost]
-        [Route("api/ProcessamentosTransacoes/ImportaLoteTransacoes/{tokenAutenticacao}")]
+        [Route("api/TransacaoIzio/ImportaLoteTransacoes/{tokenAutenticacao}")]
         public HttpResponseMessage ImportaLoteTransacoes([FromBody] List<DadosTransacaoLote> objTransacao, [FromUri] string tokenAutenticacao)
         {
             //Nome do cliente que esta executando a API, gerado após validação do Token
