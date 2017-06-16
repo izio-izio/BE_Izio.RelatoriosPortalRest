@@ -79,10 +79,10 @@ namespace TransacaoIzioRest.DAO
                 {
                     if (retornoConsulta.errors == null)
                     {
-                        retornoConsulta.errors = new List<Erros>();
+                        retornoConsulta.errors = new List<ErrosConsultaTransacao>();
                     }
 
-                    retornoConsulta.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.NotFound).ToString(), message = DadosNaoEncontrados + "." });
+                    retornoConsulta.errors.Add(new ErrosConsultaTransacao { code = Convert.ToInt32(HttpStatusCode.NotFound).ToString(), message = DadosNaoEncontrados + "." });
                 }
             }
             catch (System.Exception ex)
@@ -96,11 +96,11 @@ namespace TransacaoIzioRest.DAO
 
                 if (retornoConsulta.errors == null)
                 {
-                    retornoConsulta.errors = new List<Erros>();
+                    retornoConsulta.errors = new List<ErrosConsultaTransacao>();
                 }
 
                 //Adiciona o erro de negocio
-                retornoConsulta.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ErroBancoDeDados + ". Favor contactar o Administrador." });
+                retornoConsulta.errors.Add(new ErrosConsultaTransacao { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ErroBancoDeDados + ". Favor contactar o Administrador." });
             }
             finally
             {
@@ -195,10 +195,10 @@ namespace TransacaoIzioRest.DAO
                 {
                     if (retornoConsulta.errors == null)
                     {
-                        retornoConsulta.errors = new List<Erros>();
+                        retornoConsulta.errors = new List<ErrosConsultaTransacao>();
                     }
 
-                    retornoConsulta.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.NotFound).ToString(), message = DadosNaoEncontradosItens + "." });
+                    retornoConsulta.errors.Add(new ErrosConsultaTransacao { code = Convert.ToInt32(HttpStatusCode.NotFound).ToString(), message = DadosNaoEncontradosItens + "." });
                 }
             }
             catch (System.Exception ex)
@@ -212,11 +212,11 @@ namespace TransacaoIzioRest.DAO
 
                 if (retornoConsulta.errors == null)
                 {
-                    retornoConsulta.errors = new List<Erros>();
+                    retornoConsulta.errors = new List<ErrosConsultaTransacao>();
                 }
 
                 //Adiciona o erro de negocio
-                retornoConsulta.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ErroBancoDeDadosItens + ". Favor contactar o Administrador." });
+                retornoConsulta.errors.Add(new ErrosConsultaTransacao { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ErroBancoDeDadosItens + ". Favor contactar o Administrador." });
             }
             finally
             {

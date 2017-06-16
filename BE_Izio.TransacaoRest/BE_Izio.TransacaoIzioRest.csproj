@@ -34,6 +34,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\TransacaoRest.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -197,11 +198,15 @@
   <ItemGroup>
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\TransacaoIzioController.cs" />
+    <Compile Include="DAO\ImportaTransacaoDAO.cs" />
+    <Compile Include="DAO\ProcessamentoTransacaoDAO.cs" />
     <Compile Include="DAO\TransacaoDAO.cs" />
     <Compile Include="Exception\ApiException.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\DadosImportaTransacao.cs" />
+    <Compile Include="Models\DadosProcessamentoTransacao.cs" />
     <Compile Include="Models\TransacaoIzio.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
