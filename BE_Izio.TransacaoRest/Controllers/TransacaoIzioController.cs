@@ -53,7 +53,7 @@
                 else
                 {
                     listaErros.errors = dadosConsulta.errors;
-                    return Request.CreateResponse(HttpStatusCode.OK, listaErros);
+                    return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
                 }
             }
             catch (Exception ex)
@@ -121,7 +121,7 @@
                 else
                 {
                     listaErros.errors = dadosConsulta.errors;
-                    return Request.CreateResponse(HttpStatusCode.OK, listaErros);
+                    return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
                 }
             }
             catch (Exception ex)
@@ -151,7 +151,7 @@
         }
 
         /// <summary>
-        /// Realiza o processamento das transações carregadas em lotes para as tabelas finais do Izio
+        /// Realiza a importação da transação on-line para as tabelas finais do Izio
         /// </summary>
         /// <param name="tokenAutenticacao">Token de autorizacao para utilizacao da api</param>
         /// <returns></returns>
@@ -183,7 +183,7 @@
                 if (retorno.errors != null && retorno.errors.Count > 0)
                 {
                     listaErros.errors = retorno.errors;
-                    return Request.CreateResponse(HttpStatusCode.OK, listaErros);
+                    return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
                 }
                 else
                 {
@@ -222,7 +222,7 @@
         }
 
         /// <summary>
-        /// Realiza o processamento das transações carregadas em lotes para as tabelas finais do Izio
+        /// Realiza a importação das transações carregadas em lotes para tabela intermediária do Izio
         /// </summary>
         /// <param name="tokenAutenticacao">Token de autorizacao para utilizacao da api</param>
         /// <returns></returns>
@@ -254,14 +254,14 @@
                 if (retorno.errors != null && retorno.errors.Count > 0)
                 {
                     listaErros.errors = retorno.errors;
-                    return Request.CreateResponse(HttpStatusCode.OK, listaErros);
+                    return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
                 }
                 else
                 {
                     //retorno.payload.code = Convert.ToInt32(HttpStatusCode.OK).ToString();
                     //retorno.payload.message = "Processamento das transações realizado com sucesso.";
                     retProcessamento.payload = retorno.payload;
-                    return Request.CreateResponse(HttpStatusCode.OK, retProcessamento);
+                    return Request.CreateResponse(HttpStatusCode.Accepted, retProcessamento);
                 }
             }
             catch (System.Exception ex)

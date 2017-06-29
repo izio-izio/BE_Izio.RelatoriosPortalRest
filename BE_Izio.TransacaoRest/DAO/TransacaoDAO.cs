@@ -82,7 +82,7 @@ namespace TransacaoIzioRest.DAO
                         retornoConsulta.errors = new List<ErrosConsultaTransacao>();
                     }
 
-                    retornoConsulta.errors.Add(new ErrosConsultaTransacao { code = Convert.ToInt32(HttpStatusCode.NotFound).ToString(), message = DadosNaoEncontrados + "." });
+                    retornoConsulta.errors.Add(new ErrosConsultaTransacao { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = DadosNaoEncontrados + "." });
                 }
             }
             catch (System.Exception ex)
@@ -198,7 +198,7 @@ namespace TransacaoIzioRest.DAO
                         retornoConsulta.errors = new List<ErrosConsultaTransacao>();
                     }
 
-                    retornoConsulta.errors.Add(new ErrosConsultaTransacao { code = Convert.ToInt32(HttpStatusCode.NotFound).ToString(), message = DadosNaoEncontradosItens + "." });
+                    retornoConsulta.errors.Add(new ErrosConsultaTransacao { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = DadosNaoEncontradosItens + "." });
                 }
             }
             catch (System.Exception ex)

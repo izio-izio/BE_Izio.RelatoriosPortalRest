@@ -241,6 +241,52 @@ namespace TransacaoRest.Models
     }
 
     /// <summary>
+    /// Classe padrão com os campos viewizio_3
+    /// </summary>
+    public class DadosLoteViewizio_3
+    {
+        public long CpfCliente { get; set; }
+        public long CpfCliente_2 { get; set; }
+
+        public DateTime DataCompra { get; set; }
+        public decimal ValorCompra { get; set; }
+        public string cupom { get; set; }
+
+        public string Pdv { get; set; }
+        public Int32 CodPagto { get; set; }
+        public string MeioPagto { get; set; }
+
+        public Int32 QtdeItens { get; set; }
+
+        public string CodEAN { get; set; }
+        public long CodProduto { get; set; }
+        public string DesProduto { get; set; }
+
+        public decimal ValorUN { get; set; }
+        public decimal ValorItem { get; set; }
+        public decimal Quantidade { get; set; }
+
+        public long cod_usuario { get; set; }
+        public long cod_pessoa { get; set; }
+
+        /// <summary>
+        /// Numero do item na compra. Ex: Compra com 10 itens, teremos o item 1, item2, etc...
+        /// </summary>
+        public decimal item { get; set; }
+        public long cod_loja { get; set; }
+
+        /// <summary>
+        /// Nsu da transação quando for pago em cartão. Caso a compra seja paga em mais de um cartão, os NSU precisam vir separados por ";"
+        /// </summary>
+        public string nsu_transacao { get; set; }
+
+        /// <summary>
+        /// Data e Hota da geração Nsu da transação quando for pago em cartão. Caso a compra seja paga em mais de um cartão, as datas de geração do NSU precisam vir separados por ";"
+        /// </summary>
+        public string dat_geracao_nsu { get; set; }
+    }
+
+    /// <summary>
     /// Objeto padrão de retorno da API Rest
     /// </summary>
     public class PayloadTransacao

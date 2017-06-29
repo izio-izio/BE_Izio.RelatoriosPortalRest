@@ -6,6 +6,9 @@ using System.Net;
 using System.Text;
 using System.Web;
 using TransacaoRest.Models;
+using System.Configuration;
+using FastMember;
+using System.Data.SqlClient;
 
 namespace TransacaoIzioRest.DAO
 {
@@ -63,15 +66,15 @@ namespace TransacaoIzioRest.DAO
                 //Valida se o objeto com as transações foi preenchido
                 if (objTransacao == null)
                 {
-                    listaErros.errors.Add(new ErrosTransacao { code = Convert.ToInt32(HttpStatusCode.NotFound).ToString(), message = ObjetoTransacaoVazio });
+                    listaErros.errors.Add(new ErrosTransacao { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ObjetoTransacaoVazio });
                 }
                 else if (objTransacao.ListaItens == null)
                 {
-                    listaErros.errors.Add(new ErrosTransacao { code = Convert.ToInt32(HttpStatusCode.NotFound).ToString(), message = ObjetoItensTransacaoVazio });
+                    listaErros.errors.Add(new ErrosTransacao { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ObjetoItensTransacaoVazio });
                 }
                 else if (objTransacao.ListaItens != null && objTransacao.ListaItens.Count == 0)
                 {
-                    listaErros.errors.Add(new ErrosTransacao { code = Convert.ToInt32(HttpStatusCode.NotFound).ToString(), message = ObjetoItensTransacaoVazio });
+                    listaErros.errors.Add(new ErrosTransacao { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ObjetoItensTransacaoVazio });
                 }
 
                 //Se a lista estiver preenchida, é por que foi encontrado erros na validação
@@ -108,7 +111,7 @@ namespace TransacaoIzioRest.DAO
 
                     if (iCount == 0)
                     {
-                        listaErros.errors.Add(new ErrosTransacao { code = Convert.ToInt32(HttpStatusCode.NotFound).ToString(), message = NaoExisteCodPessoa });
+                        listaErros.errors.Add(new ErrosTransacao { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = NaoExisteCodPessoa });
                         //Log.inserirLogException(NomeClienteWs, new Exception(NaoExisteCodPessoa), 0);
 
                         retornoTransacao.errors = listaErros.errors;
@@ -339,7 +342,7 @@ namespace TransacaoIzioRest.DAO
                 sqlServer.Commit();
 
                 //Seta o retorno com sucesso
-                payloadSucesso.code = Convert.ToInt32(HttpStatusCode.OK).ToString();
+                payloadSucesso.code = Convert.ToInt32(HttpStatusCode.Accepted).ToString();
                 payloadSucesso.message = "Transação Importada com sucesso.";
 
             }
@@ -392,17 +395,19 @@ namespace TransacaoIzioRest.DAO
 
             PayloadTransacao payloadSucesso = new PayloadTransacao();
 
+            //Lista padrão para bulkt Insert na viewizio_3
+            List<DadosLoteViewizio_3> listaViewizio_3 = new List<DadosLoteViewizio_3>();
+
             try
             {
-
                 //Valida se o objeto com as transações foi preenchido
                 if (objTransacao == null)
                 {
-                    listaErros.errors.Add(new ErrosTransacao { code = Convert.ToInt32(HttpStatusCode.NotFound).ToString(), message = ObjetoTransacaoVazio });
+                    listaErros.errors.Add(new ErrosTransacao { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ObjetoTransacaoVazio });
                 }
                 else if (objTransacao.Count == 0)
                 {
-                    listaErros.errors.Add(new ErrosTransacao { code = Convert.ToInt32(HttpStatusCode.NotFound).ToString(), message = ObjetoItensTransacaoVazio });
+                    listaErros.errors.Add(new ErrosTransacao { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ObjetoItensTransacaoVazio });
                 }
 
                 //Se a lista estiver preenchida, é por que foi encontrado erros na validação
@@ -417,97 +422,176 @@ namespace TransacaoIzioRest.DAO
                 // Abre a conexao com o banco de dados
                 sqlServer.StartConnection();
 
-                //
+                //Inicia o controle de transacao
                 sqlServer.BeginTransaction();
 
-                //Monta Insert Aninhado...
-                StringBuilder queryBuilder = new StringBuilder();
-
-                Int32 iContador = 0;
-
-                //Percorre lista com os cpfs
+                //Popula lista padrão para o bulkInsert na viewizio_3
+                #region Monta lista padrão para o bulkInsert na viewizio_3
                 foreach (DadosTransacaoLote dadosTrans in objTransacao.ToList())
                 {
-                    if (iContador == 0)
+                    listaViewizio_3.Add(new DadosLoteViewizio_3
                     {
-                        queryBuilder.Clear();
-                        queryBuilder.AppendFormat("insert into viewizio_3 values");
-                    }
-
-                    //if (dadosTrans.cod_cpf.Contains("5999744601"))
-                    //{
-                    //    dadosTrans.cod_cpf = dadosTrans.cod_cpf;
-                    //}
-
-                    if (iContador < 999)
-                    {
-                        queryBuilder.AppendFormat("('{0}','{1}','{2}',{3},'{4}','{5}',{6},'{7}',{8},{9},'{10}','{11}',{12},{13},{14},{15},{16},{17},{18},'{19}','{20}'),",
-                                                     dadosTrans.cod_cpf, dadosTrans.cod_cpf,
-                                                     dadosTrans.dat_compra.ToString("yyyyMMdd HH:mm:ss"),
-                                                     dadosTrans.vlr_compra.ToString().Replace(",", "."),
-                                                     dadosTrans.cupom,
-                                                     dadosTrans.Pdv,
-                                                     "0",
-                                                     dadosTrans.des_tipo_pagamento,
-                                                     dadosTrans.qtd_itens_compra,
-                                                     dadosTrans.cod_ean,
-                                                     dadosTrans.cod_produto,
-                                                     GetStringNoAccents(dadosTrans.des_produto),
-                                                     dadosTrans.vlr_item_compra.ToString().Replace(",", "."),
-                                                     dadosTrans.vlr_item_compra.ToString().Replace(",", "."),
-                                                     dadosTrans.qtd_item_compra.ToString().Replace(",", "."),
-                                                     "1",
-                                                     dadosTrans.cod_pessoa,
-                                                     dadosTrans.nro_item_compra,
-                                                     dadosTrans.cod_loja,
-                                                     dadosTrans.nsu_transacao,
-                                                     dadosTrans.dat_geracao_nsu);
-
-                        iContador += 1;
-                    }
-                    else
-                    {
-                        //Adiciona a linha 1000 e faz o insert de 1000 registros
-                        queryBuilder.AppendFormat("('{0}','{1}','{2}',{3},'{4}','{5}',{6},'{7}',{8},{9},'{10}','{11}',{12},{13},{14},{15},{16},{17},{18},'{19}','{20}'),",
-                                                    dadosTrans.cod_cpf, dadosTrans.cod_cpf,
-                                                    dadosTrans.dat_compra.ToString("yyyyMMdd HH:mm:ss"),
-                                                    dadosTrans.vlr_compra.ToString().Replace(",", "."),
-                                                    dadosTrans.cupom,
-                                                    dadosTrans.Pdv,
-                                                    "0",
-                                                    dadosTrans.des_tipo_pagamento,
-                                                    dadosTrans.qtd_itens_compra,
-                                                    dadosTrans.cod_ean,
-                                                    dadosTrans.cod_produto,
-                                                    GetStringNoAccents(dadosTrans.des_produto),
-                                                    dadosTrans.vlr_item_compra.ToString().Replace(",", "."),
-                                                    dadosTrans.vlr_item_compra.ToString().Replace(",", "."),
-                                                    dadosTrans.qtd_item_compra.ToString().Replace(",", "."),
-                                                    "1",
-                                                    dadosTrans.cod_pessoa,
-                                                    dadosTrans.nro_item_compra,
-                                                    dadosTrans.cod_loja,
-                                                    dadosTrans.nsu_transacao,
-                                                    dadosTrans.dat_geracao_nsu);
-
-                        queryBuilder.Replace(',', ';', queryBuilder.Length - 1, 1);
-                        sqlServer.Command.CommandText = queryBuilder.ToString();
-                        sqlServer.Command.ExecuteNonQuery();
-
-                        //Zera o contador para inserir os proximos 1000
-                        iContador = 0;
-                    }
+                        CpfCliente = Convert.ToInt64(string.IsNullOrEmpty(dadosTrans.cod_cpf) == false ? dadosTrans.cod_cpf : "0"),
+                        CpfCliente_2 = Convert.ToInt64(string.IsNullOrEmpty(dadosTrans.cod_cpf) == false ? dadosTrans.cod_cpf : "0"),
+                        DataCompra = dadosTrans.dat_compra,
+                        ValorCompra = dadosTrans.vlr_compra,
+                        cupom = dadosTrans.cupom,
+                        Pdv = dadosTrans.Pdv,
+                        CodPagto = 0,
+                        MeioPagto = dadosTrans.des_tipo_pagamento,
+                        QtdeItens = dadosTrans.qtd_itens_compra,
+                        CodEAN = dadosTrans.cod_ean,
+                        CodProduto = Convert.ToInt64(dadosTrans.cod_produto),
+                        DesProduto = dadosTrans.des_produto,
+                        ValorUN = dadosTrans.vlr_item_compra,
+                        ValorItem = dadosTrans.vlr_item_compra,
+                        Quantidade = dadosTrans.qtd_item_compra,
+                        cod_usuario = 1,
+                        cod_pessoa = 0,
+                        item = dadosTrans.nro_item_compra,
+                        cod_loja = dadosTrans.cod_loja,
+                        nsu_transacao = dadosTrans.nsu_transacao,
+                        dat_geracao_nsu = dadosTrans.dat_geracao_nsu
+                    });
                 }
 
-                //Executa o insert do restante dos registros
-                queryBuilder.Replace(',', ';', queryBuilder.Length - 1, 1);
-                sqlServer.Command.CommandText = queryBuilder.ToString();
-                sqlServer.Command.ExecuteNonQuery();
+                #endregion
+
+                //Trocar a execução por bulkInsert da lista
+                #region Bulk Insert da lista
+
+                using (var bcp = new SqlBulkCopy
+                            (
+                    //Para utilizar o controle de transacao
+                            sqlServer.Command.Connection,
+                            SqlBulkCopyOptions.TableLock |
+                            SqlBulkCopyOptions.FireTriggers,
+                            sqlServer.Trans
+                            ))
+                using (
+                    var reader = ObjectReader.Create(listaViewizio_3,
+                    "CpfCliente",
+                    "CpfCliente_2",
+                    "DataCompra",
+                    "ValorCompra",
+                    "cupom",
+                    "Pdv",
+                    "CodPagto",
+                    "MeioPagto",
+                    "QtdeItens",
+                    "CodEAN",
+                    "CodProduto",
+                    "DesProduto",
+                    "ValorUN",
+                    "ValorItem",
+                    "Quantidade",
+                    "cod_usuario",
+                    "cod_pessoa",
+                    "item",
+                    "cod_loja",
+                    "nsu_transacao",
+                    "dat_geracao_nsu"))
+                {
+                    bcp.BulkCopyTimeout = ConfigurationManager.AppSettings["TimeoutExecucao"] != null ? Convert.ToInt32(ConfigurationManager.AppSettings["TimeoutExecucao"]) : 600;
+                    bcp.DestinationTableName = "viewizio_3";
+                    bcp.WriteToServer(reader);
+                }
+
+                #endregion
+
+                //***************************
+                //Metodo descontinuado
+                #region Insert aninhado - PROCEDIMENTO TODO COMENTADO
+                ////Monta Insert Aninhado...
+                //StringBuilder queryBuilder = new StringBuilder();
+
+                //Int32 iContador = 0;
+
+                ////Percorre lista com os cpfs
+                //foreach (DadosTransacaoLote dadosTrans in objTransacao.ToList())
+                //{
+                //    if (iContador == 0)
+                //    {
+                //        queryBuilder.Clear();
+                //        queryBuilder.AppendFormat("insert into viewizio_3 values");
+                //    }
+
+                //    //if (dadosTrans.cod_cpf.Contains("5999744601"))
+                //    //{
+                //    //    dadosTrans.cod_cpf = dadosTrans.cod_cpf;
+                //    //}
+
+                //    if (iContador < 999)
+                //    {
+                //        queryBuilder.AppendFormat("('{0}','{1}','{2}',{3},'{4}','{5}',{6},'{7}',{8},{9},'{10}','{11}',{12},{13},{14},{15},{16},{17},{18},'{19}','{20}'),",
+                //                                     dadosTrans.cod_cpf, dadosTrans.cod_cpf,
+                //                                     dadosTrans.dat_compra.ToString("yyyyMMdd HH:mm:ss"),
+                //                                     dadosTrans.vlr_compra.ToString().Replace(",", "."),
+                //                                     dadosTrans.cupom,
+                //                                     dadosTrans.Pdv,
+                //                                     "0",
+                //                                     dadosTrans.des_tipo_pagamento,
+                //                                     dadosTrans.qtd_itens_compra,
+                //                                     dadosTrans.cod_ean,
+                //                                     dadosTrans.cod_produto,
+                //                                     GetStringNoAccents(dadosTrans.des_produto),
+                //                                     dadosTrans.vlr_item_compra.ToString().Replace(",", "."),
+                //                                     dadosTrans.vlr_item_compra.ToString().Replace(",", "."),
+                //                                     dadosTrans.qtd_item_compra.ToString().Replace(",", "."),
+                //                                     "1",
+                //                                     dadosTrans.cod_pessoa,
+                //                                     dadosTrans.nro_item_compra,
+                //                                     dadosTrans.cod_loja,
+                //                                     dadosTrans.nsu_transacao,
+                //                                     dadosTrans.dat_geracao_nsu);
+
+                //        iContador += 1;
+                //    }
+                //    else
+                //    {
+                //        //Adiciona a linha 1000 e faz o insert de 1000 registros
+                //        queryBuilder.AppendFormat("('{0}','{1}','{2}',{3},'{4}','{5}',{6},'{7}',{8},{9},'{10}','{11}',{12},{13},{14},{15},{16},{17},{18},'{19}','{20}'),",
+                //                                    dadosTrans.cod_cpf, dadosTrans.cod_cpf,
+                //                                    dadosTrans.dat_compra.ToString("yyyyMMdd HH:mm:ss"),
+                //                                    dadosTrans.vlr_compra.ToString().Replace(",", "."),
+                //                                    dadosTrans.cupom,
+                //                                    dadosTrans.Pdv,
+                //                                    "0",
+                //                                    dadosTrans.des_tipo_pagamento,
+                //                                    dadosTrans.qtd_itens_compra,
+                //                                    dadosTrans.cod_ean,
+                //                                    dadosTrans.cod_produto,
+                //                                    GetStringNoAccents(dadosTrans.des_produto),
+                //                                    dadosTrans.vlr_item_compra.ToString().Replace(",", "."),
+                //                                    dadosTrans.vlr_item_compra.ToString().Replace(",", "."),
+                //                                    dadosTrans.qtd_item_compra.ToString().Replace(",", "."),
+                //                                    "1",
+                //                                    dadosTrans.cod_pessoa,
+                //                                    dadosTrans.nro_item_compra,
+                //                                    dadosTrans.cod_loja,
+                //                                    dadosTrans.nsu_transacao,
+                //                                    dadosTrans.dat_geracao_nsu);
+
+                //        queryBuilder.Replace(',', ';', queryBuilder.Length - 1, 1);
+                //        sqlServer.Command.CommandText = queryBuilder.ToString();
+                //        sqlServer.Command.ExecuteNonQuery();
+
+                //        //Zera o contador para inserir os proximos 1000
+                //        iContador = 0;
+                //    }
+                //}
+
+                ////Executa o insert do restante dos registros
+                //queryBuilder.Replace(',', ';', queryBuilder.Length - 1, 1);
+                //sqlServer.Command.CommandText = queryBuilder.ToString();
+                //sqlServer.Command.ExecuteNonQuery();
+
+                #endregion
 
                 sqlServer.Commit();
 
                 //Seta o retorno com sucesso
-                payloadSucesso.code = Convert.ToInt32(HttpStatusCode.OK).ToString();
+                payloadSucesso.code = Convert.ToInt32(HttpStatusCode.Accepted).ToString();
                 payloadSucesso.message = "Lote de Transações Importado com sucesso.";
             }
             catch (System.Exception ex)
