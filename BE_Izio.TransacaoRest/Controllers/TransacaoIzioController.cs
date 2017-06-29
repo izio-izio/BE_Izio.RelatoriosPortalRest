@@ -190,7 +190,7 @@
                     //retorno.payload.code = Convert.ToInt32(HttpStatusCode.OK).ToString();
                     //retorno.payload.message = "Processamento das transações realizado com sucesso.";
                     retProcessamento.payload = retorno.payload;
-                    return Request.CreateResponse(HttpStatusCode.OK, retProcessamento);
+                    return Request.CreateResponse(HttpStatusCode.Created, retProcessamento);
                 }
             }
             catch (System.Exception ex)
@@ -261,7 +261,7 @@
                     //retorno.payload.code = Convert.ToInt32(HttpStatusCode.OK).ToString();
                     //retorno.payload.message = "Processamento das transações realizado com sucesso.";
                     retProcessamento.payload = retorno.payload;
-                    return Request.CreateResponse(HttpStatusCode.Accepted, retProcessamento);
+                    return Request.CreateResponse(HttpStatusCode.Created, retProcessamento);
                 }
             }
             catch (System.Exception ex)
