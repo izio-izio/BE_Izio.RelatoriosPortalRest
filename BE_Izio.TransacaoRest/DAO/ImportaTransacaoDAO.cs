@@ -95,6 +95,7 @@ namespace TransacaoIzioRest.DAO
                 {
                     //Verifica se o codigo da pessoa informado existe na base
                     sqlServer.Command.CommandType = System.Data.CommandType.Text;
+                    sqlServer.Command.Parameters.Clear();
                     sqlServer.Command.CommandText = @"select coalesce(cod_pessoa,0) cod_pessoa from tab_pessoa with(nolock) where cod_cpf  = '" + objTransacao.cod_cpf.Replace(".", "").Replace("-", "").Trim().PadLeft(11, '0') + "'";
 
                     //Seta o codigo da pessoa do CPF informado
@@ -104,6 +105,7 @@ namespace TransacaoIzioRest.DAO
                 {
                     //Verifica se o codigo da pessoa informado existe na base
                     sqlServer.Command.CommandType = System.Data.CommandType.Text;
+                    sqlServer.Command.Parameters.Clear();
                     sqlServer.Command.CommandText = @"select count(1) from tab_pessoa with(nolock) where cod_pessoa  = " + objTransacao.cod_pessoa.ToString();
                     Int32 iCount = 0;
 
@@ -307,9 +309,11 @@ namespace TransacaoIzioRest.DAO
 
                     //Array com os NSUs da compra paga com cartão, cria array para 10 pagamentos em cartão
                     string[] arrayCodNSU = new string[10];
+                    Boolean bArrayPreechido = false;
                     if (!string.IsNullOrEmpty(objTransacao.nsu_transacao))
                     {
                         arrayCodNSU = objTransacao.nsu_transacao.Split(';');
+                        bArrayPreechido = true;
                     }
 
                     foreach (string meioPagto in ListaMeioPagto)
@@ -321,7 +325,7 @@ namespace TransacaoIzioRest.DAO
                         sqlServer.Command.Parameters.AddWithValue("@nom_tipo_pagamento", meioPagto);
 
                         //Somente para meio de pagamento diferente de dinheiro
-                        if (!meioPagto.ToUpper().Contains("DINHEIRO") && !meioPagto.ToUpper().Contains("DINHEIROS"))
+                        if (!meioPagto.ToUpper().Contains("DINHEIRO") && !meioPagto.ToUpper().Contains("DINHEIROS") && bArrayPreechido)
                         {
                             sqlServer.Command.Parameters.AddWithValue("@cod_nsu_cartao", arrayCodNSU[posSplitNSU]);
                             posSplitNSU += 1;

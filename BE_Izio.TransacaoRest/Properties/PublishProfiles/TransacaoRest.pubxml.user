@@ -157,13 +157,13 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>01/28/2015 05:03:46</publishTime>
     </File>
     <File Include="bin/TransacaoRest.dll">
-      <publishTime>06/29/2017 15:08:41</publishTime>
+      <publishTime>06/30/2017 11:36:32</publishTime>
     </File>
     <File Include="bin/TransacaoRest.pdb">
-      <publishTime>06/29/2017 15:08:41</publishTime>
+      <publishTime>06/30/2017 11:36:32</publishTime>
     </File>
     <File Include="bin/TransacaoRest.xml">
-      <publishTime>06/29/2017 15:08:41</publishTime>
+      <publishTime>06/30/2017 11:36:32</publishTime>
     </File>
     <File Include="bin/WebGrease.dll">
       <publishTime>09/10/2013 17:28:38</publishTime>
