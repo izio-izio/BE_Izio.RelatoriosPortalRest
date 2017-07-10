@@ -8,8 +8,8 @@
     using System.Collections.Generic;
     using Models;
     using TransacaoRest.Models;
-    using TransacaoIzioRest.Models;
     using System.Web;
+    using TransacaoIzioRest.DAO;
 
     public class TransacaoIzioController : ApiController
     {
@@ -273,6 +273,76 @@
                 }
                 //Seta o Objeto com o Erro ocorrido
                 listaErros.errors.Add(new ErrosTransacao { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = "Erro interno no processamento do lote das transações, favor contactar o administrador." });
+
+                //Se exception
+                if (ex.InnerException != null)
+                {
+                    //Grava o erro na tabela de log (sis_log)
+                    Log.inserirLogException(sNomeCliente, new Exception(ex.Message + System.Environment.NewLine + ex.InnerException), 0);
+                }
+                else
+                {
+                    //Grava o erro na tabela de log (sis_log)
+                    Log.inserirLogException(sNomeCliente, ex, 0);
+                }
+
+                //trocar o status code
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
+
+            }
+        }
+
+        /// <summary>
+        /// Realiza a exclusão dos registros de uma compra cancelada
+        /// </summary>
+        /// <param name="objTransacao">Dados da compra cancelada</param>
+        /// <param name="tokenAutenticacao">Token de autorizacao para utilizacao da api</param>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("api/TransacaoIzio/ExcluirRegistrosCompraCancelada/{tokenAutenticacao}")]
+        public HttpResponseMessage ExcluirRegistrosCompraCancelada([FromBody] DadosTransacaoCancelada objTransacao, [FromUri] string tokenAutenticacao)
+        {
+            //Nome do cliente que esta executando a API, gerado após validação do Token
+            string sNomeCliente = "";
+
+            //Objeto de retorno do metodo com os publicos cadastrados na campanha
+            RetornoSucessoRemoverTransacao retProcessamento = new RetornoSucessoRemoverTransacao();
+
+            //Objeto para processamento local da API
+            RetornoRemoveTransacao retorno = new RetornoRemoveTransacao();
+
+            //Objeto de retorno contendo os erros da execução da API
+            RetornoErroRemoverTransacao listaErros = new RetornoErroRemoverTransacao();
+
+            try
+            {
+                //Verifica se o token informado é válido
+                sNomeCliente = Utilidades.AutenticarTokenApiRest(tokenAutenticacao);
+
+                //Cria objeto para processamento das transacoes
+                TransacaoCanceladaDAO excluiTransacao = new TransacaoCanceladaDAO(sNomeCliente);
+                retorno = excluiTransacao.ExcluirRegistrosCompraCancelada(objTransacao, HttpContext.Current.Request.ServerVariables["REMOTE_ADDR"]);
+
+                if (retorno.errors != null && retorno.errors.Count > 0)
+                {
+                    listaErros.errors = retorno.errors;
+                    return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
+                }
+                else
+                {
+                    retProcessamento.payload = retorno.payload;
+                    return Request.CreateResponse(HttpStatusCode.OK, retProcessamento);
+                }
+            }
+            catch (System.Exception ex)
+            {
+
+                if (listaErros.errors == null)
+                {
+                    listaErros.errors = new List<Erros>();
+                }
+                //Seta o Objeto com o Erro ocorrido
+                listaErros.errors.Add(new Erros{ code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = "Erro interno no processamento do lote das transações, favor contactar o administrador." });
 
                 //Se exception
                 if (ex.InnerException != null)

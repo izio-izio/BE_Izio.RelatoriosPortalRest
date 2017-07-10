@@ -205,6 +205,7 @@
     <Compile Include="Controllers\TransacaoIzioController.cs" />
     <Compile Include="DAO\ImportaTransacaoDAO.cs" />
     <Compile Include="DAO\ProcessamentoTransacaoDAO.cs" />
+    <Compile Include="DAO\TransacaoCanceladaDAO.cs" />
     <Compile Include="DAO\TransacaoDAO.cs" />
     <Compile Include="Exception\ApiException.cs" />
     <Compile Include="Global.asax.cs">
@@ -212,6 +213,7 @@
     </Compile>
     <Compile Include="Models\DadosImportaTransacao.cs" />
     <Compile Include="Models\DadosProcessamentoTransacao.cs" />
+    <Compile Include="Models\DadosTransacaoCancelada.cs" />
     <Compile Include="Models\TransacaoIzio.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
