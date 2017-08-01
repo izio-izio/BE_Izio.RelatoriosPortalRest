@@ -325,7 +325,7 @@ namespace TransacaoIzioRest.DAO
                         sqlServer.Command.Parameters.AddWithValue("@nom_tipo_pagamento", meioPagto);
 
                         //Somente para meio de pagamento diferente de dinheiro
-                        if (!meioPagto.ToUpper().Contains("DINHEIRO") && !meioPagto.ToUpper().Contains("DINHEIROS") && bArrayPreechido)
+                        if (meioPagto.ToUpper().Contains("TEF") || meioPagto.ToUpper().Contains("CARTÃO") || meioPagto.ToUpper().Contains("CRED DEMAIS"))
                         {
                             sqlServer.Command.Parameters.AddWithValue("@cod_nsu_cartao", arrayCodNSU[posSplitNSU]);
                             posSplitNSU += 1;
