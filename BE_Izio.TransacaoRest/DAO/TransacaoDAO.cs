@@ -30,12 +30,14 @@ namespace TransacaoIzioRest.DAO
             sqlServer = new SqlServer(sNomeCliente);
             NomeClienteWs = sNomeCliente;
         }
-        
+
 
         /// <summary>
         /// Metodo retorna as compras do mês informado
         /// </summary>
         /// <returns></returns>
+        #region Consulta Ultimas Compras
+
         public DadosConsultaTransacao ConsultaUltimasTransacao(long cod_pessoa,string anoMes)
         {
             DadosConsultaTransacao retornoConsulta = new DadosConsultaTransacao();
@@ -118,12 +120,13 @@ namespace TransacaoIzioRest.DAO
             }
                 return retornoConsulta;
         }
-
+        #endregion
 
         /// <summary>
         /// Metodo retorna os itens de uma compra
         /// </summary>
         /// <returns></returns>
+        #region Consultas itens de uma compra
         public DadosConsultaItensTransacao ConsultaItensTransacao(long codigoTransacao)
         {
             DadosConsultaItensTransacao retornoConsulta = new DadosConsultaItensTransacao();
@@ -140,33 +143,32 @@ namespace TransacaoIzioRest.DAO
                                                      tri.cod_nsu cod_ean,
                                                      tri.des_produto des_produto,
                                                      round(tri.vlr_item_compra * tri.qtd_item_compra,2) vlr_item_compra,
-                                                     sum(tri.qtd_item_compra) qtd_item_compra
+                                                     tri.qtd_item_compra qtd_item_compra
                                                   into 
                                                      #tmp_transacao
                                                   from 
                                                      tab_transacao_itens tri with(nolock)
                                                   where 
                                                      tri.cod_transacao =  @cod_transacao
-                                                  group by
-                                                     tri.cod_transacao,
-                                                     tri.cod_produto,
-                                                     tri.cod_nsu,
-                                                     tri.des_produto,
-                                                     tri.vlr_item_compra,
-                                                     round(tri.vlr_item_compra * tri.qtd_item_compra,2)
                                                   
                                                   select
                                                      tmp.cod_transacao,
-                                                     tmp.cod_plu,
-                                                     tmp.cod_ean,
-                                                     coalesce(tpl.des_produto,tmp.des_produto) des_produto,
+                                                     case when ltrim(rtrim(coalesce(tmp.cod_plu,tmp.cod_ean))) <> '' then ltrim(rtrim(coalesce(tmp.cod_plu,tmp.cod_ean))) else tmp.cod_ean end cod_plu,
+                                                     case when ltrim(rtrim(coalesce(tmp.cod_ean,tmp.cod_plu))) <> '' then ltrim(rtrim(coalesce(tmp.cod_ean,tmp.cod_plu))) else tmp.cod_plu end cod_ean, 
+                                                     tmp.des_produto des_produto,
                                                      tmp.vlr_item_compra,
-                                                     tmp.qtd_item_compra,
-                                                     tpl.img_produto
+                                                     sum(tmp.qtd_item_compra) qtd_item_compra,
+                                                     null img_produto
                                                   from
                                                      #tmp_transacao tmp
-                                                  left join
-                                                     tab_produto_plu tpl with(nolock) on tpl.cod_plu = tmp.cod_plu
+                                                  group by 
+                                                     tmp.cod_transacao,
+                                                     case when ltrim(rtrim(coalesce(tmp.cod_plu,tmp.cod_ean))) <> '' then ltrim(rtrim(coalesce(tmp.cod_plu,tmp.cod_ean))) else tmp.cod_ean end ,
+                                                     case when ltrim(rtrim(coalesce(tmp.cod_ean,tmp.cod_plu))) <> '' then ltrim(rtrim(coalesce(tmp.cod_ean,tmp.cod_plu))) else tmp.cod_plu end , 
+                                                     tmp.des_produto, 
+                                                     tmp.vlr_item_compra, 
+                                                     tmp.vlr_item_compra 
+                                                  order by 4
                                                   
                                                   drop table #tmp_transacao  ";
 
@@ -203,6 +205,8 @@ namespace TransacaoIzioRest.DAO
             }
             catch (System.Exception ex)
             {
+                Log.inserirLogException(NomeClienteWs, ex, 0);
+
                 if (sqlServer.Reader != null && !sqlServer.Reader.IsClosed)
                 {
                     sqlServer.Reader.Close();
@@ -234,6 +238,8 @@ namespace TransacaoIzioRest.DAO
             }
             return retornoConsulta;
         }
+
+        #endregion
 
     }
 }
