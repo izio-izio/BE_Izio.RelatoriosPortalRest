@@ -27,6 +27,7 @@ namespace TransacaoIzioRest.DAO
         private string ErroInternoValidaCampos = "Não foi possível realizar a validação das lojas antes do processamento.";
 
         private string ErroBancoDeDadosTransacao = "Erro na importação da venda do cupom";
+        private string ErroVendaDuplicada = "A Compra já foi processada na base do Izio. Segue os dados da venda duplicada: ";
         private string ErroBancoDeDadosLoteTransacao = "Erro na importação do lote de transação";
         private string NaoExisteCodPessoa = "Codigo da pessoa informada, não existe na base do Izio";
 
@@ -354,8 +355,20 @@ namespace TransacaoIzioRest.DAO
             {
                 sqlServer.Rollback();
 
-                //Seta a lista de erros com o erro
-                listaErros.errors.Add(new ErrosTransacao { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ErroBancoDeDadosTransacao + " [" + objTransacao.cupom + "], favor contactar o administrador" });
+                if (ex.Message.Contains("unq_transacao_001"))
+                {
+                    //Seta a lista de erros com o erro
+                    listaErros.errors.Add(new ErrosTransacao { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ErroVendaDuplicada + " [ cupom: " + objTransacao.cupom + 
+                                                                                                                                                                     "   Dat. Compra: " + objTransacao.dat_compra.ToString("dd/MM/yyyy HH:mm:ss") +
+                                                                                                                                                                     "   Vlr. Compra: " + objTransacao.vlr_compra + 
+                                                                                                                                                                     "   Qtd. Itens Compra: " + objTransacao.qtd_itens_compra + 
+                                                                                                                                                                     "   Cpf: " + objTransacao.cod_cpf + " ], favor contactar o administrador." });
+                }
+                else
+                {
+                    //Seta a lista de erros com o erro
+                    listaErros.errors.Add(new ErrosTransacao { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ErroBancoDeDadosTransacao + " [" + objTransacao.cupom + "], favor contactar o administrador" });
+                }
 
                 //Insere o erro na sis_log
                 Log.inserirLogException(NomeClienteWs, ex, 0);
