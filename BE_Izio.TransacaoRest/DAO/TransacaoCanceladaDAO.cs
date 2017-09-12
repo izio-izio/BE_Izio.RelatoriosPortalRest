@@ -1,6 +1,7 @@
 ﻿using Izio.Biblioteca;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data;
 using System.Linq;
 using System.Net;
@@ -87,7 +88,8 @@ namespace TransacaoIzioRest.DAO
                 #region Executa a execução dos registros da venda cancelada
 
                 sqlServer.Command.Parameters.Clear();
-                
+                sqlServer.Command.CommandTimeout = ConfigurationManager.AppSettings["TimeoutExecucao"] != null ? Convert.ToInt32(ConfigurationManager.AppSettings["TimeoutExecucao"]) : 1200;
+
                 //Monta os parametros
                 #region Parametros
                 //Data da compra
