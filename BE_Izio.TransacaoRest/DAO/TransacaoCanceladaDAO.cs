@@ -140,7 +140,7 @@ namespace TransacaoIzioRest.DAO
                                                      tab_transacao_itens tri with(nolock),
                                                      tab_transacao trs with(nolock)
                                                   where
-                                                     trs.dat_compra = @datacompra and
+                                                     trs.dat_compra = CAST(@datacompra AS DATETIME2(0))  and
                                                      trs.vlr_compra = @valorcompra and
                                                      trs.cupom = @cupom and
                                                      trs.cod_loja = @cod_loja and
@@ -158,7 +158,7 @@ namespace TransacaoIzioRest.DAO
                                                           from 
                                                              tab_transacao 
                                                           where
-                                                             dat_compra = @datacompra and
+                                                             dat_compra = CAST(@datacompra AS DATETIME2(0)) and
                                                              vlr_compra = @valorcompra and
                                                              cupom = @cupom and
                                                              cod_loja = @cod_loja ";
@@ -174,7 +174,7 @@ namespace TransacaoIzioRest.DAO
                                                              tab_transacao_itens_cpf tri with(nolock),
                                                              tab_transacao_cpf trs with(nolock)
                                                           where
-                                                             trs.dat_compra = @datacompra and
+                                                             trs.dat_compra = CAST(@datacompra AS DATETIME2(0)) and
                                                              trs.vlr_compra = @valorcompra and
                                                              trs.cupom = @cupom and
                                                              trs.cod_loja = @cod_loja and
@@ -184,7 +184,7 @@ namespace TransacaoIzioRest.DAO
                                                           from 
                                                              tab_transacao_cpf
                                                           where
-                                                             dat_compra = @datacompra and
+                                                             dat_compra = CAST(@datacompra AS DATETIME2(0)) and
                                                              vlr_compra = @valorcompra and
                                                              cupom = @cupom and
                                                              cod_loja = @cod_loja ";
