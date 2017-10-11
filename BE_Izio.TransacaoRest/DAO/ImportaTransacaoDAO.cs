@@ -9,6 +9,7 @@ using TransacaoRest.Models;
 using System.Configuration;
 using FastMember;
 using System.Data.SqlClient;
+using Newtonsoft.Json;
 
 namespace TransacaoIzioRest.DAO
 {
@@ -370,8 +371,19 @@ namespace TransacaoIzioRest.DAO
                     listaErros.errors.Add(new ErrosTransacao { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ErroBancoDeDadosTransacao + " [" + objTransacao.cupom + "], favor contactar o administrador" });
                 }
 
-                //Insere o erro na sis_log
-                Log.inserirLogException(NomeClienteWs, ex, 0);
+                if (objTransacao != null)
+                {
+                    var jsonTransacao = JsonConvert.SerializeObject(objTransacao);
+
+                    //Salva o Json da requisição
+                    Log.inserirLogException(NomeClienteWs, new System.Exception("Cupom: [" + objTransacao.cupom + "] " + ex.Message, new System.Exception(jsonTransacao.ToString())), 0);
+                }
+                else
+                {
+                    //Insere o erro na sis_log
+                    Log.inserirLogException(NomeClienteWs, new System.Exception("Cupom: [" + objTransacao.cupom + "] " + ex.Message, new System.Exception(ex.ToString())), 0);
+                }
+                
             }
             finally
             {
@@ -401,7 +413,7 @@ namespace TransacaoIzioRest.DAO
         /// <returns></returns>
         #region Importa as vendas para tabela intermediaria viewizio_3, para ser processado em um segundo momento, pela API REST - DIKRON
         public RetornoDadosProcTransacao ImportaLoteTransacao(List<DadosTransacaoLote> objTransacao,
-                                                               string IpOrigem)
+                                                              string IpOrigem)
         {
             RetornoDadosProcTransacao retornoTransacao = new RetornoDadosProcTransacao();
             retornoTransacao.errors = new List<ErrosTransacao>();
@@ -614,6 +626,158 @@ namespace TransacaoIzioRest.DAO
             catch (System.Exception ex)
             {
                 sqlServer.Rollback();
+
+                //Seta a lista de erros com o erro
+                listaErros.errors.Add(new ErrosTransacao { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ErroBancoDeDadosLoteTransacao + ", favor contactar o administrador" });
+
+                //Insere o erro na sis_log
+                Log.inserirLogException(NomeClienteWs, ex, 0);
+            }
+            finally
+            {
+                sqlServer.CloseConnection();
+            }
+
+            if (listaErros.errors != null && listaErros.errors.Count > 0)
+            {
+                retornoTransacao.errors = listaErros.errors;
+            }
+            else
+            {
+                retornoTransacao.payload = payloadSucesso;
+            }
+
+            return retornoTransacao;
+
+        }
+        #endregion
+
+        #region Importa as vendas para tabela intermediaria viewizio_3 SEM CONTROLE DE TRANSACAO, para ser processado em um segundo momento, pela API REST - DIKRON
+        public RetornoDadosProcTransacao ImportaLoteTransacaoSemTransacao(List<DadosTransacaoLote> objTransacao,
+                                                              string IpOrigem)
+        {
+            RetornoDadosProcTransacao retornoTransacao = new RetornoDadosProcTransacao();
+            retornoTransacao.errors = new List<ErrosTransacao>();
+            retornoTransacao.payload = new PayloadTransacao();
+
+            ListaErrosTransacao listaErros = new ListaErrosTransacao();
+            listaErros.errors = new List<ErrosTransacao>();
+
+            PayloadTransacao payloadSucesso = new PayloadTransacao();
+
+            //Lista padrão para bulkt Insert na viewizio_3
+            List<DadosLoteViewizio_3> listaViewizio_3 = new List<DadosLoteViewizio_3>();
+
+            try
+            {
+                //Valida se o objeto com as transações foi preenchido
+                if (objTransacao == null)
+                {
+                    listaErros.errors.Add(new ErrosTransacao { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ObjetoTransacaoVazio });
+                }
+                else if (objTransacao.Count == 0)
+                {
+                    listaErros.errors.Add(new ErrosTransacao { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ObjetoItensTransacaoVazio });
+                }
+
+                //Se a lista estiver preenchida, é por que foi encontrado erros na validação
+                if (listaErros.errors.Count > 0)
+                {
+                    retornoTransacao.errors = listaErros.errors;
+
+                    return retornoTransacao;
+                }
+
+
+                // Abre a conexao com o banco de dados
+                sqlServer.StartConnection();
+
+                //Inicia o controle de transacao
+                //sqlServer.BeginTransaction();
+
+                //Popula lista padrão para o bulkInsert na viewizio_3
+                #region Monta lista padrão para o bulkInsert na viewizio_3
+                foreach (DadosTransacaoLote dadosTrans in objTransacao.ToList())
+                {
+                    listaViewizio_3.Add(new DadosLoteViewizio_3
+                    {
+                        CpfCliente = Convert.ToInt64(string.IsNullOrEmpty(dadosTrans.cod_cpf) == false ? dadosTrans.cod_cpf : "0"),
+                        CpfCliente_2 = Convert.ToInt64(string.IsNullOrEmpty(dadosTrans.cod_cpf) == false ? dadosTrans.cod_cpf : "0"),
+                        DataCompra = dadosTrans.dat_compra,
+                        ValorCompra = dadosTrans.vlr_compra,
+                        cupom = dadosTrans.cupom,
+                        Pdv = dadosTrans.Pdv,
+                        CodPagto = 0,
+                        MeioPagto = dadosTrans.des_tipo_pagamento,
+                        QtdeItens = dadosTrans.qtd_itens_compra,
+                        CodEAN = dadosTrans.cod_ean,
+                        CodProduto = Convert.ToInt64(dadosTrans.cod_produto),
+                        DesProduto = dadosTrans.des_produto,
+                        ValorUN = dadosTrans.vlr_item_compra,
+                        ValorItem = dadosTrans.vlr_item_compra,
+                        Quantidade = dadosTrans.qtd_item_compra,
+                        cod_usuario = 1,
+                        cod_pessoa = 0,
+                        item = dadosTrans.nro_item_compra,
+                        cod_loja = dadosTrans.cod_loja,
+                        nsu_transacao = dadosTrans.nsu_transacao,
+                        dat_geracao_nsu = dadosTrans.dat_geracao_nsu
+                    });
+                }
+
+                #endregion
+
+                //Trocar a execução por bulkInsert da lista
+                #region Bulk Insert da lista
+
+                using (var bcp = new SqlBulkCopy
+                            (
+                            //Para utilizar SEM controle de transacao
+                            sqlServer.Command.Connection,
+                            SqlBulkCopyOptions.TableLock |
+                            SqlBulkCopyOptions.FireTriggers,
+                            null
+                            ))
+                using (
+                    var reader = ObjectReader.Create(listaViewizio_3,
+                    "CpfCliente",
+                    "CpfCliente_2",
+                    "DataCompra",
+                    "ValorCompra",
+                    "cupom",
+                    "Pdv",
+                    "CodPagto",
+                    "MeioPagto",
+                    "QtdeItens",
+                    "CodEAN",
+                    "CodProduto",
+                    "DesProduto",
+                    "ValorUN",
+                    "ValorItem",
+                    "Quantidade",
+                    "cod_usuario",
+                    "cod_pessoa",
+                    "item",
+                    "cod_loja",
+                    "nsu_transacao",
+                    "dat_geracao_nsu"))
+                {
+                    bcp.BulkCopyTimeout = ConfigurationManager.AppSettings["TimeoutExecucao"] != null ? Convert.ToInt32(ConfigurationManager.AppSettings["TimeoutExecucao"]) : 600;
+                    bcp.DestinationTableName = "viewizio_3";
+                    bcp.WriteToServer(reader);
+                }
+
+                #endregion
+                
+                //sqlServer.Commit();
+
+                //Seta o retorno com sucesso
+                payloadSucesso.code = Convert.ToInt32(HttpStatusCode.Accepted).ToString();
+                payloadSucesso.message = "Lote de Transações Importado com sucesso.";
+            }
+            catch (System.Exception ex)
+            {
+                //sqlServer.Rollback();
 
                 //Seta a lista de erros com o erro
                 listaErros.errors.Add(new ErrosTransacao { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ErroBancoDeDadosLoteTransacao + ", favor contactar o administrador" });

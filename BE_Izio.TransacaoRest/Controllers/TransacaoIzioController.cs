@@ -23,6 +23,7 @@
         // POST: api/Pessoa/Autenticar
         [HttpGet]
         [Route("api/TransacaoIzio/ConsultaUltimasCompras/{tokenAutenticacao}/{codigoPessoa}/{anoMes}")]
+        [Route("ConsultaUltimasCompras/{tokenAutenticacao}/{codigoPessoa}/{anoMes}")]
         public HttpResponseMessage ConsultaUltimasCompras([FromUri]string tokenAutenticacao,[FromUri] string codigoPessoa, [FromUri] string anoMes)
         {
             string sNomeCliente = "";
@@ -249,7 +250,14 @@
 
                 //Cria objeto para processamento das transacoes
                 DAO.ImportaTransacaoDAO impTransacao = new DAO.ImportaTransacaoDAO(sNomeCliente);
-                retorno = impTransacao.ImportaLoteTransacao(objTransacao, HttpContext.Current.Request.ServerVariables["REMOTE_ADDR"]);
+                if (sNomeCliente.ToUpper() == "CONDOR")
+                {
+                    retorno = impTransacao.ImportaLoteTransacaoSemTransacao(objTransacao, HttpContext.Current.Request.ServerVariables["REMOTE_ADDR"]);
+                }
+                else
+                {
+                    retorno = impTransacao.ImportaLoteTransacao(objTransacao, HttpContext.Current.Request.ServerVariables["REMOTE_ADDR"]);
+                }
 
                 if (retorno.errors != null && retorno.errors.Count > 0)
                 {
