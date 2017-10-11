@@ -327,10 +327,21 @@ namespace TransacaoIzioRest.DAO
                         sqlServer.Command.Parameters.AddWithValue("@nom_tipo_pagamento", meioPagto);
 
                         //Somente para meio de pagamento diferente de dinheiro
-                        if (meioPagto.ToUpper().Contains("TEF") || meioPagto.ToUpper().Contains("CARTÃO") || meioPagto.ToUpper().Contains("CRED DEMAIS"))
+                        if (meioPagto.ToUpper().Contains("TEF") || meioPagto.ToUpper().Contains("CARTAO") || meioPagto.ToUpper().Contains("CARTÃO") || meioPagto.ToUpper().Contains("CRED DEMAIS"))
                         {
-                            sqlServer.Command.Parameters.AddWithValue("@cod_nsu_cartao", arrayCodNSU[posSplitNSU]);
-                            posSplitNSU += 1;
+                            if (!meioPagto.ToUpper().Contains("OFF"))
+                            {
+                                if (arrayCodNSU.ElementAtOrDefault(posSplitNSU) != null)
+                                {
+                                    sqlServer.Command.Parameters.AddWithValue("@cod_nsu_cartao", arrayCodNSU[posSplitNSU]);
+                                }
+                                else
+                                {
+                                    sqlServer.Command.Parameters.AddWithValue("@cod_nsu_cartao", "0");
+                                }
+                                
+                                posSplitNSU += 1;
+                            }
                         }
                         else
                             sqlServer.Command.Parameters.AddWithValue("@cod_nsu_cartao", DBNull.Value);
