@@ -96,6 +96,10 @@ namespace TransacaoIzioRest.DAO
 
                 sqlServer.Rollback();
 
+               //Salva o Json da requisição
+               Log.inserirLogException(NomeClienteWs, new System.Exception(ErroBancoDeDados + ex.Message, new System.Exception(sqlServer.Command.CommandText)), 0);
+                    
+
                 if (retornoConsulta.errors == null)
                 {
                     retornoConsulta.errors = new List<ErrosConsultaTransacao>();
