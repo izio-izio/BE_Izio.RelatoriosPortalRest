@@ -213,7 +213,9 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\ApiSuccess.cs" />
     <Compile Include="Models\DadosImportaTransacao.cs" />
+    <Compile Include="Models\DadosProcessamentoTermino.cs" />
     <Compile Include="Models\DadosProcessamentoTransacao.cs" />
     <Compile Include="Models\DadosTransacaoCancelada.cs" />
     <Compile Include="Models\TransacaoIzio.cs" />

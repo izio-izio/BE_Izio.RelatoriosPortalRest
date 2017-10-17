@@ -10,6 +10,7 @@
     using TransacaoRest.Models;
     using System.Web;
     using TransacaoIzioRest.DAO;
+    using System.Web.Http.Description;
 
     public class TransacaoIzioController : ApiController
     {
@@ -351,6 +352,125 @@
                 }
                 //Seta o Objeto com o Erro ocorrido
                 listaErros.errors.Add(new Erros{ code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = "Erro interno no processamento do lote das transações, favor contactar o administrador." });
+
+                //Se exception
+                if (ex.InnerException != null)
+                {
+                    //Grava o erro na tabela de log (sis_log)
+                    Log.inserirLogException(sNomeCliente, new Exception(ex.Message + System.Environment.NewLine + ex.InnerException), 0);
+                }
+                else
+                {
+                    //Grava o erro na tabela de log (sis_log)
+                    Log.inserirLogException(sNomeCliente, ex, 0);
+                }
+
+                //trocar o status code
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
+
+            }
+        }
+
+        /// <summary>
+        /// Realiza a exclusão dos registros intermediários para reprocessamento.
+        /// </summary>
+        /// <param name="tokenAutenticacao">Token de autorizacao para utilizacao da api</param>
+        /// <param name="dataProcessamento">Data (yyyy-MM-dd) para exclusão processamento (deixar em branco para deletar tudo)</param>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("api/TransacaoIzio/ExcluirRegistrosIntermediarios/{tokenAutenticacao}")]
+        [ResponseType(typeof(ApiSuccess))]
+        public HttpResponseMessage ExcluirRegistrosIntermediarios([FromUri] string tokenAutenticacao, [FromUri] string dataProcessamento = "")
+        {
+            //Nome do cliente que esta executando a API, gerado após validação do Token
+            string sNomeCliente = "";
+
+            //Objeto de retorno contendo os erros da execução da API
+            RetornoErroRemoverTransacao listaErros = new RetornoErroRemoverTransacao();
+
+            try
+            {
+                //Verifica se o token informado é válido
+                sNomeCliente = Utilidades.AutenticarTokenApiRest(tokenAutenticacao);
+
+                //Cria objeto para processamento das transacoes
+                TransacaoCanceladaDAO excluiTransacao = new TransacaoCanceladaDAO(sNomeCliente);
+                excluiTransacao.ExcluirRegistrosIntermediarios(dataProcessamento);
+                ApiSuccess success = new ApiSuccess();
+                success.code = "200";
+                success.message = "Dados Excluídos com Sucesso.";
+                return Request.CreateResponse(HttpStatusCode.OK, success);
+
+            }
+            catch (System.Exception ex)
+            {
+
+                if (listaErros.errors == null)
+                {
+                    listaErros.errors = new List<Erros>();
+                }
+                //Seta o Objeto com o Erro ocorrido
+                listaErros.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = "Erro interno no processamento do lote das transações, favor contactar o administrador." });
+
+                //Se exception
+                if (ex.InnerException != null)
+                {
+                    //Grava o erro na tabela de log (sis_log)
+                    Log.inserirLogException(sNomeCliente, new Exception(ex.Message + System.Environment.NewLine + ex.InnerException), 0);
+                }
+                else
+                {
+                    //Grava o erro na tabela de log (sis_log)
+                    Log.inserirLogException(sNomeCliente, ex, 0);
+                }
+
+                //trocar o status code
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
+
+            }
+        }
+
+
+        /// <summary>
+        /// Método para consolidação dos registros que foram enviados com os registros recebidos e processados pelo Izio.
+        /// </summary>
+        /// <param name="tokenAutenticacao">Token de autorizacao para utilizacao da api</param>
+        /// <param name="dadosTransacaoTermino">Data (yyyy-MM-dd) para exclusão processamento (deixar em branco para deletar tudo)</param>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("api/TransacaoIzio/ComparaRegistrosEnviadosProcessados/{tokenAutenticacao}")]
+        [ResponseType(typeof(RetornoDadosTermino))]
+        public HttpResponseMessage ComparaRegistrosEnviadosProcessados([FromUri] string tokenAutenticacao, [FromBody] DadosTransacaoTermino dadosTransacaoTermino)
+        {
+            //Nome do cliente que esta executando a API, gerado após validação do Token
+            string sNomeCliente = "";
+
+            //Objeto de retorno contendo os erros da execução da API
+            RetornoErroRemoverTransacao listaErros = new RetornoErroRemoverTransacao();
+
+            try
+            {
+                //Verifica se o token informado é válido
+                sNomeCliente = Utilidades.AutenticarTokenApiRest(tokenAutenticacao);
+
+                //Cria objeto para processamento das transacoes
+                TransacaoCanceladaDAO excluiTransacao = new TransacaoCanceladaDAO(sNomeCliente);
+               // excluiTransacao.ExcluirRegistrosIntermediarios(dadosTransacaoTermino);
+                ApiSuccess success = new ApiSuccess();
+                success.code = "200";
+                success.message = "Dados Excluídos com Sucesso.";
+                return Request.CreateResponse(HttpStatusCode.OK, success);
+
+            }
+            catch (System.Exception ex)
+            {
+
+                if (listaErros.errors == null)
+                {
+                    listaErros.errors = new List<Erros>();
+                }
+                //Seta o Objeto com o Erro ocorrido
+                listaErros.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = "Erro interno no processamento do lote das transações, favor contactar o administrador." });
 
                 //Se exception
                 if (ex.InnerException != null)

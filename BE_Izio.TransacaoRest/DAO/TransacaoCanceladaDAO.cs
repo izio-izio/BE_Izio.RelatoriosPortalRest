@@ -240,5 +240,73 @@ namespace TransacaoIzioRest.DAO
         }
         #endregion
 
+
+        /// <summary>
+        ///  - Remove o registra da venda na Viewizio_3
+        /// </summary>
+        /// <param name="dataProcessamento"></param>
+        /// <returns></returns>
+        #region Apaga os registros da viewizio3 para reprocessamento.
+        public void ExcluirRegistrosIntermediarios(string dataProcessamento)
+        {
+
+            try
+            {
+           
+                // Abre a conexao com o banco de dados
+                sqlServer.StartConnection();
+
+                //Inicia o controle de transacao
+                sqlServer.BeginTransaction();
+
+                #region Limpa ou Trunca a viewizio3 de acordo com o parâmetro enviado
+
+                sqlServer.Command.Parameters.Clear();
+                sqlServer.Command.CommandTimeout = ConfigurationManager.AppSettings["TimeoutExecucao"] != null ? Convert.ToInt32(ConfigurationManager.AppSettings["TimeoutExecucao"]) : 1200;
+
+                if (string.IsNullOrEmpty(dataProcessamento))
+                {
+                    //Trunca a table viewizio_3
+                    sqlServer.Command.CommandText = @"truncate table
+                                                     viewizio_3";                                          
+                }
+                else
+                {
+                    //Exclui os registros na viewizio_3 com base na data enviada
+                    sqlServer.Command.CommandText = @"delete 
+                                                  from 
+                                                     viewizio_3 
+                                                  where
+                                                     datacompra = '" + dataProcessamento + "'";
+
+                }
+     
+                //executa o delete e retorna o total de linhas afetatas
+                sqlServer.Command.ExecuteNonQuery();
+
+                #endregion
+
+                sqlServer.Commit();
+
+            }
+            catch (System.Exception ex)
+            {
+                sqlServer.Rollback();
+
+                List<Erros> listaErros = new List<Erros>();
+                //Seta a lista de erros com o erro
+                listaErros.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ErroBancoDeDados + ", favor contactar o administrador" });
+
+                //Insere o erro na sis_log
+                Log.inserirLogException(NomeClienteWs, ex, 0);
+            }
+            finally
+            {
+                sqlServer.CloseConnection();
+            }
+        }
+        #endregion
+
+
     }
 }
