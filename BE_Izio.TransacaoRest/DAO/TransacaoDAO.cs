@@ -96,9 +96,16 @@ namespace TransacaoIzioRest.DAO
 
                 sqlServer.Rollback();
 
-               //Salva o Json da requisição
-               Log.inserirLogException(NomeClienteWs, new System.Exception(ErroBancoDeDados + ex.Message, new System.Exception(sqlServer.Command.CommandText)), 0);
-                    
+                if (!string.IsNullOrEmpty(sqlServer.Command.CommandText))
+                {
+                    //Salva o command text da requisição
+                    Log.inserirLogException(NomeClienteWs, new System.Exception(ErroBancoDeDados + ex.Message, new System.Exception(sqlServer.Command.CommandText)), 0);
+                }  
+                else
+                {
+                    //Salva os parametros
+                    Log.inserirLogException(NomeClienteWs, new System.Exception(ErroBancoDeDados + ex.Message, new System.Exception("Cod. Pessoa: " + cod_pessoa.ToString() + " | Ano Mes: " + anoMes)), 0);
+                }
 
                 if (retornoConsulta.errors == null)
                 {
@@ -161,17 +168,10 @@ namespace TransacaoIzioRest.DAO
                                                      case when ltrim(rtrim(coalesce(tmp.cod_ean,tmp.cod_plu))) <> '' then ltrim(rtrim(coalesce(tmp.cod_ean,tmp.cod_plu))) else tmp.cod_plu end cod_ean, 
                                                      tmp.des_produto des_produto,
                                                      tmp.vlr_item_compra,
-                                                     sum(tmp.qtd_item_compra) qtd_item_compra,
+                                                     qtd_item_compra, 
                                                      null img_produto
                                                   from
                                                      #tmp_transacao tmp
-                                                  group by 
-                                                     tmp.cod_transacao,
-                                                     case when ltrim(rtrim(coalesce(tmp.cod_plu,tmp.cod_ean))) <> '' then ltrim(rtrim(coalesce(tmp.cod_plu,tmp.cod_ean))) else tmp.cod_ean end ,
-                                                     case when ltrim(rtrim(coalesce(tmp.cod_ean,tmp.cod_plu))) <> '' then ltrim(rtrim(coalesce(tmp.cod_ean,tmp.cod_plu))) else tmp.cod_plu end , 
-                                                     tmp.des_produto, 
-                                                     tmp.vlr_item_compra, 
-                                                     tmp.vlr_item_compra 
                                                   order by 4
                                                   
                                                   drop table #tmp_transacao  ";

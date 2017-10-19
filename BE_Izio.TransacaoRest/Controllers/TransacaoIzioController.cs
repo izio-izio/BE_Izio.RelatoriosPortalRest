@@ -23,7 +23,6 @@
         // POST: api/Pessoa/Autenticar
         [HttpGet]
         [Route("api/TransacaoIzio/ConsultaUltimasCompras/{tokenAutenticacao}/{codigoPessoa}/{anoMes}")]
-        [Route("ConsultaUltimasCompras/{tokenAutenticacao}/{codigoPessoa}/{anoMes}")]
         public HttpResponseMessage ConsultaUltimasCompras([FromUri]string tokenAutenticacao,[FromUri] string codigoPessoa, [FromUri] string anoMes)
         {
             string sNomeCliente = "";
@@ -66,19 +65,24 @@
                 //Seta o Objeto com o Erro ocorrido
                 listaErros.errors.Add(new ErrosConsultaTransacao { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ex.Message });
 
-                //Se exception
-                if (ex.InnerException != null)
+                if (!ex.Message.ToUpper().Contains("TOKEN"))
                 {
-                    //Grava o erro na tabela de log (sis_log)
-                    Log.inserirLogException(sNomeCliente, new Exception(ex.Message + System.Environment.NewLine + ex.InnerException), 0);
-                }
-                else
-                {
-                    //Grava o erro na tabela de log (sis_log)
-                    Log.inserirLogException(sNomeCliente, ex, 0);
+                    Log.inserirLogException(sNomeCliente, new Exception("Parametro Invalido: Cod. Pessoa: " + codigoPessoa.ToString() + " | Ano Mes: " + anoMes), 0);
+
+
+                    //Se exception
+                    if (ex.InnerException != null)
+                    {
+                        //Grava o erro na tabela de log (sis_log)
+                        Log.inserirLogException(sNomeCliente, new Exception(ex.Message + System.Environment.NewLine + ex.InnerException), 0);
+                    }
+                    else
+                    {
+                        //Grava o erro na tabela de log (sis_log)
+                        Log.inserirLogException(sNomeCliente, ex, 0);
+                    }
                 }
 
-                //trocar o status code
                 return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
             }
         }
@@ -134,16 +138,19 @@
                 //Seta o Objeto com o Erro ocorrido
                 listaErros.errors.Add(new ErrosConsultaTransacao { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ex.Message });
 
-                //Se exception
-                if (ex.InnerException != null)
-                {
-                    //Grava o erro na tabela de log (sis_log)
-                    Log.inserirLogException(sNomeCliente, new Exception(ex.Message + System.Environment.NewLine + ex.InnerException), 0);
-                }
-                else
-                {
-                    //Grava o erro na tabela de log (sis_log)
-                    Log.inserirLogException(sNomeCliente, ex, 0);
+                if (!ex.Message.ToUpper().Contains("TOKEN"))
+                {   
+                    //Se exception
+                    if (ex.InnerException != null)
+                    {
+                        //Grava o erro na tabela de log (sis_log)
+                        Log.inserirLogException(sNomeCliente, new Exception(ex.Message + System.Environment.NewLine + ex.InnerException), 0);
+                    }
+                    else
+                    {
+                        //Grava o erro na tabela de log (sis_log)
+                        Log.inserirLogException(sNomeCliente, ex, 0);
+                    }
                 }
 
                 //trocar o status code
@@ -204,16 +211,19 @@
                 //Seta o Objeto com o Erro ocorrido
                 listaErros.errors.Add(new ErrosTransacao { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = "Erro interno no processamento on-line das transações, favor contactar o administrador." });
 
-                //Se exception
-                if (ex.InnerException != null)
-                {
-                    //Grava o erro na tabela de log (sis_log)
-                    Log.inserirLogException(sNomeCliente, new Exception(ex.Message + System.Environment.NewLine + ex.InnerException), 0);
-                }
-                else
-                {
-                    //Grava o erro na tabela de log (sis_log)
-                    Log.inserirLogException(sNomeCliente, ex, 0);
+                if (!ex.Message.ToUpper().Contains("TOKEN"))
+                {   
+                    //Se exception
+                    if (ex.InnerException != null)
+                    {
+                        //Grava o erro na tabela de log (sis_log)
+                        Log.inserirLogException(sNomeCliente, new Exception(ex.Message + System.Environment.NewLine + ex.InnerException), 0);
+                    }
+                    else
+                    {
+                        //Grava o erro na tabela de log (sis_log)
+                        Log.inserirLogException(sNomeCliente, ex, 0);
+                    }
                 }
 
                 //trocar o status code
@@ -282,16 +292,19 @@
                 //Seta o Objeto com o Erro ocorrido
                 listaErros.errors.Add(new ErrosTransacao { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = "Erro interno no processamento do lote das transações, favor contactar o administrador." });
 
-                //Se exception
-                if (ex.InnerException != null)
+                if (!ex.Message.ToUpper().Contains("TOKEN"))
                 {
-                    //Grava o erro na tabela de log (sis_log)
-                    Log.inserirLogException(sNomeCliente, new Exception(ex.Message + System.Environment.NewLine + ex.InnerException), 0);
-                }
-                else
-                {
-                    //Grava o erro na tabela de log (sis_log)
-                    Log.inserirLogException(sNomeCliente, ex, 0);
+                    //Se exception
+                    if (ex.InnerException != null)
+                    {
+                        //Grava o erro na tabela de log (sis_log)
+                        Log.inserirLogException(sNomeCliente, new Exception(ex.Message + System.Environment.NewLine + ex.InnerException), 0);
+                    }
+                    else
+                    {
+                        //Grava o erro na tabela de log (sis_log)
+                        Log.inserirLogException(sNomeCliente, ex, 0);
+                    }
                 }
 
                 //trocar o status code
@@ -352,16 +365,19 @@
                 //Seta o Objeto com o Erro ocorrido
                 listaErros.errors.Add(new Erros{ code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = "Erro interno no processamento do lote das transações, favor contactar o administrador." });
 
-                //Se exception
-                if (ex.InnerException != null)
+                if (!ex.Message.ToUpper().Contains("TOKEN"))
                 {
-                    //Grava o erro na tabela de log (sis_log)
-                    Log.inserirLogException(sNomeCliente, new Exception(ex.Message + System.Environment.NewLine + ex.InnerException), 0);
-                }
-                else
-                {
-                    //Grava o erro na tabela de log (sis_log)
-                    Log.inserirLogException(sNomeCliente, ex, 0);
+                    //Se exception
+                    if (ex.InnerException != null)
+                    {
+                        //Grava o erro na tabela de log (sis_log)
+                        Log.inserirLogException(sNomeCliente, new Exception(ex.Message + System.Environment.NewLine + ex.InnerException), 0);
+                    }
+                    else
+                    {
+                        //Grava o erro na tabela de log (sis_log)
+                        Log.inserirLogException(sNomeCliente, ex, 0);
+                    }
                 }
 
                 //trocar o status code
