@@ -10,6 +10,7 @@ using System.Configuration;
 using FastMember;
 using System.Data.SqlClient;
 using Newtonsoft.Json;
+using System.Data;
 
 namespace TransacaoIzioRest.DAO
 {
@@ -30,6 +31,7 @@ namespace TransacaoIzioRest.DAO
         private string ErroBancoDeDadosTransacao = "Erro na importação da venda do cupom";
         private string ErroVendaDuplicada = "A Compra já foi processada na base do Izio. Segue os dados da venda duplicada: ";
         private string ErroBancoDeDadosLoteTransacao = "Erro na importação do lote de transação";
+        private string ErroDataMaiorDiaAtual = "Venda com data maior que a data do dia processamento.";
         private string NaoExisteCodPessoa = "Codigo da pessoa informada, não existe na base do Izio";
 
         #endregion
@@ -370,11 +372,16 @@ namespace TransacaoIzioRest.DAO
                 if (ex.Message.Contains("unq_transacao_001"))
                 {
                     //Seta a lista de erros com o erro
-                    listaErros.errors.Add(new ErrosTransacao { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ErroVendaDuplicada + " [ cupom: " + objTransacao.cupom + 
-                                                                                                                                                                     "   Dat. Compra: " + objTransacao.dat_compra.ToString("dd/MM/yyyy HH:mm:ss") +
-                                                                                                                                                                     "   Vlr. Compra: " + objTransacao.vlr_compra + 
-                                                                                                                                                                     "   Qtd. Itens Compra: " + objTransacao.qtd_itens_compra + 
-                                                                                                                                                                     "   Cpf: " + objTransacao.cod_cpf + " ], favor contactar o administrador." });
+                    listaErros.errors.Add(new ErrosTransacao
+                    {
+                        code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(),
+                        message = ErroVendaDuplicada + " [ Loja: " + objTransacao.cod_loja + 
+                                                       "   Cupom: " + objTransacao.cupom +
+                                                       "   Dat. Compra: " + objTransacao.dat_compra.ToString("dd/MM/yyyy HH:mm:ss") +
+                                                       "   Vlr. Compra: " + objTransacao.vlr_compra +
+                                                       "   Qtd. Itens Compra: " + objTransacao.qtd_itens_compra +
+                                                       "   Cpf: " + objTransacao.cod_cpf + " ], favor contactar o administrador."
+                    });
                 }
                 else
                 {
@@ -422,7 +429,7 @@ namespace TransacaoIzioRest.DAO
         /// <param name="objTransacao"></param>
         /// <param name="IpOrigem"></param>
         /// <returns></returns>
-        #region Importa as vendas para tabela intermediaria viewizio_3, para ser processado em um segundo momento, pela API REST - DIKRON
+        #region Importa as vendas para tabela intermediaria viewizio_3, para ser processado em um segundo momento, pela API REST - RUNDECK
         public RetornoDadosProcTransacao ImportaLoteTransacao(List<DadosTransacaoLote> objTransacao,
                                                               string IpOrigem)
         {
@@ -663,9 +670,18 @@ namespace TransacaoIzioRest.DAO
         }
         #endregion
 
-        #region Importa as vendas para tabela intermediaria viewizio_3 SEM CONTROLE DE TRANSACAO, para ser processado em um segundo momento, pela API REST - DIKRON
+        /// <summary>
+        /// Processa as vendas em lote de até mil compras, inserido os registros na tabela intermediaria viewizio_3
+        ///  - Processamento utiliza SEM controle de transação
+        /// </summary>
+        /// <param name="objTransacao"></param>
+        /// <param name="IpOrigem"></param>
+        /// <param name="jsonRequisicao"></param>
+        /// <returns></returns>
+        #region Importa as vendas para tabela intermediaria viewizio_3 SEM CONTROLE DE TRANSACAO, para ser processado em um segundo momento, pela API REST - RUNDECK
         public RetornoDadosProcTransacao ImportaLoteTransacaoSemTransacao(List<DadosTransacaoLote> objTransacao,
-                                                              string IpOrigem)
+                                                                          string IpOrigem,
+                                                                          string jsonRequisicao = "")
         {
             RetornoDadosProcTransacao retornoTransacao = new RetornoDadosProcTransacao();
             retornoTransacao.errors = new List<ErrosTransacao>();
@@ -678,9 +694,14 @@ namespace TransacaoIzioRest.DAO
 
             //Lista padrão para bulkt Insert na viewizio_3
             List<DadosLoteViewizio_3> listaViewizio_3 = new List<DadosLoteViewizio_3>();
+            Boolean DataMaiorQueDiaAtual = false;
+
+            string dat_compra = "", cod_loja = "", cupom = "", vlr_compra = "", qtd_itens_compra = "";
 
             try
             {
+                jsonRequisicao = JsonConvert.SerializeObject(objTransacao); 
+
                 //Valida se o objeto com as transações foi preenchido
                 if (objTransacao == null)
                 {
@@ -708,32 +729,98 @@ namespace TransacaoIzioRest.DAO
 
                 //Popula lista padrão para o bulkInsert na viewizio_3
                 #region Monta lista padrão para o bulkInsert na viewizio_3
+
                 foreach (DadosTransacaoLote dadosTrans in objTransacao.ToList())
                 {
-                    listaViewizio_3.Add(new DadosLoteViewizio_3
+
+                    //Verifica se a data da compra for maior que o dia do processamento, indica data incorreta
+                    // neste caso é rejeitado o log e se tiver com auditória, é salvo o json da requisição
+                    if (dadosTrans.dat_compra.Date > DateTime.Now.Date)
                     {
-                        CpfCliente = Convert.ToInt64(string.IsNullOrEmpty(dadosTrans.cod_cpf) == false ? dadosTrans.cod_cpf : "0"),
-                        CpfCliente_2 = Convert.ToInt64(string.IsNullOrEmpty(dadosTrans.cod_cpf) == false ? dadosTrans.cod_cpf : "0"),
-                        DataCompra = dadosTrans.dat_compra,
-                        ValorCompra = dadosTrans.vlr_compra,
-                        cupom = dadosTrans.cupom,
-                        Pdv = dadosTrans.Pdv,
-                        CodPagto = 0,
-                        MeioPagto = dadosTrans.des_tipo_pagamento,
-                        QtdeItens = dadosTrans.qtd_itens_compra,
-                        CodEAN = dadosTrans.cod_ean,
-                        CodProduto = Convert.ToInt64(dadosTrans.cod_produto),
-                        DesProduto = dadosTrans.des_produto,
-                        ValorUN = dadosTrans.vlr_item_compra,
-                        ValorItem = dadosTrans.vlr_item_compra,
-                        Quantidade = dadosTrans.qtd_item_compra,
-                        cod_usuario = 1,
-                        cod_pessoa = 0,
-                        item = dadosTrans.nro_item_compra,
-                        cod_loja = dadosTrans.cod_loja,
-                        nsu_transacao = dadosTrans.nsu_transacao,
-                        dat_geracao_nsu = dadosTrans.dat_geracao_nsu
-                    });
+                        //Insere json na tabela de auditória
+                        if (ConfigurationManager.AppSettings["ClienteAuditoria"] != null && ConfigurationManager.AppSettings["ClienteAuditoria"].ToString().ToUpper().Contains(NomeClienteWs.ToUpper()))
+                        {
+                            sqlServer.Command.Parameters.Clear();
+                            sqlServer.Command.CommandText = "insert into tab_viewizio_auditoria (dat_compra,cod_loja,cupom,vlr_compra,qtd_itens_compra,des_json_requisicao) values (@dat_compra,@cod_loja,@cupom,@vlr_compra,@qtd_itens_compra,@des_json_requisicao)";
+
+                            #region Parametros
+
+                            IDbDataParameter pdat_compra = sqlServer.Command.CreateParameter();
+                            pdat_compra.ParameterName = "@dat_compra";
+                            pdat_compra.Value = dadosTrans.dat_compra;
+                            sqlServer.Command.Parameters.Add(pdat_compra);
+
+                            IDbDataParameter pcod_loja = sqlServer.Command.CreateParameter();
+                            pcod_loja.ParameterName = "@cod_loja";
+                            pcod_loja.Value = dadosTrans.cod_loja;
+                            sqlServer.Command.Parameters.Add(pcod_loja);
+
+                            IDbDataParameter pcupom = sqlServer.Command.CreateParameter();
+                            pcupom.ParameterName = "@cupom";
+                            pcupom.Value = dadosTrans.cupom;
+                            sqlServer.Command.Parameters.Add(pcupom);
+
+                            IDbDataParameter pvlr_compra = sqlServer.Command.CreateParameter();
+                            pvlr_compra.ParameterName = "@vlr_compra";
+                            pvlr_compra.Value = dadosTrans.vlr_compra;
+                            sqlServer.Command.Parameters.Add(pvlr_compra);
+
+                            IDbDataParameter pqtd_itens_compra = sqlServer.Command.CreateParameter();
+                            pqtd_itens_compra.ParameterName = "@qtd_itens_compra";
+                            pqtd_itens_compra.Value = dadosTrans.qtd_itens_compra;
+                            sqlServer.Command.Parameters.Add(pqtd_itens_compra);
+
+                            //Json da requisição
+                            IDbDataParameter pdes_json_requisicao = sqlServer.Command.CreateParameter();
+                            pdes_json_requisicao.ParameterName = "@des_json_requisicao";
+                            pdes_json_requisicao.Value = jsonRequisicao.Length > 4000 ? jsonRequisicao.Substring(0, 3999) : jsonRequisicao;
+                            sqlServer.Command.Parameters.Add(pdes_json_requisicao);
+
+                            #endregion
+
+                            sqlServer.Command.ExecuteNonQuery();
+
+                        }
+
+                        dat_compra = dadosTrans.dat_compra.ToString("dd/MM/yyyy HH:mm:ss");
+                        cod_loja = dadosTrans.cod_loja.ToString();
+                        cupom = dadosTrans.cupom;
+                        vlr_compra = dadosTrans.vlr_compra.ToString();
+                        qtd_itens_compra = dadosTrans.qtd_itens_compra.ToString();
+
+                        DataMaiorQueDiaAtual = true;
+
+                        throw new System.Exception(ErroDataMaiorDiaAtual);
+
+                    }
+                    else
+                    {
+                        //Adiciona o registro na lista somente se a data da compra for menor ou igual a data do dia do processamento
+                        listaViewizio_3.Add(new DadosLoteViewizio_3
+                        {
+                            CpfCliente = Convert.ToInt64(string.IsNullOrEmpty(dadosTrans.cod_cpf) == false ? dadosTrans.cod_cpf : "0"),
+                            CpfCliente_2 = Convert.ToInt64(string.IsNullOrEmpty(dadosTrans.cod_cpf) == false ? dadosTrans.cod_cpf : "0"),
+                            DataCompra = dadosTrans.dat_compra,
+                            ValorCompra = dadosTrans.vlr_compra,
+                            cupom = dadosTrans.cupom,
+                            Pdv = dadosTrans.Pdv,
+                            CodPagto = 0,
+                            MeioPagto = dadosTrans.des_tipo_pagamento,
+                            QtdeItens = dadosTrans.qtd_itens_compra,
+                            CodEAN = dadosTrans.cod_ean,
+                            CodProduto = Convert.ToInt64(dadosTrans.cod_produto),
+                            DesProduto = dadosTrans.des_produto,
+                            ValorUN = dadosTrans.vlr_item_compra,
+                            ValorItem = dadosTrans.vlr_item_compra,
+                            Quantidade = dadosTrans.qtd_item_compra,
+                            cod_usuario = 1,
+                            cod_pessoa = 0,
+                            item = dadosTrans.nro_item_compra,
+                            cod_loja = dadosTrans.cod_loja,
+                            nsu_transacao = dadosTrans.nsu_transacao,
+                            dat_geracao_nsu = dadosTrans.dat_geracao_nsu
+                        });
+                    }
                 }
 
                 #endregion
@@ -779,7 +866,7 @@ namespace TransacaoIzioRest.DAO
                 }
 
                 #endregion
-                
+
                 //sqlServer.Commit();
 
                 //Seta o retorno com sucesso
@@ -790,8 +877,22 @@ namespace TransacaoIzioRest.DAO
             {
                 //sqlServer.Rollback();
 
-                //Seta a lista de erros com o erro
-                listaErros.errors.Add(new ErrosTransacao { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ErroBancoDeDadosLoteTransacao + ", favor contactar o administrador" });
+                if (DataMaiorQueDiaAtual)
+                {
+                    //Seta a lista de erros com o erro
+                    listaErros.errors.Add(new ErrosTransacao
+                    {
+                        code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(),
+                        message = ErroDataMaiorDiaAtual +
+                        " {Loja = " + cod_loja + " | Dat.Compra = " + dat_compra + " | Cupom " + cupom + " | Vlr.Compra = " + vlr_compra + " | Qtd.Itens.Compra = " + qtd_itens_compra + " } " +
+                        ", favor contactar o administrador"
+                    });
+                }
+                else
+                {
+                    //Seta a lista de erros com o erro
+                    listaErros.errors.Add(new ErrosTransacao { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ErroBancoDeDadosLoteTransacao + ", favor contactar o administrador" });
+                }
 
                 //Insere o erro na sis_log
                 Log.inserirLogException(NomeClienteWs, ex, 0);
