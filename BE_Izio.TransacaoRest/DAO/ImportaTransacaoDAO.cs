@@ -223,7 +223,8 @@ namespace TransacaoIzioRest.DAO
                                                            cod_NSU,
                                                            cod_transacao,
                                                            vlr_item_compra,
-                                                           qtd_item_compra) 
+                                                           qtd_item_compra,
+                                                           vlr_desconto_item) 
                                                         values (
                                                            (CONVERT(datetimeoffset, getdate()) AT TIME ZONE 'E. South America Standard Time'),
                                                            @cod_produto,
@@ -231,7 +232,8 @@ namespace TransacaoIzioRest.DAO
                                                            @cod_NSU,
                                                            @cod_transacao,
                                                            @vlr_item_compra,
-                                                           @qtd_item_compra) ";
+                                                           @qtd_item_compra,
+                                                           @vlr_desconto_item) ";
                     }
                     else
                     {
@@ -242,7 +244,8 @@ namespace TransacaoIzioRest.DAO
                                                            cod_NSU,
                                                            cod_tab_transacao_cpf,
                                                            vlr_item_compra,
-                                                           qtd_item_compra) 
+                                                           qtd_item_compra,
+                                                           vlr_desconto_item) 
                                                         values (
                                                            (CONVERT(datetimeoffset, getdate()) AT TIME ZONE 'E. South America Standard Time'),
                                                            @cod_produto,
@@ -250,7 +253,8 @@ namespace TransacaoIzioRest.DAO
                                                            @cod_NSU,
                                                            @cod_transacao,
                                                            @vlr_item_compra,
-                                                           @qtd_item_compra) ";
+                                                           @qtd_item_compra,
+                                                           @vlr_desconto_item) ";
 
                     }
 
@@ -269,6 +273,15 @@ namespace TransacaoIzioRest.DAO
                         sqlServer.Command.Parameters.AddWithValue("@vlr_item_compra", item.vlr_item_compra);
                         sqlServer.Command.Parameters.AddWithValue("@qtd_item_compra", item.qtd_item_compra);
 
+                        if (item.vlr_desconto_item != null)
+                        {
+                            sqlServer.Command.Parameters.AddWithValue("@vlr_desconto_item", item.vlr_desconto_item);
+                        }
+                        else
+                        {
+                            sqlServer.Command.Parameters.AddWithValue("@vlr_desconto_item", DBNull.Value);
+                        }
+                        
                         //Executa a procedure
                         sqlServer.Command.ExecuteNonQuery();
                     }
@@ -491,7 +504,7 @@ namespace TransacaoIzioRest.DAO
                         CodProduto = Convert.ToInt64(dadosTrans.cod_produto),
                         DesProduto = dadosTrans.des_produto,
                         ValorItem = dadosTrans.vlr_item_compra,
-                        vlr_desconto_item = dadosTrans.vlr_desconto_item != null ? dadosTrans.vlr_desconto_item : 0,
+                        vlr_desconto_item = dadosTrans.vlr_desconto_item,
                         Quantidade = dadosTrans.qtd_item_compra,
                         cod_usuario = 1,
                         cod_pessoa = 0,

@@ -145,6 +145,11 @@
         /// Imagem do produto em Base64
         /// </summary>
         public string img_produto { get; set; }
+
+        /// <summary>
+        /// Valor do desconto aplicado no item
+        /// </summary>
+        public decimal? vlr_desconto_item { get; set; }
     }
 
     #endregion

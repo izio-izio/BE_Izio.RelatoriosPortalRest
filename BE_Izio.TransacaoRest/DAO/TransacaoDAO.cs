@@ -153,8 +153,9 @@ namespace TransacaoIzioRest.DAO
                                                      tri.cod_produto cod_plu,
                                                      tri.cod_nsu cod_ean,
                                                      tri.des_produto des_produto,
-                                                     round(tri.vlr_item_compra * tri.qtd_item_compra,2) vlr_item_compra,
-                                                     tri.qtd_item_compra qtd_item_compra
+                                                     round((tri.vlr_item_compra * tri.qtd_item_compra-(isnull(tri.vlr_desconto_item,0))),2) vlr_item_compra,
+                                                     tri.qtd_item_compra qtd_item_compra,
+                                                     tri.vlr_desconto_item
                                                   into 
                                                      #tmp_transacao
                                                   from 
@@ -169,7 +170,8 @@ namespace TransacaoIzioRest.DAO
                                                      tmp.des_produto des_produto,
                                                      tmp.vlr_item_compra,
                                                      qtd_item_compra, 
-                                                     null img_produto
+                                                     null img_produto,
+                                                     vlr_desconto_item
                                                   from
                                                      #tmp_transacao tmp
                                                   order by 4

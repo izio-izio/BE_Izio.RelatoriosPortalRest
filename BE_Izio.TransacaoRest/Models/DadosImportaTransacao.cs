@@ -133,6 +133,11 @@ namespace TransacaoRest.Models
         /// </summary>
         [Required]
         public decimal qtd_item_compra { get; set; }
+
+        /// <summary>
+        /// Valor do desconto aplicado no item
+        /// </summary>
+        public decimal? vlr_desconto_item { get; set; }
     }
 
     /// <summary>
