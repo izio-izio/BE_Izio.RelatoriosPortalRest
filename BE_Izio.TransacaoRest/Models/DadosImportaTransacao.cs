@@ -222,6 +222,11 @@ namespace TransacaoRest.Models
         public decimal vlr_item_compra { get; set; }
 
         /// <summary>
+        /// Valor do desconto aplicado no item
+        /// </summary>
+        public decimal? vlr_desconto_item { get; set; }
+        
+        /// <summary>
         /// Quantidade do produto comprado
         /// </summary>
         [Required]
@@ -262,8 +267,8 @@ namespace TransacaoRest.Models
         public long CodProduto { get; set; }
         public string DesProduto { get; set; }
 
-        public decimal ValorUN { get; set; }
         public decimal ValorItem { get; set; }
+        public decimal? vlr_desconto_item { get; set; }
         public decimal Quantidade { get; set; }
 
         public long cod_usuario { get; set; }

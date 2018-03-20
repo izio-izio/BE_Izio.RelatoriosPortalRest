@@ -490,8 +490,8 @@ namespace TransacaoIzioRest.DAO
                         CodEAN = dadosTrans.cod_ean,
                         CodProduto = Convert.ToInt64(dadosTrans.cod_produto),
                         DesProduto = dadosTrans.des_produto,
-                        ValorUN = dadosTrans.vlr_item_compra,
                         ValorItem = dadosTrans.vlr_item_compra,
+                        vlr_desconto_item = dadosTrans.vlr_desconto_item != null ? dadosTrans.vlr_desconto_item : 0,
                         Quantidade = dadosTrans.qtd_item_compra,
                         cod_usuario = 1,
                         cod_pessoa = 0,
@@ -529,8 +529,8 @@ namespace TransacaoIzioRest.DAO
                     "CodEAN",
                     "CodProduto",
                     "DesProduto",
-                    "ValorUN",
                     "ValorItem",
+                    "vlr_desconto_item",
                     "Quantidade",
                     "cod_usuario",
                     "cod_pessoa",
@@ -545,96 +545,7 @@ namespace TransacaoIzioRest.DAO
                 }
 
                 #endregion
-
-                //***************************
-                //Metodo descontinuado
-                #region Insert aninhado - PROCEDIMENTO TODO COMENTADO
-                ////Monta Insert Aninhado...
-                //StringBuilder queryBuilder = new StringBuilder();
-
-                //Int32 iContador = 0;
-
-                ////Percorre lista com os cpfs
-                //foreach (DadosTransacaoLote dadosTrans in objTransacao.ToList())
-                //{
-                //    if (iContador == 0)
-                //    {
-                //        queryBuilder.Clear();
-                //        queryBuilder.AppendFormat("insert into viewizio_3 values");
-                //    }
-
-                //    //if (dadosTrans.cod_cpf.Contains("5999744601"))
-                //    //{
-                //    //    dadosTrans.cod_cpf = dadosTrans.cod_cpf;
-                //    //}
-
-                //    if (iContador < 999)
-                //    {
-                //        queryBuilder.AppendFormat("('{0}','{1}','{2}',{3},'{4}','{5}',{6},'{7}',{8},{9},'{10}','{11}',{12},{13},{14},{15},{16},{17},{18},'{19}','{20}'),",
-                //                                     dadosTrans.cod_cpf, dadosTrans.cod_cpf,
-                //                                     dadosTrans.dat_compra.ToString("yyyyMMdd HH:mm:ss"),
-                //                                     dadosTrans.vlr_compra.ToString().Replace(",", "."),
-                //                                     dadosTrans.cupom,
-                //                                     dadosTrans.Pdv,
-                //                                     "0",
-                //                                     dadosTrans.des_tipo_pagamento,
-                //                                     dadosTrans.qtd_itens_compra,
-                //                                     dadosTrans.cod_ean,
-                //                                     dadosTrans.cod_produto,
-                //                                     GetStringNoAccents(dadosTrans.des_produto),
-                //                                     dadosTrans.vlr_item_compra.ToString().Replace(",", "."),
-                //                                     dadosTrans.vlr_item_compra.ToString().Replace(",", "."),
-                //                                     dadosTrans.qtd_item_compra.ToString().Replace(",", "."),
-                //                                     "1",
-                //                                     dadosTrans.cod_pessoa,
-                //                                     dadosTrans.nro_item_compra,
-                //                                     dadosTrans.cod_loja,
-                //                                     dadosTrans.nsu_transacao,
-                //                                     dadosTrans.dat_geracao_nsu);
-
-                //        iContador += 1;
-                //    }
-                //    else
-                //    {
-                //        //Adiciona a linha 1000 e faz o insert de 1000 registros
-                //        queryBuilder.AppendFormat("('{0}','{1}','{2}',{3},'{4}','{5}',{6},'{7}',{8},{9},'{10}','{11}',{12},{13},{14},{15},{16},{17},{18},'{19}','{20}'),",
-                //                                    dadosTrans.cod_cpf, dadosTrans.cod_cpf,
-                //                                    dadosTrans.dat_compra.ToString("yyyyMMdd HH:mm:ss"),
-                //                                    dadosTrans.vlr_compra.ToString().Replace(",", "."),
-                //                                    dadosTrans.cupom,
-                //                                    dadosTrans.Pdv,
-                //                                    "0",
-                //                                    dadosTrans.des_tipo_pagamento,
-                //                                    dadosTrans.qtd_itens_compra,
-                //                                    dadosTrans.cod_ean,
-                //                                    dadosTrans.cod_produto,
-                //                                    GetStringNoAccents(dadosTrans.des_produto),
-                //                                    dadosTrans.vlr_item_compra.ToString().Replace(",", "."),
-                //                                    dadosTrans.vlr_item_compra.ToString().Replace(",", "."),
-                //                                    dadosTrans.qtd_item_compra.ToString().Replace(",", "."),
-                //                                    "1",
-                //                                    dadosTrans.cod_pessoa,
-                //                                    dadosTrans.nro_item_compra,
-                //                                    dadosTrans.cod_loja,
-                //                                    dadosTrans.nsu_transacao,
-                //                                    dadosTrans.dat_geracao_nsu);
-
-                //        queryBuilder.Replace(',', ';', queryBuilder.Length - 1, 1);
-                //        sqlServer.Command.CommandText = queryBuilder.ToString();
-                //        sqlServer.Command.ExecuteNonQuery();
-
-                //        //Zera o contador para inserir os proximos 1000
-                //        iContador = 0;
-                //    }
-                //}
-
-                ////Executa o insert do restante dos registros
-                //queryBuilder.Replace(',', ';', queryBuilder.Length - 1, 1);
-                //sqlServer.Command.CommandText = queryBuilder.ToString();
-                //sqlServer.Command.ExecuteNonQuery();
-
-                #endregion
-
+                
                 sqlServer.Commit();
 
                 //Seta o retorno com sucesso
@@ -810,8 +721,8 @@ namespace TransacaoIzioRest.DAO
                             CodEAN = dadosTrans.cod_ean,
                             CodProduto = Convert.ToInt64(dadosTrans.cod_produto),
                             DesProduto = dadosTrans.des_produto,
-                            ValorUN = dadosTrans.vlr_item_compra,
                             ValorItem = dadosTrans.vlr_item_compra,
+                            vlr_desconto_item = dadosTrans.vlr_desconto_item,
                             Quantidade = dadosTrans.qtd_item_compra,
                             cod_usuario = 1,
                             cod_pessoa = 0,
@@ -850,8 +761,8 @@ namespace TransacaoIzioRest.DAO
                     "CodEAN",
                     "CodProduto",
                     "DesProduto",
-                    "ValorUN",
                     "ValorItem",
+                    "vlr_desconto_item",
                     "Quantidade",
                     "cod_usuario",
                     "cod_pessoa",
