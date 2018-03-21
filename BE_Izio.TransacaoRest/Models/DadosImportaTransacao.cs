@@ -77,6 +77,11 @@ namespace TransacaoRest.Models
         public Int32 qtd_itens_compra { get; set; }
 
         /// <summary>
+        /// Valor total de desconto aplicado nos itens vendidos
+        /// </summary>
+        public decimal? vlr_total_desconto { get; set; }
+
+        /// <summary>
         /// Numero do cupom fiscal 
         /// </summary>
         [Required]
@@ -203,6 +208,11 @@ namespace TransacaoRest.Models
         public Int32 qtd_itens_compra { get; set; }
 
         /// <summary>
+        /// Valor total de desconto aplicado nos itens vendidos
+        /// </summary>
+        public decimal? vlr_total_desconto { get; set; }
+
+        /// <summary>
         /// Codigo de barras. Se não tiver enviar o codigo interno do produto
         /// </summary>
         [Required]
@@ -267,6 +277,10 @@ namespace TransacaoRest.Models
         public string MeioPagto { get; set; }
 
         public Int32 QtdeItens { get; set; }
+        /// <summary>
+        /// Valor total de desconto aplicado nos itens vendidos
+        /// </summary>
+        public decimal? vlr_total_desconto { get; set; }
 
         public string CodEAN { get; set; }
         public long CodProduto { get; set; }

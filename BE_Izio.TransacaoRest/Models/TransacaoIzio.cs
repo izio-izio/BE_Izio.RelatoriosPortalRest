@@ -56,6 +56,11 @@
         public decimal vlr_compra	 { get; set; }
 
         /// <summary>
+        /// Valor total de desconto aplicado nos itens vendidos
+        /// </summary>
+        public decimal? vlr_total_desconto { get; set; }
+
+        /// <summary>
         /// Código da Loja
         /// </summary>
         public long cod_loja	 { get; set; }

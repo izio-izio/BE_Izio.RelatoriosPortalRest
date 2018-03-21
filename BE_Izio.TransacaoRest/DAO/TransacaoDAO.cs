@@ -48,7 +48,7 @@ namespace TransacaoIzioRest.DAO
                 sqlServer.StartConnection();
 
                 //Verifica se o usuario e a senha informado esta correto
-                sqlServer.Command.CommandText = @"select trs.cod_transacao,trs.cod_pessoa,trs.dat_compra,trs.vlr_compra,trs.cod_loja, tlj.razao_social des_loja, trs.qtd_itens_compra,trs.cupom 
+                sqlServer.Command.CommandText = @"select trs.cod_transacao,trs.cod_pessoa,trs.dat_compra,trs.vlr_compra,trs.cod_loja, tlj.razao_social des_loja, trs.qtd_itens_compra,trs.cupom ,trs.vlr_total_desconto
                                                   from 
                                                      tab_transacao trs with(nolock) 
                                                   left join

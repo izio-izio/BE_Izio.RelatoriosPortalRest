@@ -131,6 +131,9 @@ namespace TransacaoIzioRest.DAO
                 sqlServer.BeginTransaction();
                 sqlServer.Command.CommandType = System.Data.CommandType.Text;
 
+                //Monta script para inserir o cabeçalho (capa) da venda 
+                #region Monta script para inserir o cabeçalho (capa) da venda 
+
                 //Codigo pessoa maior que 0, indica que é uma compra identificada
                 if (objTransacao.cod_pessoa > 0)
                 {
@@ -144,7 +147,8 @@ namespace TransacaoIzioRest.DAO
                                                       dat_importacao,
                                                       cod_arquivo,
                                                       qtd_itens_compra,
-                                                      cupom) output INSERTED.cod_transacao 
+                                                      cupom,
+                                                      vlr_total_desconto) output INSERTED.cod_transacao 
                                                    values (
                                                       @cod_pessoa,
                                                       @dat_compra,
@@ -154,7 +158,8 @@ namespace TransacaoIzioRest.DAO
                                                       (CONVERT(datetimeoffset, getdate()) AT TIME ZONE 'E. South America Standard Time'),
                                                       @cod_arquivo,
                                                       @qtd_itens_compra,
-                                                      @cupom) ";
+                                                      @cupom,
+                                                      @vlr_total_desconto) ";
                 }
                 else
                 {
@@ -167,7 +172,8 @@ namespace TransacaoIzioRest.DAO
                                                       cod_usuario,
                                                       dat_importacao,
                                                       qtd_itens_compra,
-                                                      cupom) output INSERTED.cod_tab_transacao_cpf
+                                                      cupom,
+                                                      vlr_total_desconto) output INSERTED.cod_tab_transacao_cpf
                                                    values (
                                                       @num_cpf,
                                                       @dat_compra,
@@ -176,9 +182,12 @@ namespace TransacaoIzioRest.DAO
                                                       @cod_usuario,
                                                       (CONVERT(datetimeoffset, getdate()) AT TIME ZONE 'E. South America Standard Time'),
                                                       @qtd_itens_compra,
-                                                      @cupom) ";
+                                                      @cupom,
+                                                      @vlr_total_desconto) ";
 
                 }
+
+                #endregion
 
                 #region Monta Parametros
 
@@ -200,7 +209,14 @@ namespace TransacaoIzioRest.DAO
 
                 sqlServer.Command.Parameters.AddWithValue("@cupom", objTransacao.cupom);
 
-                //Log.inserirLogException(NomeClienteWs, new Exception("Carga Transacaco Cupom: " + objTransacao.cupom + "  |  Ip Requisicao: " + IpOrigem), 0);
+                if (objTransacao.vlr_total_desconto != null)
+                {
+                    sqlServer.Command.Parameters.AddWithValue("@vlr_total_desconto", objTransacao.vlr_total_desconto);
+                }
+                else
+                {
+                    sqlServer.Command.Parameters.AddWithValue("@vlr_total_desconto", DBNull.Value);
+                }
 
                 #endregion
 
@@ -511,7 +527,8 @@ namespace TransacaoIzioRest.DAO
                         item = dadosTrans.nro_item_compra,
                         cod_loja = dadosTrans.cod_loja,
                         nsu_transacao = dadosTrans.nsu_transacao,
-                        dat_geracao_nsu = dadosTrans.dat_geracao_nsu
+                        dat_geracao_nsu = dadosTrans.dat_geracao_nsu,
+                        vlr_total_desconto = dadosTrans.vlr_total_desconto
                     });
                 }
 
@@ -742,7 +759,8 @@ namespace TransacaoIzioRest.DAO
                             item = dadosTrans.nro_item_compra,
                             cod_loja = dadosTrans.cod_loja,
                             nsu_transacao = dadosTrans.nsu_transacao,
-                            dat_geracao_nsu = dadosTrans.dat_geracao_nsu
+                            dat_geracao_nsu = dadosTrans.dat_geracao_nsu,
+                            vlr_total_desconto = dadosTrans.vlr_total_desconto
                         });
                     }
                 }
