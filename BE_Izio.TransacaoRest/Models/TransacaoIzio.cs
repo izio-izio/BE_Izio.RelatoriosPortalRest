@@ -79,6 +79,16 @@
         /// Numero do cupom da compra
         /// </summary>
         public string cupom	 { get; set; }
+
+        /// <summary>
+        /// Valor de cashback gerado na compra
+        /// </summary>
+        public decimal? vlr_credito_cashback { get; set; }
+
+        /// <summary>
+        /// Data de validade para o cashback gerado na compra
+        /// </summary>
+        public DateTime? dat_validade_cashback { get; set; }
     }
 
     #endregion

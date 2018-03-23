@@ -14,11 +14,8 @@ namespace TransacaoIzioRest.DAO
 
         private string DadosNaoEncontrados = "Não foram encontrados registros";
         private string DadosNaoEncontradosItens = "Não foram encontrados registros";
-        private string CodigoCampanhaInvalido = "Código da campanha não é valido.";
-        private string CampanhaInvalida = "Campanha não está mais válida";
         private string ErroBancoDeDados = "Não foi possível realizar consulta das transações";
         private string ErroBancoDeDadosItens = "Não foi possível realizar consulta dos itens da venda";
-        private string TipoCampanhaInvalido = "Campanha informada não é gatilho por ticket";
 
         #endregion
 
@@ -48,13 +45,27 @@ namespace TransacaoIzioRest.DAO
                 sqlServer.StartConnection();
 
                 //Verifica se o usuario e a senha informado esta correto
-                sqlServer.Command.CommandText = @"select trs.cod_transacao,trs.cod_pessoa,trs.dat_compra,trs.vlr_compra,trs.cod_loja, tlj.razao_social des_loja, trs.qtd_itens_compra,trs.cupom ,trs.vlr_total_desconto
+                sqlServer.Command.CommandText = @"select 
+                                                     trs.cod_transacao,
+                                                     trs.cod_pessoa,
+                                                     trs.dat_compra,
+                                                     trs.vlr_compra,
+                                                     trs.cod_loja, 
+                                                     tlj.razao_social des_loja, 
+                                                     trs.qtd_itens_compra,
+                                                     trs.cupom ,
+                                                     trs.vlr_total_desconto,
+                                                     tlc.vlr_credito as vlr_credito,
+                                                     tlc.dat_validade as dat_validade_cashback
                                                   from 
                                                      tab_transacao trs with(nolock) 
                                                   left join
                                                      tab_loja tlj with(nolock) on tlj.cod_loja = trs.cod_loja 
-                                                  where dat_compra between '" + anoMes+"01 00:00:01' and '" +anoMes + DateTime.DaysInMonth(Convert.ToInt32(anoMes.Substring(0,4)), Convert.ToInt32(anoMes.Substring(4, 2))).ToString() + " 23:59:59' and " +
-                                                  "     cod_pessoa = @cod_pessoa order by dat_compra desc";
+                                                  left join
+                                                     tab_lancamento_credito_campanha tlc with(nolock) on tlc.cod_transacao = trs.cod_transacao
+                                                  where 
+                                                      dat_compra between '" + anoMes+"01 00:00:01' and '" +anoMes + DateTime.DaysInMonth(Convert.ToInt32(anoMes.Substring(0,4)), Convert.ToInt32(anoMes.Substring(4, 2))).ToString() + " 23:59:59' and " +
+                                                  "   cod_pessoa = @cod_pessoa order by dat_compra desc";
 
                 // **********************************************************************************
                 //Monta os parametros

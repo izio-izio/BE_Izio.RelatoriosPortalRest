@@ -21,13 +21,10 @@ namespace TransacaoIzioRest.DAO
     {
         #region Constantes Processamento Transacao
 
-        private string DadosNaoEncontrados = "Não foram encontrados registros";
-        private string ErroBancoDeDados = "Não foi possível realizar processamentos da transações para as tabelas finais do Izio";
-
+        
         private string ObjetoTransacaoVazio = "Objeto com os dados das vendas está vazio, impossível realizar o processamento.";
         private string ObjetoItensTransacaoVazio = "Objeto com os itens das vendas está vazio, impossível realizar o processamento.";
-        private string ErroInternoValidaCampos = "Não foi possível realizar a validação das lojas antes do processamento.";
-
+        
         private string ErroBancoDeDadosTransacao = "Erro na importação da venda do cupom";
         private string ErroVendaDuplicada = "A Compra já foi processada na base do Izio. Segue os dados da venda duplicada: ";
         private string ErroBancoDeDadosLoteTransacao = "Erro na importação do lote de transação";
@@ -567,7 +564,8 @@ namespace TransacaoIzioRest.DAO
                     "item",
                     "cod_loja",
                     "nsu_transacao",
-                    "dat_geracao_nsu"))
+                    "dat_geracao_nsu",
+                    "vlr_total_desconto"))
                 {
                     bcp.BulkCopyTimeout = ConfigurationManager.AppSettings["TimeoutExecucao"] != null ? Convert.ToInt32(ConfigurationManager.AppSettings["TimeoutExecucao"]) : 600;
                     bcp.DestinationTableName = "viewizio_3";
