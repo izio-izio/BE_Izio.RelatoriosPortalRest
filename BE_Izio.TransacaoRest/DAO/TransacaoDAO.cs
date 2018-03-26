@@ -64,8 +64,8 @@ namespace TransacaoIzioRest.DAO
                                                   left join
                                                      tab_lancamento_credito_campanha tlc with(nolock) on tlc.cod_transacao = trs.cod_transacao
                                                   where 
-                                                      dat_compra between '" + anoMes+"01 00:00:01' and '" +anoMes + DateTime.DaysInMonth(Convert.ToInt32(anoMes.Substring(0,4)), Convert.ToInt32(anoMes.Substring(4, 2))).ToString() + " 23:59:59' and " +
-                                                  "   cod_pessoa = @cod_pessoa order by dat_compra desc";
+                                                      trs.dat_compra between '" + anoMes+"01 00:00:01' and '" +anoMes + DateTime.DaysInMonth(Convert.ToInt32(anoMes.Substring(0,4)), Convert.ToInt32(anoMes.Substring(4, 2))).ToString() + " 23:59:59' and " +
+                                                  "   trs.cod_pessoa = @cod_pessoa order by trs.dat_compra desc";
 
                 // **********************************************************************************
                 //Monta os parametros
