@@ -798,7 +798,8 @@ namespace TransacaoIzioRest.DAO
                     "item",
                     "cod_loja",
                     "nsu_transacao",
-                    "dat_geracao_nsu"))
+                    "dat_geracao_nsu",
+                    "vlr_total_desconto"))
                 {
                     bcp.BulkCopyTimeout = ConfigurationManager.AppSettings["TimeoutExecucao"] != null ? Convert.ToInt32(ConfigurationManager.AppSettings["TimeoutExecucao"]) : 600;
                     bcp.DestinationTableName = "viewizio_3";
