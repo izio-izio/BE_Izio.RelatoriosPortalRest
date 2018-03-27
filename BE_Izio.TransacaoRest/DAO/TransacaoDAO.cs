@@ -45,7 +45,7 @@ namespace TransacaoIzioRest.DAO
                 sqlServer.StartConnection();
 
                 //Verifica se o usuario e a senha informado esta correto
-                sqlServer.Command.CommandText = @"select 
+                sqlServer.Command.CommandText = @"select distinct
                                                      trs.cod_transacao,
                                                      trs.cod_pessoa,
                                                      trs.dat_compra,
@@ -55,7 +55,7 @@ namespace TransacaoIzioRest.DAO
                                                      trs.qtd_itens_compra,
                                                      trs.cupom ,
                                                      trs.vlr_total_desconto,
-                                                     tlc.vlr_credito as vlr_credito,
+                                                     tlc.vlr_credito as vlr_credito_cashback,
                                                      tlc.dat_validade as dat_validade_cashback
                                                   from 
                                                      tab_transacao trs with(nolock) 
