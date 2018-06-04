@@ -1,5 +1,6 @@
 ﻿namespace TransacaoIzioRest.Models
 {
+    using Izio.Biblioteca.Model;
     using System;
     using System.Collections.Generic;
 
@@ -19,7 +20,7 @@
     {
         public Payload payload { get; set; }
 
-        public List<ErrosConsultaTransacao> errors { get; set; }
+        public List<Erros> errors { get; set; }
     }
 
     /// <summary>
@@ -110,7 +111,7 @@
     {
         public PayloadItensTransacao payload { get; set; }
 
-        public List<ErrosConsultaTransacao> errors { get; set; }
+        public List<Erros> errors { get; set; }
     }
 
     /// <summary>
@@ -168,22 +169,5 @@
     }
 
     #endregion
-    
-    /// <summary>
-    /// Retorna objeto com os erros ocorridos
-    /// </summary>
-    public class ListaErrosConsultaTransacao
-    {
-        public List<ErrosConsultaTransacao> errors { get; set; }
-    }
-
-    /// <summary>
-    /// Classe que retornas as lista de erros 
-    /// </summary>
-    public class ErrosConsultaTransacao
-    {
-        public string code { get; set; }
-        public string message { get; set; }
-    }
 
 }

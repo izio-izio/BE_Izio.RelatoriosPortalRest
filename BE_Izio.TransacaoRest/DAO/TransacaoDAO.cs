@@ -1,7 +1,9 @@
 ﻿using Izio.Biblioteca;
+using Izio.Biblioteca.Model;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Net;
 using TransacaoIzioRest.Models;
 
@@ -92,10 +94,10 @@ namespace TransacaoIzioRest.DAO
                 {
                     if (retornoConsulta.errors == null)
                     {
-                        retornoConsulta.errors = new List<ErrosConsultaTransacao>();
+                        retornoConsulta.errors = new List<Erros>();
                     }
 
-                    retornoConsulta.errors.Add(new ErrosConsultaTransacao { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = DadosNaoEncontrados + "." });
+                    retornoConsulta.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = DadosNaoEncontrados + "." });
                 }
             }
             catch (System.Exception ex)
@@ -107,24 +109,19 @@ namespace TransacaoIzioRest.DAO
 
                 sqlServer.Rollback();
 
-                if (!string.IsNullOrEmpty(sqlServer.Command.CommandText))
-                {
-                    //Salva o command text da requisição
-                    Log.inserirLogException(NomeClienteWs, new System.Exception(ErroBancoDeDados + ex.Message, new System.Exception(sqlServer.Command.CommandText)), 0);
-                }  
-                else
-                {
-                    //Salva os parametros
-                    Log.inserirLogException(NomeClienteWs, new System.Exception(ErroBancoDeDados + ex.Message, new System.Exception("Cod. Pessoa: " + cod_pessoa.ToString() + " | Ano Mes: " + anoMes)), 0);
-                }
+                DadosLog dadosLog = new DadosLog();
+                dadosLog.des_erro_tecnico = ex.ToString();
+
+                //Pegar a mensagem padrão retornada da api, caso não tenha mensagem de negocio para devolver na API
+                Log.InserirLogIzio(NomeClienteWs, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
 
                 if (retornoConsulta.errors == null)
                 {
-                    retornoConsulta.errors = new List<ErrosConsultaTransacao>();
+                    retornoConsulta.errors = new List<Erros>();
                 }
 
                 //Adiciona o erro de negocio
-                retornoConsulta.errors.Add(new ErrosConsultaTransacao { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ErroBancoDeDados + ". Favor contactar o Administrador." });
+                retornoConsulta.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ErroBancoDeDados + ". Favor contactar o Administrador." });
             }
             finally
             {
@@ -208,22 +205,20 @@ namespace TransacaoIzioRest.DAO
                     //Cria o payload de retorno
                     retornoConsulta.payload = new PayloadItensTransacao();
 
-                    retornoConsulta.payload.listaItensTransacao = new Izio.Biblioteca.ModuloClasse().PreencheClassePorDataReader<DadosItensTransacao>(sqlServer.Reader);
+                    retornoConsulta.payload.listaItensTransacao = new ModuloClasse().PreencheClassePorDataReader<DadosItensTransacao>(sqlServer.Reader);
                 }
                 else
                 {
                     if (retornoConsulta.errors == null)
                     {
-                        retornoConsulta.errors = new List<ErrosConsultaTransacao>();
+                        retornoConsulta.errors = new List<Erros>();
                     }
 
-                    retornoConsulta.errors.Add(new ErrosConsultaTransacao { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = DadosNaoEncontradosItens + "." });
+                    retornoConsulta.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = DadosNaoEncontradosItens + "." });
                 }
             }
             catch (System.Exception ex)
             {
-                Log.inserirLogException(NomeClienteWs, ex, 0);
-
                 if (sqlServer.Reader != null && !sqlServer.Reader.IsClosed)
                 {
                     sqlServer.Reader.Close();
@@ -231,13 +226,103 @@ namespace TransacaoIzioRest.DAO
 
                 sqlServer.Rollback();
 
+                DadosLog dadosLog = new DadosLog();
+                dadosLog.des_erro_tecnico = ex.ToString();
+
+                //Pegar a mensagem padrão retornada da api, caso não tenha mensagem de negocio para devolver na API
+                Log.InserirLogIzio(NomeClienteWs, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
+
                 if (retornoConsulta.errors == null)
                 {
-                    retornoConsulta.errors = new List<ErrosConsultaTransacao>();
+                    retornoConsulta.errors = new List<Erros>();
                 }
 
                 //Adiciona o erro de negocio
-                retornoConsulta.errors.Add(new ErrosConsultaTransacao { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ErroBancoDeDadosItens + ". Favor contactar o Administrador." });
+                retornoConsulta.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ErroBancoDeDadosItens + ". Favor contactar o Administrador." });
+            }
+            finally
+            {
+                if (sqlServer != null)
+                {
+                    if (sqlServer.Reader != null && !sqlServer.Reader.IsClosed)
+                    {
+                        sqlServer.Reader.Close();
+                        sqlServer.Reader.Dispose();
+                    }
+
+                    sqlServer.CloseConnection();
+
+                }
+            }
+            return retornoConsulta;
+        }
+
+        #endregion
+
+        /// <summary>
+        /// Consultar os registros que foram enviados para Izio para a tabela intermédiária - Viewizio_3.
+        /// </summary>
+        /// <returns></returns>
+        #region Consultar os registros que foram enviados para Izio para a tabela intermédiária - Viewizio_3.
+        public RetornoDadosTermino ConsultarTransacoesCarregadaEmLote(DateTime dataCompra)
+        {
+            RetornoDadosTermino retornoConsulta = new RetornoDadosTermino();
+
+            retornoConsulta.payload = new PayloadTermino();
+            retornoConsulta.payload.dat_compra = dataCompra;
+
+            try
+            {
+                //Abre a conexao com o banco da dados
+                sqlServer.StartConnection();
+
+                //Consulta a quantidade de registros importados na viewizio_3
+                sqlServer.Command.CommandText = string.Format("select count(1) from viewizio_3 with(nolock) where datacompra between '{0}' and '{0} 23:59:59' and cod_loja > 0 ",dataCompra.ToString("yyyyMMdd"));
+                retornoConsulta.payload.qtd_registros_importados = (int)sqlServer.Command.ExecuteScalar();
+
+                //Consulta o valor vendido por loja e popula a lista de saida
+                sqlServer.Command.CommandText = string.Format(@"select cod_loja,sum(valorcompra) vlr_vendas, count(1) qtd_vendas from (
+                                                                   select
+                                                                   cod_loja,
+                                                                   cupom,
+                                                                   ValorCompra,
+                                                                   datacompra,
+                                                                   QtdeItens
+                                                                from
+                                                                   viewizio_3 with(nolock)
+                                                                where
+                                                                   datacompra between '{0}' and '{0} 23:59:59' and cod_loja > 0
+                                                                group by
+                                                                   cod_loja,
+                                                                   cupom,
+                                                                   ValorCompra,
+                                                                   datacompra,
+                                                                   QtdeItens)  tab group by cod_loja ", dataCompra.ToString("yyyyMMdd")); 
+
+                //Executa a consulta
+                sqlServer.Reader = sqlServer.Command.ExecuteReader();
+                retornoConsulta.payload.lst_lojas = new ModuloClasse().PreencheClassePorDataReader<ComprasLoja>(sqlServer.Reader);
+
+                retornoConsulta.payload.qtd_vendas = retornoConsulta.payload.lst_lojas.AsEnumerable().Sum(x => x.qtd_vendas);
+                retornoConsulta.payload.vlr_total_vendas = retornoConsulta.payload.lst_lojas.AsEnumerable().Sum(x => x.vlr_vendas);
+
+            }
+            catch (System.Exception ex)
+            {
+                if (sqlServer.Reader != null && !sqlServer.Reader.IsClosed)
+                {
+                    sqlServer.Reader.Close();
+                }
+
+                sqlServer.Rollback();
+
+                DadosLog dadosLog = new DadosLog();
+                dadosLog.des_erro_tecnico = ex.ToString();
+
+                //Pegar a mensagem padrão retornada da api, caso não tenha mensagem de negocio para devolver na API
+                Log.InserirLogIzio(NomeClienteWs, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
+
+                throw;
             }
             finally
             {

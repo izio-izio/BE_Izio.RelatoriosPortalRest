@@ -51,8 +51,8 @@
       <HintPath>..\packages\FastMember.1.1.0\lib\net40\FastMember.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Izio.Biblioteca, Version=1.0.6649.20902, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Izio.Biblioteca.1.0.6649.20902\lib\net45\Izio.Biblioteca.dll</HintPath>
+    <Reference Include="Izio.Biblioteca, Version=1.1.6726.29995, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Izio.Biblioteca.1.1.6726.29995\lib\net45\Izio.Biblioteca.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.AI.Agent.Intercept, Version=2.0.6.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.ApplicationInsights.Agent.Intercept.2.0.6\lib\net45\Microsoft.AI.Agent.Intercept.dll</HintPath>
@@ -231,7 +231,6 @@
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\TransacaoIzioController.cs" />
     <Compile Include="DAO\ImportaTransacaoDAO.cs" />
-    <Compile Include="DAO\ProcessamentoTransacaoDAO.cs" />
     <Compile Include="DAO\TransacaoCanceladaDAO.cs" />
     <Compile Include="DAO\TransacaoDAO.cs" />
     <Compile Include="Exception\ApiException.cs" />
@@ -239,6 +238,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\DadosImportaTransacao.cs" />
+    <Compile Include="Models\DadosProcessamentoTermino.cs" />
     <Compile Include="Models\DadosProcessamentoTransacao.cs" />
     <Compile Include="Models\DadosTransacaoCancelada.cs" />
     <Compile Include="Models\TransacaoIzio.cs" />

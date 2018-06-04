@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Izio.Biblioteca.Model;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -9,7 +10,7 @@ namespace TransacaoRest.Models
     /// </summary>
     public class RetornoRemoveTransacao
     {
-        public Payload payload { get; set; }
+        public Sucesso payload { get; set; }
 
         public List<Erros> errors { get; set; }
     }
@@ -19,7 +20,7 @@ namespace TransacaoRest.Models
     /// </summary>
     public class RetornoSucessoRemoverTransacao
     {
-        public Payload payload { get; set; }
+        public Sucesso payload { get; set; }
     }
 
     /// <summary>

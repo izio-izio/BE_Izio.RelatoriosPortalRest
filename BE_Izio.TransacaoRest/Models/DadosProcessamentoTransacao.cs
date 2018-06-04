@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Izio.Biblioteca.Model;
+using System;
 using System.Collections.Generic;
 
 namespace TransacaoRest.Models
@@ -8,7 +9,7 @@ namespace TransacaoRest.Models
     /// </summary>
     public class RetornoDadosTransacao
     {
-        public Payload payload { get; set; }
+        public Sucesso payload { get; set; }
     }
 
     /// <summary>
@@ -16,18 +17,9 @@ namespace TransacaoRest.Models
     /// </summary>
     public class DadosProcessamento
     {
-        public Payload payload { get; set; }
+        public Sucesso payload { get; set; }
 
         public List<Erros> errors { get; set; }
-    }
-
-    /// <summary>
-    /// Objeto padrão de retorno da API Rest
-    /// </summary>
-    public class Payload
-    {
-        public string code { get; set; }
-        public string message { get; set; }
     }
 
     /// <summary>
@@ -39,22 +31,5 @@ namespace TransacaoRest.Models
         /// Codigo da loja que está sendo feito o processamento
         /// </summary>
         public Int64 cod_loja { get; set; }
-    }
-
-    /// <summary>
-    /// Retorna objeto com os erros ocorridos
-    /// </summary>
-    public class ListaErros
-    {
-        public List<Erros> errors { get; set; }
-    }
-
-    /// <summary>
-    /// Classe que retornas as lista de erros 
-    /// </summary>
-    public class Erros
-    {
-        public string code { get; set; }
-        public string message { get; set; }
     }
 }

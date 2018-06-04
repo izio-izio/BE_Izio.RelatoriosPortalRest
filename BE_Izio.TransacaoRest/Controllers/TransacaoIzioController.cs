@@ -4,12 +4,14 @@
     using System.Net;
     using System.Net.Http;
     using System.Web.Http;
-    using Izio.Biblioteca;
     using System.Collections.Generic;
-    using Models;
     using TransacaoRest.Models;
     using System.Web;
     using TransacaoIzioRest.DAO;
+    using System.Web.Http.Description;
+    using Izio.Biblioteca;
+    using Izio.Biblioteca.Model;
+    using TransacaoIzioRest.Models;
 
     public class TransacaoIzioController : ApiController
     {
@@ -34,7 +36,7 @@
             DadosConsultaTransacao dadosConsulta = new DadosConsultaTransacao();
 
             //Objeto de retorno contendo os erros da execução da API
-            ListaErrosConsultaTransacao listaErros = new ListaErrosConsultaTransacao();
+            ApiErrors listaErros = new ApiErrors();
 
             try
             {
@@ -60,27 +62,20 @@
             {
                 if (listaErros.errors == null)
                 {
-                    listaErros.errors = new List<ErrosConsultaTransacao>();
+                    listaErros.errors = new List<Erros>();
                 }
                 //Seta o Objeto com o Erro ocorrido
-                listaErros.errors.Add(new ErrosConsultaTransacao { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ex.Message });
+                listaErros.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = "Parametro Invalido: Cod. Pessoa: " + codigoPessoa.ToString() + " | Ano Mes: " + anoMes });
 
                 if (!ex.Message.ToUpper().Contains("TOKEN"))
                 {
-                    Log.inserirLogException(sNomeCliente, new Exception("Parametro Invalido: Cod. Pessoa: " + codigoPessoa.ToString() + " | Ano Mes: " + anoMes), 0);
+                    DadosLog dadosLog = new DadosLog();
+                    dadosLog.des_erro_tecnico = "Parametro Invalido: Cod. Pessoa: " + codigoPessoa.ToString() + " | Ano Mes: " + anoMes;
+                    Log.InserirLogIzio(sNomeCliente, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
 
-
-                    //Se exception
-                    if (ex.InnerException != null)
-                    {
-                        //Grava o erro na tabela de log (sis_log)
-                        Log.inserirLogException(sNomeCliente, new Exception(ex.Message + System.Environment.NewLine + ex.InnerException), 0);
-                    }
-                    else
-                    {
-                        //Grava o erro na tabela de log (sis_log)
-                        Log.inserirLogException(sNomeCliente, ex, 0);
-                    }
+                    dadosLog.des_erro_tecnico = ex.ToString();
+                    //Pegar a mensagem padrão retornada da api, caso não tenha mensagem de negocio para devolver na API
+                    Log.InserirLogIzio(sNomeCliente, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
                 }
 
                 return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
@@ -107,7 +102,7 @@
             DadosConsultaItensTransacao dadosConsulta = new DadosConsultaItensTransacao();
 
             //Objeto de retorno contendo os erros da execução da API
-            ListaErrosConsultaTransacao listaErros = new ListaErrosConsultaTransacao();
+            ApiErrors listaErros = new ApiErrors();
 
             try
             {
@@ -133,24 +128,18 @@
             {
                 if (listaErros.errors == null)
                 {
-                    listaErros.errors = new List<ErrosConsultaTransacao>();
+                    listaErros.errors = new List<Erros>();
                 }
                 //Seta o Objeto com o Erro ocorrido
-                listaErros.errors.Add(new ErrosConsultaTransacao { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ex.Message });
+                listaErros.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ex.Message });
 
                 if (!ex.Message.ToUpper().Contains("TOKEN"))
-                {   
-                    //Se exception
-                    if (ex.InnerException != null)
-                    {
-                        //Grava o erro na tabela de log (sis_log)
-                        Log.inserirLogException(sNomeCliente, new Exception(ex.Message + System.Environment.NewLine + ex.InnerException), 0);
-                    }
-                    else
-                    {
-                        //Grava o erro na tabela de log (sis_log)
-                        Log.inserirLogException(sNomeCliente, ex, 0);
-                    }
+                {
+                    DadosLog dadosLog = new DadosLog();
+                    dadosLog.des_erro_tecnico = ex.ToString();
+
+                    //Pegar a mensagem padrão retornada da api, caso não tenha mensagem de negocio para devolver na API
+                    Log.InserirLogIzio(sNomeCliente, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
                 }
 
                 //trocar o status code
@@ -161,6 +150,11 @@
         /// <summary>
         /// Realiza a importação da transação on-line para as tabelas finais do Izio
         /// </summary>
+        /// <remarks>
+        /// Importa as vendas para as tabelas finais do Izio
+        /// Processamento On-line das Vendas.
+        /// </remarks>
+        /// <param name="objTransacao">Json com os dados de 1 venda (capa e os itens)</param>
         /// <param name="tokenAutenticacao">Token de autorizacao para utilizacao da api</param>
         /// <returns></returns>
         [HttpPost]
@@ -212,18 +206,12 @@
                 listaErros.errors.Add(new ErrosTransacao { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = "Erro interno no processamento on-line das transações, favor contactar o administrador." });
 
                 if (!ex.Message.ToUpper().Contains("TOKEN"))
-                {   
-                    //Se exception
-                    if (ex.InnerException != null)
-                    {
-                        //Grava o erro na tabela de log (sis_log)
-                        Log.inserirLogException(sNomeCliente, new Exception(ex.Message + System.Environment.NewLine + ex.InnerException), 0);
-                    }
-                    else
-                    {
-                        //Grava o erro na tabela de log (sis_log)
-                        Log.inserirLogException(sNomeCliente, ex, 0);
-                    }
+                {
+                    DadosLog dadosLog = new DadosLog();
+                    dadosLog.des_erro_tecnico = ex.ToString();
+
+                    //Pegar a mensagem padrão retornada da api, caso não tenha mensagem de negocio para devolver na API
+                    Log.InserirLogIzio(sNomeCliente, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
                 }
 
                 //trocar o status code
@@ -233,8 +221,14 @@
         }
 
         /// <summary>
-        /// Realiza a importação das transações carregadas em lotes para tabela intermediária do Izio
+        /// Realiza a importação em lote das transações carregadas em lotes para tabela intermediária do Izio
         /// </summary>
+        /// <remarks>
+        /// Método para importar as vendas em lote de 1000 em 1000 registros para a tabela intermediária do Izio
+        /// 
+        /// As vendas importadas por este método serão processadas para as tabelas finais do Izio em processamento back.
+        /// </remarks>
+        /// <param name="objTransacao">Lote em Json com as vendas</param>
         /// <param name="tokenAutenticacao">Token de autorizacao para utilizacao da api</param>
         /// <returns></returns>
         [HttpPost]
@@ -276,8 +270,6 @@
                 }
                 else
                 {
-                    //retorno.payload.code = Convert.ToInt32(HttpStatusCode.OK).ToString();
-                    //retorno.payload.message = "Processamento das transações realizado com sucesso.";
                     retProcessamento.payload = retorno.payload;
                     return Request.CreateResponse(HttpStatusCode.Created, retProcessamento);
                 }
@@ -294,17 +286,11 @@
 
                 if (!ex.Message.ToUpper().Contains("TOKEN"))
                 {
-                    //Se exception
-                    if (ex.InnerException != null)
-                    {
-                        //Grava o erro na tabela de log (sis_log)
-                        Log.inserirLogException(sNomeCliente, new Exception(ex.Message + System.Environment.NewLine + ex.InnerException), 0);
-                    }
-                    else
-                    {
-                        //Grava o erro na tabela de log (sis_log)
-                        Log.inserirLogException(sNomeCliente, ex, 0);
-                    }
+                    DadosLog dadosLog = new DadosLog();
+                    dadosLog.des_erro_tecnico = ex.ToString();
+
+                    //Pegar a mensagem padrão retornada da api, caso não tenha mensagem de negocio para devolver na API
+                    Log.InserirLogIzio(sNomeCliente, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
                 }
 
                 //trocar o status code
@@ -333,7 +319,7 @@
             RetornoRemoveTransacao retorno = new RetornoRemoveTransacao();
 
             //Objeto de retorno contendo os erros da execução da API
-            RetornoErroRemoverTransacao listaErros = new RetornoErroRemoverTransacao();
+            ApiErrors listaErros = new ApiErrors();
 
             try
             {
@@ -367,19 +353,151 @@
 
                 if (!ex.Message.ToUpper().Contains("TOKEN"))
                 {
-                    //Se exception
-                    if (ex.InnerException != null)
+                    DadosLog dadosLog = new DadosLog();
+                    dadosLog.des_erro_tecnico = ex.ToString();
+
+                    //Pegar a mensagem padrão retornada da api, caso não tenha mensagem de negocio para devolver na API
+                    Log.InserirLogIzio(sNomeCliente, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
+                }
+
+                //trocar o status code
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
+
+            }
+        }
+
+        /// <summary>
+        /// Realiza a exclusão dos registros intermediários para reprocessamento.
+        /// </summary>
+        /// <param name="tokenAutenticacao">Token de autorizacao para utilizacao da api</param>
+        /// <param name="dataProcessamento">Data (yyyy-MM-dd) para exclusão processamento (deixar em branco para deletar tudo)</param>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("api/TransacaoIzio/ExcluirRegistrosIntermediarios/{tokenAutenticacao}")]
+        [ApiExplorerSettings(IgnoreApi = true)]
+        [ResponseType(typeof(ApiSuccess))]
+        public HttpResponseMessage ExcluirRegistrosIntermediarios([FromUri] string tokenAutenticacao, [FromUri] string dataProcessamento = "")
+        {
+            //Nome do cliente que esta executando a API, gerado após validação do Token
+            string sNomeCliente = "";
+
+            //Objeto de retorno contendo os erros da execução da API
+            ApiErrors listaErros = new ApiErrors();
+
+            try
+            {
+                //Verifica se o token informado é válido
+                sNomeCliente = Utilidades.AutenticarTokenApiRest(tokenAutenticacao);
+
+                //Cria objeto para processamento das transacoes
+                TransacaoCanceladaDAO excluiTransacao = new TransacaoCanceladaDAO(sNomeCliente);
+                excluiTransacao.ExcluirRegistrosIntermediarios(dataProcessamento);
+
+                ApiSuccess success = new ApiSuccess();
+
+                success.payload = new Sucesso();
+                success.payload.code = "200";
+                success.payload.message = "Dados Excluídos com Sucesso.";
+                return Request.CreateResponse(HttpStatusCode.OK, success);
+
+            }
+            catch (System.Exception ex)
+            {
+
+                if (listaErros.errors == null)
+                {
+                    listaErros.errors = new List<Erros>();
+                }
+                //Seta o Objeto com o Erro ocorrido
+                listaErros.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = "Erro interno no processamento do lote das transações, favor contactar o administrador." });
+                DadosLog dadosLog = new DadosLog();
+                dadosLog.des_erro_tecnico = ex.ToString();
+                
+                //Pegar a mensagem padrão retornada da api, caso não tenha mensagem de negocio para devolver na API
+                Log.InserirLogIzio(sNomeCliente, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
+
+                //trocar o status code
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
+
+            }
+        }
+
+
+        /// <summary>
+        /// Método para consultar os registros que foram enviados para Izio para a tabela intermédiária.
+        /// </summary>
+        /// <remarks>
+        /// Consultar o total das vendas importadas em lote no Izio. As Vendas que foram carregadas na tabela intermediária
+        /// </remarks>
+        /// <param name="tokenAutenticacao">Token de autorizacao para utilizacao da api</param>
+        /// <param name="dataImportacao">Data (yyyyMMdd) para consulta das transações (vendas) importadas em lote</param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("api/TransacaoIzio/ConsultarTransacoesCarregadaEmLote/{tokenAutenticacao}/{dataImportacao}")]
+        [ResponseType(typeof(RetornoDadosTermino))]
+        public HttpResponseMessage ConsultarTransacoesCarregadaEmLote([FromUri] string tokenAutenticacao, [FromUri] string dataImportacao)
+        {
+            //Nome do cliente que esta executando a API, gerado após validação do Token
+            string sNomeCliente = "";
+
+            //Objeto de retorno contendo os erros da execução da API
+            ApiErrors listaErros = new ApiErrors();
+            listaErros.errors = new List<Erros>();
+
+            //Objeto de retorno com o movimento das lojas
+            RetornoDadosTermino retorno = new RetornoDadosTermino();
+
+            try
+            {
+                #region Validação dos campos 
+                if (string.IsNullOrEmpty(dataImportacao))
+                {
+                    //Seta o Objeto com o Erro ocorrido
+                    listaErros.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = "O campo data importação é obrigatório." });
+                }
+                else if (dataImportacao.Trim().Length < 8 || dataImportacao.Trim().Length > 8)
+                {
+                    //Seta o Objeto com o Erro ocorrido
+                    listaErros.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = "Data importação não foi informada corretamente (yyyyMMdd)." });
+                }
+                else
+                {
+                    DateTime data;
+                    if (!DateTime.TryParseExact(dataImportacao, "yyyyMMdd", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out data))
                     {
-                        //Grava o erro na tabela de log (sis_log)
-                        Log.inserirLogException(sNomeCliente, new Exception(ex.Message + System.Environment.NewLine + ex.InnerException), 0);
-                    }
-                    else
-                    {
-                        //Grava o erro na tabela de log (sis_log)
-                        Log.inserirLogException(sNomeCliente, ex, 0);
+                        //Seta o Objeto com o Erro ocorrido
+                        listaErros.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = "A data importação não foi informada corretamente (yyyyMMdd)." });
                     }
                 }
 
+                if (listaErros.errors.Count > 0)
+                {
+                    return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
+                }
+                #endregion
+
+                //Verifica se o token informado é válido
+                sNomeCliente = Utilidades.AutenticarTokenApiRest(tokenAutenticacao);
+
+                //Cria objeto para processamento das transacoes
+                TransacaoDAO dao = new TransacaoDAO(sNomeCliente);
+
+                retorno = dao.ConsultarTransacoesCarregadaEmLote(DateTime.ParseExact(dataImportacao, "yyyyMMdd", System.Globalization.CultureInfo.InvariantCulture));
+
+                return Request.CreateResponse(HttpStatusCode.OK, retorno);
+
+            }
+            catch (System.Exception ex)
+            {
+                DadosLog dadosLog = new DadosLog();
+                dadosLog.des_erro_tecnico = ex.ToString();
+
+                //Pegar a mensagem padrão retornada da api, caso não tenha mensagem de negocio para devolver na API
+                Log.InserirLogIzio(sNomeCliente, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
+
+                //Seta o Objeto com o Erro ocorrido
+                listaErros.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = "Erro interno no processamento do lote das transações, favor contactar o administrador." });
+                
                 //trocar o status code
                 return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
 
