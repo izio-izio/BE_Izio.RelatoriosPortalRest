@@ -2,6 +2,7 @@
 using Izio.Biblioteca.Model;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data;
 using System.Linq;
 using System.Net;
@@ -275,6 +276,7 @@ namespace TransacaoIzioRest.DAO
             {
                 //Abre a conexao com o banco da dados
                 sqlServer.StartConnection();
+                sqlServer.Command.CommandTimeout = ConfigurationManager.AppSettings["TimeoutExecucao"] != null ? Convert.ToInt32(ConfigurationManager.AppSettings["TimeoutExecucao"]) : 1200;
 
                 //Consulta a quantidade de registros importados na viewizio_3
                 sqlServer.Command.CommandText = string.Format("select count(1) from viewizio_3 with(nolock) where datacompra between '{0}' and '{0} 23:59:59' and cod_loja > 0 ",dataCompra.ToString("yyyyMMdd"));
