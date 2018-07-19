@@ -98,6 +98,11 @@ namespace TransacaoRest.Models
         public string dat_geracao_nsu { get; set; }
 
         /// <summary>
+        /// BIN do cartão utiliza no pagamento da venda. Caso a compra seja paga em mais de um cartão, os BINs precisam vir separados por ";"
+        /// </summary>
+        public string des_bin_cartao { get; set; }
+
+        /// <summary>
         /// Lista com os itens da compra
         /// </summary>
         [Required]

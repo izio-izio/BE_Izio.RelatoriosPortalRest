@@ -314,12 +314,14 @@ namespace TransacaoIzioRest.DAO
                                                            cod_transacao,
                                                            nom_tipo_pagamento,
                                                            cod_nsu_cartao,
-                                                           dat_nsu_cartao) 
+                                                           dat_nsu_cartao,
+                                                           des_bin_cartao) 
                                                         values (
                                                            @cod_transacao,
                                                            @nom_tipo_pagamento,
                                                            @cod_nsu_cartao,
-                                                           @dat_nsu_cartao) ";
+                                                           @dat_nsu_cartao,
+                                                           @des_bin_cartao) ";
                     }
                     else
                     {

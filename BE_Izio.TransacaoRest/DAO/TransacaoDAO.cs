@@ -156,8 +156,43 @@ namespace TransacaoIzioRest.DAO
                 //Abre a conexao com o banco da dados
                 sqlServer.StartConnection();
 
-                //Verifica se o usuario e a senha informado esta correto
-                sqlServer.Command.CommandText = @"select 
+                if (ConfigurationManager.AppSettings["clientesCRE"] != null && ConfigurationManager.AppSettings["clientesCRE"].ToString().ToUpper().Contains(NomeClienteWs.ToUpper()))
+                {
+                    sqlServer.Command.CommandText = @"select 
+                                                     tri.cod_transacao,
+                                                     tri.cod_produto cod_plu,
+                                                     tri.cod_nsu cod_ean,
+                                                     tri.des_produto des_produto,
+                                                     round(tri.vlr_item_compra-(isnull(tri.vlr_desconto_item,0)),2) vlr_item_compra,
+                                                     tri.qtd_item_compra qtd_item_compra,
+                                                     tri.vlr_desconto_item
+                                                  into 
+                                                     #tmp_transacao
+                                                  from 
+                                                     tab_transacao_itens tri with(nolock)
+                                                  where 
+                                                     tri.cod_transacao =  @cod_transacao
+                                                  
+                                                  select
+                                                     tmp.cod_transacao,
+                                                     case when ltrim(rtrim(coalesce(tmp.cod_plu,tmp.cod_ean))) <> '' then ltrim(rtrim(coalesce(tmp.cod_plu,tmp.cod_ean))) else tmp.cod_ean end cod_plu,
+                                                     case when ltrim(rtrim(coalesce(tmp.cod_ean,tmp.cod_plu))) <> '' then ltrim(rtrim(coalesce(tmp.cod_ean,tmp.cod_plu))) else tmp.cod_plu end cod_ean, 
+                                                     tmp.des_produto des_produto,
+                                                     tmp.vlr_item_compra,
+                                                     qtd_item_compra, 
+                                                     null img_produto,
+                                                     vlr_desconto_item
+                                                  from
+                                                     #tmp_transacao tmp
+                                                  order by 4
+                                                  
+                                                  drop table #tmp_transacao  ";
+                }
+                else
+                {
+
+                    //Verifica se o usuario e a senha informado esta correto
+                    sqlServer.Command.CommandText = @"select 
                                                      tri.cod_transacao,
                                                      tri.cod_produto cod_plu,
                                                      tri.cod_nsu cod_ean,
@@ -186,6 +221,7 @@ namespace TransacaoIzioRest.DAO
                                                   order by 4
                                                   
                                                   drop table #tmp_transacao  ";
+                }
 
                 // **********************************************************************************
                 //Monta os parametros
