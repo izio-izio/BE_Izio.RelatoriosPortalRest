@@ -303,10 +303,6 @@ namespace TransacaoIzioRest.DAO
 
                     #region Importa os meios de pagamentos
 
-                    //Monta Array com os meios de pagamento da transacao
-                    List<string> ListaMeioPagto = new List<string>();
-                    ListaMeioPagto = objTransacao.nom_tipo_pagamento.Split(';').ToList();
-
                     //Insere os meios de pagamentos da transacao
                     if (objTransacao.cod_pessoa > 0)
                     {
@@ -329,19 +325,29 @@ namespace TransacaoIzioRest.DAO
                                                            cod_tab_transacao_cpf,
                                                            nom_tipo_pagamento,
                                                            cod_nsu_cartao,
-                                                           dat_nsu_cartao) 
+                                                           dat_nsu_cartao,
+                                                           des_bin_cartao) 
                                                         values (
                                                            @cod_transacao,
                                                            @nom_tipo_pagamento,
                                                            @cod_nsu_cartao,
-                                                           @dat_nsu_cartao) ";
+                                                           @dat_nsu_cartao,
+                                                           @des_bin_cartao) ";
                     }
+
+
+                    //Monta Array com os meios de pagamento da transacao
+                    List<string> ListaMeioPagto = new List<string>();
+                    objTransacao.nom_tipo_pagamento = objTransacao.nom_tipo_pagamento.Replace(":", "@");
+
+                    ListaMeioPagto = objTransacao.nom_tipo_pagamento.Split(';').ToList();
 
                     Int32 posSplitNSU = 0;
 
                     //Array com os NSUs da compra paga com cartão, cria array para 10 pagamentos em cartão
                     string[] arrayCodNSU = new string[10];
                     Boolean bArrayPreechido = false;
+
                     if (!string.IsNullOrEmpty(objTransacao.nsu_transacao))
                     {
                         arrayCodNSU = objTransacao.nsu_transacao.Split(';');
@@ -354,30 +360,44 @@ namespace TransacaoIzioRest.DAO
 
                         sqlServer.Command.Parameters.AddWithValue("@cod_transacao", lCodTransacao);
 
-                        sqlServer.Command.Parameters.AddWithValue("@nom_tipo_pagamento", meioPagto);
+                        //List<string> itemMeioPagto;
+                        string nomePagamennto = "";
 
-                        //Somente para meio de pagamento diferente de dinheiro
-                        if (meioPagto.ToUpper().Contains("TEF") || meioPagto.ToUpper().Contains("CARTAO") || meioPagto.ToUpper().Contains("CARTÃO") || meioPagto.ToUpper().Contains("CRED DEMAIS"))
+                        if (!string.IsNullOrEmpty(meioPagto))
                         {
-                            if (!meioPagto.ToUpper().Contains("OFF"))
-                            {
-                                if (arrayCodNSU.ElementAtOrDefault(posSplitNSU) != null)
-                                {
-                                    sqlServer.Command.Parameters.AddWithValue("@cod_nsu_cartao", arrayCodNSU[posSplitNSU]);
-                                }
-                                else
-                                {
-                                    sqlServer.Command.Parameters.AddWithValue("@cod_nsu_cartao", "0");
-                                }
-                                
-                                posSplitNSU += 1;
-                            }
+                            nomePagamennto = meioPagto;
+                            //itemMeioPagto = nomePagamennto.Split('@').ToList();
                         }
                         else
-                            sqlServer.Command.Parameters.AddWithValue("@cod_nsu_cartao", DBNull.Value);
+                        {
+                            nomePagamennto = "Não Informado";
+                        }
 
-                        sqlServer.Command.Parameters.AddWithValue("@dat_nsu_cartao", DBNull.Value);
+                        if (arrayCodNSU.ElementAtOrDefault(posSplitNSU) != null)
+                        {
+                            sqlServer.Command.Parameters.AddWithValue("@cod_nsu_cartao", arrayCodNSU[posSplitNSU]);
+                            sqlServer.Command.Parameters.AddWithValue("@dat_nsu_cartao", string.IsNullOrEmpty(objTransacao.dat_geracao_nsu.Split(';')[posSplitNSU]) ? "" : objTransacao.dat_geracao_nsu.Split(';')[posSplitNSU]);
+                        }
+                        else
+                        {
+                            sqlServer.Command.Parameters.AddWithValue("@cod_nsu_cartao", "0");
+                            sqlServer.Command.Parameters.AddWithValue("@dat_nsu_cartao", DBNull.Value);
+                        }
 
+                        if (string.IsNullOrEmpty(objTransacao.des_bin_cartao))
+                        {
+                            sqlServer.Command.Parameters.AddWithValue("@des_bin_cartao", nomePagamennto.Split('@').Count() == 1 ? "" : nomePagamennto.Split('@')[0]);
+                        }
+                        else
+                        {
+                            sqlServer.Command.Parameters.AddWithValue("@des_bin_cartao", string.IsNullOrEmpty(objTransacao.des_bin_cartao.Split(';')[posSplitNSU]) ? "" : objTransacao.des_bin_cartao.Split(';')[posSplitNSU]);
+                        }
+
+                        posSplitNSU += 1;
+                        
+                        sqlServer.Command.Parameters.AddWithValue("@nom_tipo_pagamento", nomePagamennto.Split('@').Count() == 1 ? nomePagamennto : nomePagamennto.Split('@')[1]);
+                        
+                        
                         //Executa a procedure
                         sqlServer.Command.ExecuteNonQuery();
                     }
