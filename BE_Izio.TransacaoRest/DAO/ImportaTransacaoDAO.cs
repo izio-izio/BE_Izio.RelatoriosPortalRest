@@ -547,7 +547,8 @@ namespace TransacaoIzioRest.DAO
                         cod_loja = dadosTrans.cod_loja,
                         nsu_transacao = dadosTrans.nsu_transacao,
                         dat_geracao_nsu = dadosTrans.dat_geracao_nsu,
-                        vlr_total_desconto = dadosTrans.vlr_total_desconto
+                        vlr_total_desconto = dadosTrans.vlr_total_desconto,
+                        des_bin_cartao = dadosTrans.des_bin_cartao
                     });
                 }
 
@@ -587,7 +588,8 @@ namespace TransacaoIzioRest.DAO
                     "cod_loja",
                     "nsu_transacao",
                     "dat_geracao_nsu",
-                    "vlr_total_desconto"))
+                    "vlr_total_desconto",
+                    "des_bin_cartao"))
                 {
                     bcp.BulkCopyTimeout = ConfigurationManager.AppSettings["TimeoutExecucao"] != null ? Convert.ToInt32(ConfigurationManager.AppSettings["TimeoutExecucao"]) : 600;
                     bcp.DestinationTableName = "viewizio_3";
@@ -780,7 +782,8 @@ namespace TransacaoIzioRest.DAO
                             cod_loja = dadosTrans.cod_loja,
                             nsu_transacao = dadosTrans.nsu_transacao,
                             dat_geracao_nsu = dadosTrans.dat_geracao_nsu,
-                            vlr_total_desconto = dadosTrans.vlr_total_desconto
+                            vlr_total_desconto = dadosTrans.vlr_total_desconto,
+                            des_bin_cartao = dadosTrans.des_bin_cartao
                         });
                     }
                 }
@@ -821,7 +824,8 @@ namespace TransacaoIzioRest.DAO
                     "cod_loja",
                     "nsu_transacao",
                     "dat_geracao_nsu",
-                    "vlr_total_desconto"))
+                    "vlr_total_desconto",
+                    "des_bin_cartao"))
                 {
                     bcp.BulkCopyTimeout = ConfigurationManager.AppSettings["TimeoutExecucao"] != null ? Convert.ToInt32(ConfigurationManager.AppSettings["TimeoutExecucao"]) : 600;
                     bcp.DestinationTableName = "viewizio_3";

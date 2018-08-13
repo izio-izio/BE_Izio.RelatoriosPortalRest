@@ -98,7 +98,7 @@ namespace TransacaoRest.Models
         public string dat_geracao_nsu { get; set; }
 
         /// <summary>
-        /// BIN do cartão utiliza no pagamento da venda. Caso a compra seja paga em mais de um cartão, os BINs precisam vir separados por ";"
+        /// BIN do cartão utilizado no pagamento da venda. Caso a compra seja paga em mais de um cartão, os BINs precisam vir separados por ";"
         /// </summary>
         public string des_bin_cartao { get; set; }
 
@@ -263,6 +263,12 @@ namespace TransacaoRest.Models
         /// </summary>
         [Required]
         public long cod_loja { get; set; }
+
+        /// <summary>
+        /// BIN do cartão utilizado no pagamento da venda. Caso a compra seja paga em mais de um cartão, os BINs precisam vir separados por ";"
+        /// </summary>
+        public string des_bin_cartao { get; set; }
+
     }
 
     /// <summary>
@@ -313,6 +319,11 @@ namespace TransacaoRest.Models
         /// Data e Hota da geração Nsu da transação quando for pago em cartão. Caso a compra seja paga em mais de um cartão, as datas de geração do NSU precisam vir separados por ";"
         /// </summary>
         public string dat_geracao_nsu { get; set; }
+
+        /// <summary>
+        /// BIN do cartão utilizado no pagamento da venda. Caso a compra seja paga em mais de um cartão, os BINs precisam vir separados por ";"
+        /// </summary>
+        public string des_bin_cartao { get; set; }
     }
 
     /// <summary>
