@@ -40,8 +40,19 @@
 
             try
             {
-                //Valida o token
-                sNomeCliente = Utilidades.AutenticarTokenApiRest(tokenAutenticacao);
+                //Valida Token no Izio
+                #region Valida Token no Izio
+                try
+                {
+                    //Verifica se o token informado é válido
+                    sNomeCliente = Utilidades.AutenticarTokenApiRest(tokenAutenticacao);
+                }
+                catch (Exception)
+                {
+                    listaErros.errors.Add(new ErrosTransacao { code = Convert.ToInt32(HttpStatusCode.Unauthorized).ToString(), message = "Token informado não é valido." });
+                    return Request.CreateResponse(HttpStatusCode.Unauthorized, listaErros);
+                }
+                #endregion
 
                 //Executa metodo para consulta das transacações
                 DAO.TransacaoDAO consulta = new DAO.TransacaoDAO(sNomeCliente);
@@ -175,8 +186,19 @@
 
             try
             {
-                //Verifica se o token informado é válido
-                sNomeCliente = Utilidades.AutenticarTokenApiRest(tokenAutenticacao);
+                //Valida Token no Izio
+                #region Valida Token no Izio
+                try
+                {
+                    //Verifica se o token informado é válido
+                    sNomeCliente = Utilidades.AutenticarTokenApiRest(tokenAutenticacao);
+                }
+                catch (Exception)
+                {
+                    listaErros.errors.Add(new ErrosTransacao { code = Convert.ToInt32(HttpStatusCode.Unauthorized).ToString(), message = "Token informado não é valido." });
+                    return Request.CreateResponse(HttpStatusCode.Unauthorized, listaErros);
+                }
+                #endregion
 
                 //Cria objeto para processamento das transacoes
                 DAO.ImportaTransacaoDAO impTransacao = new DAO.ImportaTransacaoDAO(sNomeCliente);
@@ -249,8 +271,19 @@
 
             try
             {
-                //Verifica se o token informado é válido
-                sNomeCliente = Utilidades.AutenticarTokenApiRest(tokenAutenticacao);
+                //Valida Token no Izio
+                #region Valida Token no Izio
+                try
+                {
+                    //Verifica se o token informado é válido
+                    sNomeCliente = Utilidades.AutenticarTokenApiRest(tokenAutenticacao);
+                }
+                catch (Exception)
+                {
+                    listaErros.errors.Add(new ErrosTransacao { code = Convert.ToInt32(HttpStatusCode.Unauthorized).ToString(), message = "Token informado não é valido." });
+                    return Request.CreateResponse(HttpStatusCode.Unauthorized, listaErros);
+                }
+                #endregion
 
                 //Cria objeto para processamento das transacoes
                 DAO.ImportaTransacaoDAO impTransacao = new DAO.ImportaTransacaoDAO(sNomeCliente);
@@ -276,22 +309,20 @@
             }
             catch (System.Exception ex)
             {
-
+                Log.inserirLogException(sNomeCliente, ex, 0);
                 if (listaErros.errors == null)
                 {
                     listaErros.errors = new List<ErrosTransacao>();
                 }
+
                 //Seta o Objeto com o Erro ocorrido
                 listaErros.errors.Add(new ErrosTransacao { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = "Erro interno no processamento do lote das transações, favor contactar o administrador." });
 
-                if (!ex.Message.ToUpper().Contains("TOKEN"))
-                {
-                    DadosLog dadosLog = new DadosLog();
-                    dadosLog.des_erro_tecnico = ex.ToString();
+                DadosLog dadosLog = new DadosLog();
+                dadosLog.des_erro_tecnico = ex.ToString();
 
-                    //Pegar a mensagem padrão retornada da api, caso não tenha mensagem de negocio para devolver na API
-                    Log.InserirLogIzio(sNomeCliente, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
-                }
+                //Pegar a mensagem padrão retornada da api, caso não tenha mensagem de negocio para devolver na API
+                Log.InserirLogIzio("lab", dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
 
                 //trocar o status code
                 return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
@@ -323,8 +354,19 @@
 
             try
             {
-                //Verifica se o token informado é válido
-                sNomeCliente = Utilidades.AutenticarTokenApiRest(tokenAutenticacao);
+                //Valida Token no Izio
+                #region Valida Token no Izio
+                try
+                {
+                    //Verifica se o token informado é válido
+                    sNomeCliente = Utilidades.AutenticarTokenApiRest(tokenAutenticacao);
+                }
+                catch (Exception)
+                {
+                    listaErros.errors.Add(new ErrosTransacao { code = Convert.ToInt32(HttpStatusCode.Unauthorized).ToString(), message = "Token informado não é valido." });
+                    return Request.CreateResponse(HttpStatusCode.Unauthorized, listaErros);
+                }
+                #endregion
 
                 //Cria objeto para processamento das transacoes
                 TransacaoCanceladaDAO excluiTransacao = new TransacaoCanceladaDAO(sNomeCliente);
@@ -386,8 +428,19 @@
 
             try
             {
-                //Verifica se o token informado é válido
-                sNomeCliente = Utilidades.AutenticarTokenApiRest(tokenAutenticacao);
+                //Valida Token no Izio
+                #region Valida Token no Izio
+                try
+                {
+                    //Verifica se o token informado é válido
+                    sNomeCliente = Utilidades.AutenticarTokenApiRest(tokenAutenticacao);
+                }
+                catch (Exception)
+                {
+                    listaErros.errors.Add(new ErrosTransacao { code = Convert.ToInt32(HttpStatusCode.Unauthorized).ToString(), message = "Token informado não é valido." });
+                    return Request.CreateResponse(HttpStatusCode.Unauthorized, listaErros);
+                }
+                #endregion
 
                 //Cria objeto para processamento das transacoes
                 TransacaoCanceladaDAO excluiTransacao = new TransacaoCanceladaDAO(sNomeCliente);
@@ -476,8 +529,19 @@
                 }
                 #endregion
 
-                //Verifica se o token informado é válido
-                sNomeCliente = Utilidades.AutenticarTokenApiRest(tokenAutenticacao);
+                //Valida Token no Izio
+                #region Valida Token no Izio
+                try
+                {
+                    //Verifica se o token informado é válido
+                    sNomeCliente = Utilidades.AutenticarTokenApiRest(tokenAutenticacao);
+                }
+                catch (Exception)
+                {
+                    listaErros.errors.Add(new ErrosTransacao { code = Convert.ToInt32(HttpStatusCode.Unauthorized).ToString(), message = "Token informado não é valido." });
+                    return Request.CreateResponse(HttpStatusCode.Unauthorized, listaErros);
+                }
+                #endregion
 
                 //Cria objeto para processamento das transacoes
                 TransacaoDAO dao = new TransacaoDAO(sNomeCliente);
