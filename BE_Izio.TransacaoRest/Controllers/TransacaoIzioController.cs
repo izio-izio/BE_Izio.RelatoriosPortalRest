@@ -49,7 +49,7 @@
                 }
                 catch (Exception)
                 {
-                    listaErros.errors.Add(new ErrosTransacao { code = Convert.ToInt32(HttpStatusCode.Unauthorized).ToString(), message = "Token informado não é valido." });
+                    listaErros.errors.Add(new Izio.Biblioteca.Model.Erros { code = Convert.ToInt32(HttpStatusCode.Unauthorized).ToString(), message = "Token informado não é valido." });
                     return Request.CreateResponse(HttpStatusCode.Unauthorized, listaErros);
                 }
                 #endregion
@@ -363,7 +363,7 @@
                 }
                 catch (Exception)
                 {
-                    listaErros.errors.Add(new ErrosTransacao { code = Convert.ToInt32(HttpStatusCode.Unauthorized).ToString(), message = "Token informado não é valido." });
+                    listaErros.errors.Add(new Izio.Biblioteca.Model.Erros { code = Convert.ToInt32(HttpStatusCode.Unauthorized).ToString(), message = "Token informado não é valido." });
                     return Request.CreateResponse(HttpStatusCode.Unauthorized, listaErros);
                 }
                 #endregion
@@ -437,7 +437,7 @@
                 }
                 catch (Exception)
                 {
-                    listaErros.errors.Add(new ErrosTransacao { code = Convert.ToInt32(HttpStatusCode.Unauthorized).ToString(), message = "Token informado não é valido." });
+                    listaErros.errors.Add(new Izio.Biblioteca.Model.Erros { code = Convert.ToInt32(HttpStatusCode.Unauthorized).ToString(), message = "Token informado não é valido." });
                     return Request.CreateResponse(HttpStatusCode.Unauthorized, listaErros);
                 }
                 #endregion
@@ -538,7 +538,7 @@
                 }
                 catch (Exception)
                 {
-                    listaErros.errors.Add(new ErrosTransacao { code = Convert.ToInt32(HttpStatusCode.Unauthorized).ToString(), message = "Token informado não é valido." });
+                    listaErros.errors.Add(new Izio.Biblioteca.Model.Erros { code = Convert.ToInt32(HttpStatusCode.Unauthorized).ToString(), message = "Token informado não é valido." });
                     return Request.CreateResponse(HttpStatusCode.Unauthorized, listaErros);
                 }
                 #endregion
