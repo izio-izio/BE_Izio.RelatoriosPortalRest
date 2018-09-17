@@ -12,6 +12,7 @@
     using Izio.Biblioteca;
     using Izio.Biblioteca.Model;
     using TransacaoIzioRest.Models;
+    using System.Linq;
 
     public class TransacaoIzioController : ApiController
     {
@@ -23,7 +24,7 @@
         /// <param name="anoMes">Ano e mês (yyyyMM) para consulta das compras neste periodo</param>
         /// <returns></returns>
         // POST: api/Pessoa/Autenticar
-        [HttpGet]
+        [HttpGet, Utilidades.ValidaTokenAutenticacao]
         [Route("api/TransacaoIzio/ConsultaUltimasCompras/{tokenAutenticacao}/{codigoPessoa}/{anoMes}")]
         public HttpResponseMessage ConsultaUltimasCompras([FromUri]string tokenAutenticacao,[FromUri] string codigoPessoa, [FromUri] string anoMes)
         {
@@ -42,16 +43,10 @@
             {
                 //Valida Token no Izio
                 #region Valida Token no Izio
-                try
-                {
-                    //Verifica se o token informado é válido
-                    sNomeCliente = Utilidades.AutenticarTokenApiRest(tokenAutenticacao);
-                }
-                catch (Exception)
-                {
-                    listaErros.errors.Add(new Izio.Biblioteca.Model.Erros { code = Convert.ToInt32(HttpStatusCode.Unauthorized).ToString(), message = "Token informado não é valido." });
-                    return Request.CreateResponse(HttpStatusCode.Unauthorized, listaErros);
-                }
+
+                    sNomeCliente = Request.Headers.GetValues("sNomeCliente").First();
+                    tokenAutenticacao = Request.Headers.GetValues("tokenAutenticacao").First();
+               
                 #endregion
 
                 //Executa metodo para consulta das transacações
@@ -100,7 +95,7 @@
         /// <param name="codigoTransacao">Codigo da transacao para a consulta dos itens da compra</param>
         /// <returns></returns>
         // POST: api/Pessoa/Autenticar
-        [HttpGet]
+        [HttpGet, Utilidades.ValidaTokenAutenticacao]
         [Route("api/TransacaoIzio/ConsultaItensCompra/{tokenAutenticacao}/{codigoTransacao}")]
         public HttpResponseMessage ConsultaItensCompra([FromUri]string tokenAutenticacao, [FromUri] string codigoTransacao)
         {
@@ -168,7 +163,7 @@
         /// <param name="objTransacao">Json com os dados de 1 venda (capa e os itens)</param>
         /// <param name="tokenAutenticacao">Token de autorizacao para utilizacao da api</param>
         /// <returns></returns>
-        [HttpPost]
+        [HttpPost, Utilidades.ValidaTokenAutenticacao]
         [Route("api/TransacaoIzio/ImportaTransacao/{tokenAutenticacao}")]
         public HttpResponseMessage ImportaTransacao([FromBody] DadosTransacaoOnline objTransacao, [FromUri] string tokenAutenticacao)
         {
@@ -188,16 +183,8 @@
             {
                 //Valida Token no Izio
                 #region Valida Token no Izio
-                try
-                {
-                    //Verifica se o token informado é válido
-                    sNomeCliente = Utilidades.AutenticarTokenApiRest(tokenAutenticacao);
-                }
-                catch (Exception)
-                {
-                    listaErros.errors.Add(new ErrosTransacao { code = Convert.ToInt32(HttpStatusCode.Unauthorized).ToString(), message = "Token informado não é valido." });
-                    return Request.CreateResponse(HttpStatusCode.Unauthorized, listaErros);
-                }
+                sNomeCliente = Request.Headers.GetValues("sNomeCliente").First();
+                tokenAutenticacao = Request.Headers.GetValues("tokenAutenticacao").First();
                 #endregion
 
                 //Cria objeto para processamento das transacoes
@@ -253,7 +240,7 @@
         /// <param name="objTransacao">Lote em Json com as vendas</param>
         /// <param name="tokenAutenticacao">Token de autorizacao para utilizacao da api</param>
         /// <returns></returns>
-        [HttpPost]
+        [HttpPost, Utilidades.ValidaTokenAutenticacao]
         [Route("api/TransacaoIzio/ImportaLoteTransacoes/{tokenAutenticacao}")]
         public HttpResponseMessage ImportaLoteTransacoes([FromBody] List<DadosTransacaoLote> objTransacao, [FromUri] string tokenAutenticacao)
         {
@@ -273,16 +260,8 @@
             {
                 //Valida Token no Izio
                 #region Valida Token no Izio
-                try
-                {
-                    //Verifica se o token informado é válido
-                    sNomeCliente = Utilidades.AutenticarTokenApiRest(tokenAutenticacao);
-                }
-                catch (Exception)
-                {
-                    listaErros.errors.Add(new ErrosTransacao { code = Convert.ToInt32(HttpStatusCode.Unauthorized).ToString(), message = "Token informado não é valido." });
-                    return Request.CreateResponse(HttpStatusCode.Unauthorized, listaErros);
-                }
+                sNomeCliente = Request.Headers.GetValues("sNomeCliente").First();
+                tokenAutenticacao = Request.Headers.GetValues("tokenAutenticacao").First();
                 #endregion
 
                 //Cria objeto para processamento das transacoes
@@ -336,7 +315,7 @@
         /// <param name="objTransacao">Dados da compra cancelada</param>
         /// <param name="tokenAutenticacao">Token de autorizacao para utilizacao da api</param>
         /// <returns></returns>
-        [HttpPost]
+        [HttpPost, Utilidades.ValidaTokenAutenticacao]
         [Route("api/TransacaoIzio/ExcluirRegistrosCompraCancelada/{tokenAutenticacao}")]
         public HttpResponseMessage ExcluirRegistrosCompraCancelada([FromBody] DadosTransacaoCancelada objTransacao, [FromUri] string tokenAutenticacao)
         {
@@ -356,16 +335,8 @@
             {
                 //Valida Token no Izio
                 #region Valida Token no Izio
-                try
-                {
-                    //Verifica se o token informado é válido
-                    sNomeCliente = Utilidades.AutenticarTokenApiRest(tokenAutenticacao);
-                }
-                catch (Exception)
-                {
-                    listaErros.errors.Add(new Izio.Biblioteca.Model.Erros { code = Convert.ToInt32(HttpStatusCode.Unauthorized).ToString(), message = "Token informado não é valido." });
-                    return Request.CreateResponse(HttpStatusCode.Unauthorized, listaErros);
-                }
+                sNomeCliente = Request.Headers.GetValues("sNomeCliente").First();
+                tokenAutenticacao = Request.Headers.GetValues("tokenAutenticacao").First();
                 #endregion
 
                 //Cria objeto para processamento das transacoes
@@ -414,7 +385,7 @@
         /// <param name="tokenAutenticacao">Token de autorizacao para utilizacao da api</param>
         /// <param name="dataProcessamento">Data (yyyy-MM-dd) para exclusão processamento (deixar em branco para deletar tudo)</param>
         /// <returns></returns>
-        [HttpPost]
+        [HttpPost, Utilidades.ValidaTokenAutenticacao]
         [Route("api/TransacaoIzio/ExcluirRegistrosIntermediarios/{tokenAutenticacao}")]
         [ApiExplorerSettings(IgnoreApi = true)]
         [ResponseType(typeof(ApiSuccess))]
@@ -430,16 +401,8 @@
             {
                 //Valida Token no Izio
                 #region Valida Token no Izio
-                try
-                {
-                    //Verifica se o token informado é válido
-                    sNomeCliente = Utilidades.AutenticarTokenApiRest(tokenAutenticacao);
-                }
-                catch (Exception)
-                {
-                    listaErros.errors.Add(new Izio.Biblioteca.Model.Erros { code = Convert.ToInt32(HttpStatusCode.Unauthorized).ToString(), message = "Token informado não é valido." });
-                    return Request.CreateResponse(HttpStatusCode.Unauthorized, listaErros);
-                }
+                sNomeCliente = Request.Headers.GetValues("sNomeCliente").First();
+                tokenAutenticacao = Request.Headers.GetValues("tokenAutenticacao").First();
                 #endregion
 
                 //Cria objeto para processamento das transacoes
@@ -485,7 +448,7 @@
         /// <param name="tokenAutenticacao">Token de autorizacao para utilizacao da api</param>
         /// <param name="dataImportacao">Data (yyyyMMdd) para consulta das transações (vendas) importadas em lote</param>
         /// <returns></returns>
-        [HttpGet]
+        [HttpGet, Utilidades.ValidaTokenAutenticacao]
         [Route("api/TransacaoIzio/ConsultarTransacoesCarregadaEmLote/{tokenAutenticacao}/{dataImportacao}")]
         [ResponseType(typeof(RetornoDadosTermino))]
         public HttpResponseMessage ConsultarTransacoesCarregadaEmLote([FromUri] string tokenAutenticacao, [FromUri] string dataImportacao)
@@ -531,16 +494,8 @@
 
                 //Valida Token no Izio
                 #region Valida Token no Izio
-                try
-                {
-                    //Verifica se o token informado é válido
-                    sNomeCliente = Utilidades.AutenticarTokenApiRest(tokenAutenticacao);
-                }
-                catch (Exception)
-                {
-                    listaErros.errors.Add(new Izio.Biblioteca.Model.Erros { code = Convert.ToInt32(HttpStatusCode.Unauthorized).ToString(), message = "Token informado não é valido." });
-                    return Request.CreateResponse(HttpStatusCode.Unauthorized, listaErros);
-                }
+                sNomeCliente = Request.Headers.GetValues("sNomeCliente").First();
+                tokenAutenticacao = Request.Headers.GetValues("tokenAutenticacao").First();
                 #endregion
 
                 //Cria objeto para processamento das transacoes
