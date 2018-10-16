@@ -34,12 +34,12 @@ namespace TransacaoRest.Models
         /// <summary>
         /// Codigo da equipe (enviar 100)
         /// </summary>
-        public long cod_equipe { get; set; }
+        public long? cod_equipe { get; set; }
 
         /// <summary>
         /// Codigo da pessoa,se não tiver enviar 0
         /// </summary>
-        public long cod_pessoa { get; set; }
+        public long? cod_pessoa { get; set; } = 0;
 
         /// <summary>
         /// Data e hora da realização da compra
@@ -68,7 +68,7 @@ namespace TransacaoRest.Models
         /// <summary>
         /// Codigo do usuario (enviar 1)
         /// </summary>
-        public long cod_usuario { get; set; }
+        public long? cod_usuario { get; set; } = 1;
 
         /// <summary>
         /// Quantidade de itens da compra
