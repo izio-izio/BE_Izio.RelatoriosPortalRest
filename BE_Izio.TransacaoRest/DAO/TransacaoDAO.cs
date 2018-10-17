@@ -12,17 +12,6 @@ namespace TransacaoIzioRest.DAO
 {
     public class TransacaoDAO
     {
-
-        #region Constantes Credito CPF
-
-        private string DadosNaoEncontrados = "Não foram encontrados registros";
-        private string DadosNaoEncontradosItens = "Não foram encontrados registros";
-        private string ErroBancoDeDados = "Não foi possível realizar consulta das transações";
-        private string ErroBancoDeDadosItens = "Não foi possível realizar consulta dos itens da venda";
-
-        #endregion
-
-
         SqlServer sqlServer;
         string NomeClienteWs;
         public TransacaoDAO(string sNomeCliente)
@@ -91,15 +80,7 @@ namespace TransacaoIzioRest.DAO
 
                     retornoConsulta.payload.listaTransacao = new Izio.Biblioteca.ModuloClasse().PreencheClassePorDataReader<TransacaoIzioRest.Models.DadosTransacao>(sqlServer.Reader);
                 }
-                else
-                {
-                    if (retornoConsulta.errors == null)
-                    {
-                        retornoConsulta.errors = new List<Erros>();
-                    }
 
-                    retornoConsulta.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = DadosNaoEncontrados + "." });
-                }
             }
             catch (System.Exception ex)
             {
@@ -116,13 +97,7 @@ namespace TransacaoIzioRest.DAO
                 //Pegar a mensagem padrão retornada da api, caso não tenha mensagem de negocio para devolver na API
                 Log.InserirLogIzio(NomeClienteWs, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
 
-                if (retornoConsulta.errors == null)
-                {
-                    retornoConsulta.errors = new List<Erros>();
-                }
-
-                //Adiciona o erro de negocio
-                retornoConsulta.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ErroBancoDeDados + ". Favor contactar o Administrador." });
+                throw;
             }
             finally
             {
@@ -147,9 +122,9 @@ namespace TransacaoIzioRest.DAO
         /// </summary>
         /// <returns></returns>
         #region Consultas itens de uma compra
-        public DadosConsultaItensTransacao ConsultaItensTransacao(long codigoTransacao)
+        public RetornoDadosItensTransacao ConsultaItensTransacao(long codigoTransacao)
         {
-            DadosConsultaItensTransacao retornoConsulta = new DadosConsultaItensTransacao();
+            RetornoDadosItensTransacao retornoConsulta = new RetornoDadosItensTransacao();
 
             try
             {
@@ -244,15 +219,6 @@ namespace TransacaoIzioRest.DAO
 
                     retornoConsulta.payload.listaItensTransacao = new ModuloClasse().PreencheClassePorDataReader<DadosItensTransacao>(sqlServer.Reader);
                 }
-                else
-                {
-                    if (retornoConsulta.errors == null)
-                    {
-                        retornoConsulta.errors = new List<Erros>();
-                    }
-
-                    retornoConsulta.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = DadosNaoEncontradosItens + "." });
-                }
             }
             catch (System.Exception ex)
             {
@@ -269,13 +235,7 @@ namespace TransacaoIzioRest.DAO
                 //Pegar a mensagem padrão retornada da api, caso não tenha mensagem de negocio para devolver na API
                 Log.InserirLogIzio(NomeClienteWs, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
 
-                if (retornoConsulta.errors == null)
-                {
-                    retornoConsulta.errors = new List<Erros>();
-                }
-
-                //Adiciona o erro de negocio
-                retornoConsulta.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ErroBancoDeDadosItens + ". Favor contactar o Administrador." });
+                throw;
             }
             finally
             {

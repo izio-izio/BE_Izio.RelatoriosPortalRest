@@ -22,11 +22,7 @@ namespace TransacaoIzioRest.DAO
         #region Constantes Remover Venda Cancelada
 
         private string DadosNaoEncontrados = "Não foram encontrados registros";
-        private string ErroBancoDeDados = "Não foi possível realizar o exclusão dos dados da venda cancelada no  Izio";
 
-        private string ObjetoTransacaoCanceladaVazio = "Objeto com os dados da venda cancelada está vazio, impossível realizar o processamento.";
-        private string SucessoExclusao = "Compra cancelada excluída com sucesso.";
-        
         #endregion
 
         SqlServer sqlServer;
@@ -47,39 +43,15 @@ namespace TransacaoIzioRest.DAO
         /// <param name="IpOrigem"></param>
         /// <returns></returns>
         #region Apaga os registros da venda cancelada na base do Izio
-        public RetornoRemoveTransacao ExcluirRegistrosCompraCancelada(DadosTransacaoCancelada objTransacao, string IpOrigem)
+        public ApiErrors ExcluirRegistrosCompraCancelada(DadosTransacaoCancelada objTransacao, string IpOrigem)
         {
-            //Retorno do metodo
-            RetornoRemoveTransacao retornoTransacao = new RetornoRemoveTransacao();
-            retornoTransacao.errors = new List<Erros>();
-            retornoTransacao.payload = new Sucesso();
-
-            //Retorno Erro
-            List<Erros> listaErros = new List<Erros>();
-            
-            //Retorno Sucesso
-            Sucesso payloadSucesso = new Sucesso();
-
             //Total de registros deletados
             Int32 totalRegistrosExcluidos = 0;
 
+            ApiErrors retorno = new ApiErrors();
+
             try
             {
-                //Valida se o objeto com as transações foi preenchido
-                if (objTransacao == null)
-                {
-                    listaErros.Add(new Erros{ code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ObjetoTransacaoCanceladaVazio });
-                }
-                
-                //Se a lista estiver preenchida, é por que foi encontrado erros na validação
-                if (listaErros.Count > 0)
-                {
-                    retornoTransacao.errors = listaErros;
-
-                    return retornoTransacao;
-                }
-
-
                 // Abre a conexao com o banco de dados
                 sqlServer.StartConnection();
 
@@ -199,44 +171,33 @@ namespace TransacaoIzioRest.DAO
 
                 sqlServer.Commit();
 
+                retorno.errors = new List<Erros>();
+
                 //Se total de linhas afetadas for igual a zero, indica que não foi excluido nenhum registros
                 if (totalRegistrosExcluidos == 0)
                 {
                     //Seta a lista de erros com o erro
-                    listaErros.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = DadosNaoEncontrados + ", para exclusão da venda Cancelada." });
-                }
-                else
-                {
-                    //Seta o retorno com sucesso
-                    payloadSucesso.code = Convert.ToInt32(HttpStatusCode.OK).ToString();
-                    payloadSucesso.message = SucessoExclusao;
+                    retorno.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = DadosNaoEncontrados + ", para exclusão da venda Cancelada." });
                 }
             }
             catch (System.Exception ex)
             {
                 sqlServer.Rollback();
 
-                //Seta a lista de erros com o erro
-                listaErros.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ErroBancoDeDados + ", favor contactar o administrador" });
+                DadosLog dadosLog = new DadosLog();
+                dadosLog.des_erro_tecnico = ex.ToString();
 
-                //Insere o erro na sis_log
-                Log.inserirLogException(NomeClienteWs, ex, 0);
+                //Pegar a mensagem padrão retornada da api, caso não tenha mensagem de negocio para devolver na API
+                Log.InserirLogIzio(NomeClienteWs, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
+
+                throw;
             }
             finally
             {
                 sqlServer.CloseConnection();
             }
-
-            if (listaErros != null && listaErros.Count > 0)
-            {
-                retornoTransacao.errors = listaErros;
-            }
-            else
-            {
-                retornoTransacao.payload = payloadSucesso;
-            }
-
-            return retornoTransacao;
+            
+            return retorno;
 
         }
         #endregion

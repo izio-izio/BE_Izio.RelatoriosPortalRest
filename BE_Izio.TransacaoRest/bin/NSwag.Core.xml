@@ -181,28 +181,198 @@
             <param name="statusCode">The HTTP status code.</param>
             <returns>true if success.</returns>
         </member>
-        <member name="T:NSwag.IgnorableSerializerContractResolver">
-            <summary>Special JsonConvert resolver that allows you to ignore properties. See http://stackoverflow.com/a/13588192/1037948 </summary>
+        <member name="T:NSwag.JsonExpectedSchema">
+            <summary>Specifies a schema which is expected.</summary>
         </member>
-        <member name="M:NSwag.IgnorableSerializerContractResolver.#ctor">
-            <summary>Initializes a new instance of the <see cref="T:NSwag.IgnorableSerializerContractResolver"/> class.</summary>
+        <member name="P:NSwag.JsonExpectedSchema.Description">
+            <summary>Gets or sets the description.</summary>
         </member>
-        <member name="M:NSwag.IgnorableSerializerContractResolver.Ignore(System.Type,System.String[])">
-            <summary>Explicitly ignore the given property(s) for the given type</summary>
-            <param name="type">The type.</param>
-            <param name="propertyNames">One or more properties to ignore. Leave empty to ignore the type entirely.</param>
+        <member name="P:NSwag.JsonExpectedSchema.Schema">
+            <summary>Gets or sets the schema.</summary>
         </member>
-        <member name="M:NSwag.IgnorableSerializerContractResolver.IsIgnored(System.Type,System.String)">
-            <summary>Is the given property for the given type ignored?</summary>
-            <param name="type">The type.</param>
-            <param name="propertyName">Name of the property.</param>
-            <returns></returns>
+        <member name="T:NSwag.OpenApiCallback">
+            <summary>Describes an OpenAPI callback.</summary>
         </member>
-        <member name="M:NSwag.IgnorableSerializerContractResolver.CreateProperty(System.Reflection.MemberInfo,Newtonsoft.Json.MemberSerialization)">
-            <summary>The decision logic goes here</summary>
-            <param name="member">The member to create a <see cref="T:Newtonsoft.Json.Serialization.JsonProperty" /> for.</param>
-            <param name="memberSerialization">The member's parent <see cref="T:Newtonsoft.Json.MemberSerialization" />.</param>
-            <returns>A created <see cref="T:Newtonsoft.Json.Serialization.JsonProperty" /> for the given <see cref="T:System.Reflection.MemberInfo" />.</returns>
+        <member name="T:NSwag.OpenApiComponents">
+            <summary>Container for reusable components (OpenAPI only).</summary>
+        </member>
+        <member name="M:NSwag.OpenApiComponents.#ctor(NSwag.SwaggerDocument)">
+            <summary></summary>
+            <param name="document"></param>
+        </member>
+        <member name="P:NSwag.OpenApiComponents.Schemas">
+            <summary>Gets or sets the types.</summary>
+        </member>
+        <member name="P:NSwag.OpenApiComponents.Responses">
+            <summary>Gets or sets the responses which can be used for all operations.</summary>
+        </member>
+        <member name="P:NSwag.OpenApiComponents.Parameters">
+            <summary>Gets or sets the parameters which can be used for all operations.</summary>
+        </member>
+        <member name="P:NSwag.OpenApiComponents.Examples">
+            <summary>Gets or sets the headers.</summary>
+        </member>
+        <member name="P:NSwag.OpenApiComponents.Headers">
+            <summary>Gets or sets the types.</summary>
+        </member>
+        <member name="P:NSwag.OpenApiComponents.SecuritySchemes">
+            <summary>Gets or sets the security definitions.</summary>
+        </member>
+        <member name="P:NSwag.OpenApiComponents.Links">
+            <summary>Gets or sets the security definitions.</summary>
+        </member>
+        <member name="P:NSwag.OpenApiComponents.Callbacks">
+            <summary>Gets or sets the security definitions.</summary>
+        </member>
+        <member name="T:NSwag.OpenApiEncoding">
+            <summary>Describes the OpenApi encoding.</summary>
+        </member>
+        <member name="P:NSwag.OpenApiEncoding.EncodingType">
+            <summary>Gets or sets the encoding type.</summary>
+        </member>
+        <member name="P:NSwag.OpenApiEncoding.Headers">
+            <summary>Gets or sets the headers.</summary>
+        </member>
+        <member name="P:NSwag.OpenApiEncoding.Style">
+            <summary>Gets or sets the encoding type.</summary>
+        </member>
+        <member name="P:NSwag.OpenApiEncoding.Explode">
+            <summary>Gets or sets a value indicating whether values of type array or object generate separate parameters for each value of the array, or key-value-pair of the map.</summary>
+        </member>
+        <member name="P:NSwag.OpenApiEncoding.AllowReserved">
+            <summary>Gets or sets a value indicating whether the parameter value should allow reserved characters, as defined by RFC3986.</summary>
+        </member>
+        <member name="T:NSwag.OpenApiExample">
+            <summary>The Swagger example (OpenAPI only).</summary>
+        </member>
+        <member name="P:NSwag.OpenApiExample.Summary">
+            <summary>Gets or sets the example's description.</summary>
+        </member>
+        <member name="P:NSwag.OpenApiExample.Description">
+            <summary>Gets or sets the example's description.</summary>
+        </member>
+        <member name="P:NSwag.OpenApiExample.Value">
+            <summary>Gets or sets the example's value.</summary>
+        </member>
+        <member name="P:NSwag.OpenApiExample.ExternalValue">
+            <summary>Gets or sets the example's external value.</summary>
+        </member>
+        <member name="T:NSwag.OpenApiLink">
+            <summary>The OpenApi link (OpenAPI only).</summary>
+        </member>
+        <member name="P:NSwag.OpenApiLink.OperationRef">
+            <summary>Gets or sets the example's description.</summary>
+        </member>
+        <member name="P:NSwag.OpenApiLink.OperationId">
+            <summary>Gets or sets the example's description.</summary>
+        </member>
+        <member name="P:NSwag.OpenApiLink.Parameters">
+            <summary>Gets or sets the example's value.</summary>
+        </member>
+        <member name="P:NSwag.OpenApiLink.RequestBody">
+            <summary>Gets or sets the example's external value.</summary>
+        </member>
+        <member name="P:NSwag.OpenApiLink.Description">
+            <summary>Gets or sets the example's external value.</summary>
+        </member>
+        <member name="P:NSwag.OpenApiLink.Server">
+            <summary>Gets or sets the server.</summary>
+        </member>
+        <member name="T:NSwag.OpenApiMediaType">
+            <summary>The Swagger media type (OpenAPI only).</summary>
+        </member>
+        <member name="P:NSwag.OpenApiMediaType.Schema">
+            <summary>Gets or sets the schema.</summary>
+        </member>
+        <member name="P:NSwag.OpenApiMediaType.Example">
+            <summary>Gets or sets the example.</summary>
+        </member>
+        <member name="P:NSwag.OpenApiMediaType.Examples">
+            <summary>Gets or sets the headers (OpenAPI only).</summary>
+        </member>
+        <member name="P:NSwag.OpenApiMediaType.Encoding">
+            <summary>Gets or sets the example's value.</summary>
+        </member>
+        <member name="T:NSwag.OpenApiOAuthFlow">
+            <summary>Configuration for an OAuth flow.</summary>
+        </member>
+        <member name="P:NSwag.OpenApiOAuthFlow.AuthorizationUrl">
+            <summary>Gets or sets the authorization URL to be used for this flow (Swagger only).</summary>
+        </member>
+        <member name="P:NSwag.OpenApiOAuthFlow.TokenUrl">
+            <summary>Gets or sets the token URL to be used for this flow (Swagger only).</summary>
+        </member>
+        <member name="P:NSwag.OpenApiOAuthFlow.RefreshUrl">
+            <summary>Gets or sets the token URL to be used for this flow (Swagger only).</summary>
+        </member>
+        <member name="P:NSwag.OpenApiOAuthFlow.Scopes">
+            <summary>Gets the available scopes for the OAuth2 security scheme (Swagger only).</summary>
+        </member>
+        <member name="T:NSwag.OpenApiOAuthFlows">
+            <summary>Configuration information for the supported flow types.</summary>
+        </member>
+        <member name="P:NSwag.OpenApiOAuthFlows.Implicit">
+            <summary>Gets or sets the configuration for the OAuth Implicit Code flow.</summary>
+        </member>
+        <member name="P:NSwag.OpenApiOAuthFlows.Password">
+            <summary>Gets or sets the configuration for the OAuth Resource Owner Password flow.</summary>
+        </member>
+        <member name="P:NSwag.OpenApiOAuthFlows.ClientCredentials">
+            <summary>Gets or sets the configuration for the OAuth Client Credentials flow.</summary>
+        </member>
+        <member name="P:NSwag.OpenApiOAuthFlows.AuthorizationCode">
+            <summary>Gets or sets the configuration for the OAuth Authorization Code flow.</summary>
+        </member>
+        <member name="T:NSwag.OpenApiRequestBody">
+            <summary>The OpenApi request body (OpenAPI only).</summary>
+        </member>
+        <member name="M:NSwag.OpenApiRequestBody.#ctor">
+            <summary>Initializes a new instance of the <see cref="T:NSwag.OpenApiRequestBody"/> class.</summary>
+        </member>
+        <member name="P:NSwag.OpenApiRequestBody.Name">
+            <summary>Gets or sets the name.</summary>
+        </member>
+        <member name="P:NSwag.OpenApiRequestBody.Description">
+            <summary>Gets or sets the description.</summary>
+        </member>
+        <member name="P:NSwag.OpenApiRequestBody.Content">
+            <summary>Gets or sets the descriptions of potential response payloads (OpenApi only).</summary>
+        </member>
+        <member name="P:NSwag.OpenApiRequestBody.IsRequired">
+            <summary>Gets or sets the example's external value.</summary>
+        </member>
+        <member name="P:NSwag.OpenApiRequestBody.Position">
+            <summary>Gets or sets the name.</summary>
+        </member>
+        <member name="P:NSwag.OpenApiRequestBody.ActualName">
+            <summary>Gets the actual name of the request body parameter.</summary>
+        </member>
+        <member name="T:NSwag.OpenApiServer">
+            <summary>Describes an OpenAPI server.</summary>
+        </member>
+        <member name="P:NSwag.OpenApiServer.Url">
+            <summary>Gets or sets the URL of the server.</summary>
+        </member>
+        <member name="P:NSwag.OpenApiServer.Description">
+            <summary>Gets or sets the description of the server.</summary>
+        </member>
+        <member name="P:NSwag.OpenApiServer.Variables">
+            <summary>Gets or sets the variables of the server.</summary>
+        </member>
+        <member name="P:NSwag.OpenApiServer.IsValid">
+            <summary>Gets a value indicating whether the server description is valid.</summary>
+        </member>
+        <member name="T:NSwag.OpenApiServerVariable">
+            <summary>Describes an OpenAPI server variable.</summary>
+        </member>
+        <member name="P:NSwag.OpenApiServerVariable.Enum">
+            <summary>Gets or sets the URL of the server.</summary>
+        </member>
+        <member name="P:NSwag.OpenApiServerVariable.Default">
+            <summary>Gets or sets the variables of the server.</summary>
+        </member>
+        <member name="P:NSwag.OpenApiServerVariable.Description">
+            <summary>Gets or sets the description of the server.</summary>
         </member>
         <member name="T:NSwag.SwaggerContact">
             <summary>The web service contact description.</summary>
@@ -215,6 +385,143 @@
         </member>
         <member name="P:NSwag.SwaggerContact.Email">
             <summary>Gets or sets the contact email.</summary>
+        </member>
+        <member name="T:NSwag.SwaggerDocument">
+            <summary>Describes a JSON web service.</summary>
+        </member>
+        <member name="M:NSwag.SwaggerDocument.#ctor">
+            <summary>Initializes a new instance of the <see cref="T:NSwag.SwaggerDocument"/> class.</summary>
+        </member>
+        <member name="P:NSwag.SwaggerDocument.ToolchainVersion">
+            <summary>Gets the NSwag toolchain version.</summary>
+        </member>
+        <member name="P:NSwag.SwaggerDocument.SchemaType">
+            <summary>Gets or sets the preferred schema type.</summary>
+        </member>
+        <member name="P:NSwag.SwaggerDocument.DocumentPath">
+            <summary>Gets or sets the document path (URI or file path).</summary>
+        </member>
+        <member name="P:NSwag.SwaggerDocument.Generator">
+            <summary>Gets or sets the Swagger generator information.</summary>
+        </member>
+        <member name="P:NSwag.SwaggerDocument.Swagger">
+            <summary>Gets or sets the Swagger specification version being used (Swagger only).</summary>
+        </member>
+        <member name="P:NSwag.SwaggerDocument.OpenApi">
+            <summary>Gets or sets the OpenAPI specification version being used (OpenAPI only).</summary>
+        </member>
+        <member name="P:NSwag.SwaggerDocument.Info">
+            <summary>Gets or sets the metadata about the API.</summary>
+        </member>
+        <member name="P:NSwag.SwaggerDocument.Servers">
+            <summary>Gets or sets the servers (OpenAPI only).</summary>
+        </member>
+        <member name="P:NSwag.SwaggerDocument.Paths">
+            <summary>Gets or sets the operations.</summary>
+        </member>
+        <member name="P:NSwag.SwaggerDocument.Components">
+            <summary>Gets or sets the components.</summary>
+        </member>
+        <member name="P:NSwag.SwaggerDocument.Security">
+            <summary>Gets or sets a security description.</summary>
+        </member>
+        <member name="P:NSwag.SwaggerDocument.Tags">
+            <summary>Gets or sets the description.</summary>
+        </member>
+        <member name="P:NSwag.SwaggerDocument.BaseUrl">
+            <summary>Gets the base URL of the web service.</summary>
+        </member>
+        <member name="P:NSwag.SwaggerDocument.ExternalDocumentation">
+            <summary>Gets or sets the external documentation.</summary>
+        </member>
+        <member name="M:NSwag.SwaggerDocument.ToJson">
+            <summary>Converts the Swagger specification to JSON.</summary>
+            <returns>The JSON string.</returns>
+        </member>
+        <member name="M:NSwag.SwaggerDocument.ToJson(NJsonSchema.SchemaType)">
+            <summary>Converts the description object to JSON.</summary>
+            <param name="schemaType">The schema type.</param>
+            <returns>The JSON string.</returns>
+        </member>
+        <member name="M:NSwag.SwaggerDocument.ToJson(NJsonSchema.SchemaType,Newtonsoft.Json.Formatting)">
+            <summary>Converts the description object to JSON.</summary>
+            <param name="schemaType">The schema type.</param>
+            <param name="formatting">The formatting.</param>
+            <returns>The JSON string.</returns>
+        </member>
+        <member name="M:NSwag.SwaggerDocument.FromJsonAsync(System.String)">
+            <summary>Creates a Swagger specification from a JSON string.</summary>
+            <param name="data">The JSON data.</param>
+            <returns>The <see cref="T:NSwag.SwaggerDocument"/>.</returns>
+        </member>
+        <member name="M:NSwag.SwaggerDocument.FromJsonAsync(System.String,System.String)">
+            <summary>Creates a Swagger specification from a JSON string.</summary>
+            <param name="data">The JSON data.</param>
+            <param name="documentPath">The document path (URL or file path) for resolving relative document references.</param>
+            <returns>The <see cref="T:NSwag.SwaggerDocument"/>.</returns>
+        </member>
+        <member name="M:NSwag.SwaggerDocument.FromJsonAsync(System.String,System.String,NJsonSchema.SchemaType)">
+            <summary>Creates a Swagger specification from a JSON string.</summary>
+            <param name="data">The JSON data.</param>
+            <param name="documentPath">The document path (URL or file path) for resolving relative document references.</param>
+            <param name="expectedSchemaType">The expected schema type which is used when the type cannot be determined.</param>
+            <returns>The <see cref="T:NSwag.SwaggerDocument"/>.</returns>
+        </member>
+        <member name="M:NSwag.SwaggerDocument.FromJsonAsync(System.String,System.String,NJsonSchema.SchemaType,System.Func{NSwag.SwaggerDocument,NJsonSchema.JsonReferenceResolver})">
+            <summary>Creates a Swagger specification from a JSON string.</summary>
+            <param name="data">The JSON data.</param>
+            <param name="documentPath">The document path (URL or file path) for resolving relative document references.</param>
+            <param name="expectedSchemaType">The expected schema type which is used when the type cannot be determined.</param>
+            <param name="referenceResolverFactory">The JSON reference resolver factory.</param>
+            <returns>The <see cref="T:NSwag.SwaggerDocument"/>.</returns>
+        </member>
+        <member name="M:NSwag.SwaggerDocument.FromFileAsync(System.String)">
+            <summary>Creates a Swagger specification from a JSON file.</summary>
+            <param name="filePath">The file path.</param>
+            <returns>The <see cref="T:NSwag.SwaggerDocument" />.</returns>
+        </member>
+        <member name="M:NSwag.SwaggerDocument.FromUrlAsync(System.String)">
+            <summary>Creates a Swagger specification from an URL.</summary>
+            <param name="url">The URL.</param>
+            <returns>The <see cref="T:NSwag.SwaggerDocument"/>.</returns>
+        </member>
+        <member name="P:NSwag.SwaggerDocument.Operations">
+            <summary>Gets the operations.</summary>
+        </member>
+        <member name="M:NSwag.SwaggerDocument.GenerateOperationIds">
+            <summary>Generates missing or non-unique operation IDs.</summary>
+        </member>
+        <member name="M:NSwag.SwaggerDocument.CreateJsonSerializerContractResolver(NJsonSchema.SchemaType)">
+            <summary>Creates the serializer contract resolver based on the <see cref="T:NJsonSchema.SchemaType"/>.</summary>
+            <param name="schemaType">The schema type.</param>
+            <returns>The settings.</returns>
+        </member>
+        <member name="P:NSwag.SwaggerDocument.Host">
+            <summary>Gets or sets the host (name or ip) serving the API (Swagger only).</summary>
+        </member>
+        <member name="P:NSwag.SwaggerDocument.BasePath">
+            <summary>Gets or sets the base path on which the API is served, which is relative to the <see cref="P:NSwag.SwaggerDocument.Host"/>.</summary>
+        </member>
+        <member name="P:NSwag.SwaggerDocument.Schemes">
+            <summary>Gets or sets the schemes.</summary>
+        </member>
+        <member name="P:NSwag.SwaggerDocument.Consumes">
+            <summary>Gets or sets a list of MIME types the operation can consume.</summary>
+        </member>
+        <member name="P:NSwag.SwaggerDocument.Produces">
+            <summary>Gets or sets a list of MIME types the operation can produce.</summary>
+        </member>
+        <member name="P:NSwag.SwaggerDocument.Definitions">
+            <summary>Gets or sets the types (Swagger only).</summary>
+        </member>
+        <member name="P:NSwag.SwaggerDocument.Parameters">
+            <summary>Gets or sets the parameters which can be used for all operations (Swagger only).</summary>
+        </member>
+        <member name="P:NSwag.SwaggerDocument.Responses">
+            <summary>Gets or sets the responses which can be used for all operations (Swagger only).</summary>
+        </member>
+        <member name="P:NSwag.SwaggerDocument.SecurityDefinitions">
+            <summary>Gets or sets the security definitions (Swagger only).</summary>
         </member>
         <member name="T:NSwag.SwaggerExternalDocumentation">
             <summary>The external documentation description.</summary>
@@ -249,9 +556,6 @@
         <member name="P:NSwag.SwaggerInfo.Version">
             <summary>Gets or sets the API version.</summary>
         </member>
-        <member name="P:NSwag.SwaggerInfo.ExtensionData">
-            <summary>Get or set the schema less extensions (this can be used as vendor extensions as well) in Path schema</summary>
-        </member>
         <member name="T:NSwag.SwaggerLicense">
             <summary>The license information.</summary>
         </member>
@@ -283,7 +587,7 @@
             <summary>Describes a JSON web service operation. </summary>
         </member>
         <member name="M:NSwag.SwaggerOperation.#ctor">
-            <summary>Initializes a new instance of the <see cref="T:NSwag.SwaggerOperations"/> class.</summary>
+            <summary>Initializes a new instance of the <see cref="T:NSwag.SwaggerPathItem"/> class.</summary>
         </member>
         <member name="P:NSwag.SwaggerOperation.Parent">
             <summary>Gets the parent operations list.</summary>
@@ -303,9 +607,6 @@
         <member name="P:NSwag.SwaggerOperation.OperationId">
             <summary>Gets or sets the operation ID (unique name).</summary>
         </member>
-        <member name="P:NSwag.SwaggerOperation.Schemes">
-            <summary>Gets or sets the schemes.</summary>
-        </member>
         <member name="P:NSwag.SwaggerOperation.Consumes">
             <summary>Gets or sets a list of MIME types the operation can consume.</summary>
         </member>
@@ -315,11 +616,20 @@
         <member name="P:NSwag.SwaggerOperation.Parameters">
             <summary>Gets or sets the parameters.</summary>
         </member>
+        <member name="P:NSwag.SwaggerOperation.RequestBody">
+            <summary>Gets or sets the request body (OpenAPI only).</summary>
+        </member>
         <member name="P:NSwag.SwaggerOperation.ActualParameters">
             <summary>Gets the actual parameters (a combination of all inherited and local parameters).</summary>
         </member>
         <member name="P:NSwag.SwaggerOperation.Responses">
             <summary>Gets or sets the HTTP Status Code/Response pairs.</summary>
+        </member>
+        <member name="P:NSwag.SwaggerOperation.Schemes">
+            <summary>Gets or sets the schemes.</summary>
+        </member>
+        <member name="P:NSwag.SwaggerOperation.Callbacks">
+            <summary>Gets or sets the callbacks (OpenAPI only).</summary>
         </member>
         <member name="P:NSwag.SwaggerOperation.IsDeprecated">
             <summary>Gets or sets a value indicating whether the operation is deprecated.</summary>
@@ -327,8 +637,8 @@
         <member name="P:NSwag.SwaggerOperation.Security">
             <summary>Gets or sets a security description.</summary>
         </member>
-        <member name="P:NSwag.SwaggerOperation.ExtensionData">
-            <summary>Get or set the schema less extensions (this can be used as vendor extensions as well).</summary>
+        <member name="P:NSwag.SwaggerOperation.Servers">
+            <summary>Gets or sets the servers (OpenAPI only).</summary>
         </member>
         <member name="P:NSwag.SwaggerOperation.ActualConsumes">
             <summary>Gets the list of MIME types the operation can consume, either from the operation or from the <see cref="T:NSwag.SwaggerDocument"/>.</summary>
@@ -339,11 +649,14 @@
         <member name="P:NSwag.SwaggerOperation.ActualSchemes">
             <summary>Gets the actual schemes, either from the operation or from the <see cref="T:NSwag.SwaggerDocument"/>.</summary>
         </member>
-        <member name="P:NSwag.SwaggerOperation.AllResponses">
-            <summary>Gets the responses from the operation and from the <see cref="T:NSwag.SwaggerDocument"/>.</summary>
+        <member name="P:NSwag.SwaggerOperation.ActualResponses">
+            <summary>Gets the responses from the operation and from the <see cref="T:NSwag.SwaggerDocument"/> and dereferences them if necessary.</summary>
         </member>
         <member name="P:NSwag.SwaggerOperation.ActualSecurity">
             <summary>Gets the actual security description, either from the operation or from the <see cref="T:NSwag.SwaggerDocument"/>.</summary>
+        </member>
+        <member name="P:NSwag.SwaggerOperation.ParametersRaw">
+            <summary>Gets or sets the parameters.</summary>
         </member>
         <member name="T:NSwag.SwaggerOperationDescription">
             <summary>Flattened information about an operation.</summary>
@@ -384,11 +697,11 @@
         <member name="F:NSwag.SwaggerOperationMethod.Patch">
             <summary>The HTTP PATCH method. </summary>
         </member>
+        <member name="F:NSwag.SwaggerOperationMethod.Trace">
+            <summary>The HTTP TRACE method (OpenAPI only). </summary>
+        </member>
         <member name="T:NSwag.SwaggerParameter">
             <summary>Describes an operation parameter. </summary>
-        </member>
-        <member name="P:NSwag.SwaggerParameter.Parent">
-            <summary>Gets the parent operation.</summary>
         </member>
         <member name="P:NSwag.SwaggerParameter.Name">
             <summary>Gets or sets the name.</summary>
@@ -396,30 +709,53 @@
         <member name="P:NSwag.SwaggerParameter.Kind">
             <summary>Gets or sets the kind of the parameter.</summary>
         </member>
+        <member name="P:NSwag.SwaggerParameter.Style">
+            <summary>Gets or sets the style of the parameter (OpenAPI only).</summary>
+        </member>
+        <member name="P:NSwag.SwaggerParameter.Explode">
+            <summary>Gets or sets the explode setting for the parameter (OpenAPI only).</summary>
+        </member>
         <member name="P:NSwag.SwaggerParameter.IsRequired">
             <summary>Gets or sets a value indicating whether the parameter is required (default: false).</summary>
+        </member>
+        <member name="P:NSwag.SwaggerParameter.AllowEmptyValue">
+            <summary>Gets or sets a value indicating whether passing empty-valued parameters is allowed (default: false).</summary>
+        </member>
+        <member name="P:NSwag.SwaggerParameter.Description">
+            <summary>Gets or sets the description. </summary>
+        </member>
+        <member name="P:NSwag.SwaggerParameter.ActualParameter">
+            <summary>Gets the actual parameter.</summary>
+        </member>
+        <member name="P:NSwag.SwaggerParameter.CollectionFormat">
+            <summary>Gets or sets the format of the array if type array is used.</summary>
+        </member>
+        <member name="P:NSwag.SwaggerParameter.Examples">
+            <summary>Gets or sets the headers (OpenAPI only).</summary>
         </member>
         <member name="P:NSwag.SwaggerParameter.Schema">
             <summary>Gets or sets the schema which is only available when <see cref="P:NSwag.SwaggerParameter.Kind"/> == body.</summary>
         </member>
-        <member name="P:NSwag.SwaggerParameter.IsNullableRaw">
-            <summary>Sets a value indicating whether the parameter can be null (use IsNullable() to get a parameter's nullability).</summary>
-            <remarks>The Swagger spec does not support null in schemas, see https://github.com/OAI/OpenAPI-Specification/issues/229 </remarks>
+        <member name="P:NSwag.SwaggerParameter.CustomSchema">
+            <summary>Gets or sets the custom schema which is used when <see cref="P:NSwag.SwaggerParameter.Kind"/> != body.</summary>
+        </member>
+        <member name="P:NSwag.SwaggerParameter.Position">
+            <summary>Gets or sets the name.</summary>
         </member>
         <member name="P:NSwag.SwaggerParameter.ActualSchema">
             <summary>Gets the actual schema, either the parameter schema itself (or its reference) or the <see cref="P:NSwag.SwaggerParameter.Schema"/> property when <see cref="P:NSwag.SwaggerParameter.Kind"/> == body.</summary>
             <exception cref="T:System.InvalidOperationException" accessor="get">The schema reference path is not resolved.</exception>
         </member>
-        <member name="P:NSwag.SwaggerParameter.CollectionFormat">
-            <summary>Gets or sets the format of the array if type array is used.</summary>
-        </member>
-        <member name="M:NSwag.SwaggerParameter.IsNullable(NJsonSchema.NullHandling)">
+        <member name="M:NSwag.SwaggerParameter.IsNullable(NJsonSchema.SchemaType)">
             <summary>Gets a value indicating whether the validated data can be null.</summary>
-            <param name="nullHandling">The null handling.</param>
+            <param name="schemaType">The schema type.</param>
             <returns>The result.</returns>
         </member>
         <member name="P:NSwag.SwaggerParameter.IsXmlBodyParameter">
             <summary>Gets a value indicating whether this is an XML body parameter.</summary>
+        </member>
+        <member name="P:NSwag.SwaggerParameter.IsBinaryBodyParameter">
+            <summary>Gets a value indicating whether this is an binary body parameter.</summary>
         </member>
         <member name="T:NSwag.SwaggerParameterCollectionFormat">
             <summary>Defines the collectionFormat of a parameter.</summary>
@@ -466,29 +802,82 @@
         <member name="F:NSwag.SwaggerParameterKind.ModelBinding">
             <summary>A model binding parameter (either form data, path or query; by default query; generated by Swashbuckle).</summary>
         </member>
-        <member name="T:NSwag.SwaggerOperations">
+        <member name="T:NSwag.SwaggerParameterStyle">
+            <summary>Enumeration of the parameter kinds. </summary>
+        </member>
+        <member name="F:NSwag.SwaggerParameterStyle.Undefined">
+            <summary>An undefined kind.</summary>
+        </member>
+        <member name="F:NSwag.SwaggerParameterStyle.Simple">
+            <summary>Comma-separated values. For Path parameters.
+            Corresponds to the {param_name} URI template
+            </summary>
+        </member>
+        <member name="F:NSwag.SwaggerParameterStyle.Label">
+            <summary>Dot-prefixed values, also known as label expansion. For Path parameters.
+            Corresponds to the {.param_name} URI template
+            </summary>
+        </member>
+        <member name="F:NSwag.SwaggerParameterStyle.Matrix">
+            <summary>Semicolon-prefixed values, also known as path-style expansion.
+            For path parameters. Corresponds to the {;param_name} URI template
+            </summary>
+        </member>
+        <member name="F:NSwag.SwaggerParameterStyle.Form">
+            <summary>Ampersand-separated values. Also known as form-style query expansion.
+            Corresponds to the {?param_name} URI template.
+            </summary>
+        </member>
+        <member name="F:NSwag.SwaggerParameterStyle.SpaceDelimeted">
+            <summary>Space-separated array values. Same as collectionFormat: ssv in OpenAPI 2.0.
+            Has effect only for non-exploded arrays (explode: false), that is, the space
+            separates the array values if the array is a single parameter, as in arr=a b c.
+            </summary>
+        </member>
+        <member name="F:NSwag.SwaggerParameterStyle.PipeDelimited">
+            <summary>Pipeline-separated array values. Same as collectionFormat: pipes in
+            OpenAPI 2.0. Has effect only for non-exploded arrays (explode: false),
+            that is, the pipe separates the array values if the array is a single
+            parameter, as in arr=a|b|c.</summary>
+        </member>
+        <member name="F:NSwag.SwaggerParameterStyle.DeepObject">
+            <summary>Simple way of rendering nested objects using form parameters (applies to objects only)</summary>
+        </member>
+        <member name="T:NSwag.SwaggerPathItem">
             <summary>A Swagger path.</summary>
         </member>
-        <member name="M:NSwag.SwaggerOperations.#ctor">
-            <summary>Initializes a new instance of the <see cref="T:NSwag.SwaggerOperations"/> class.</summary>
+        <member name="M:NSwag.SwaggerPathItem.#ctor">
+            <summary>Initializes a new instance of the <see cref="T:NSwag.SwaggerPathItem"/> class.</summary>
         </member>
-        <member name="P:NSwag.SwaggerOperations.Parent">
+        <member name="P:NSwag.SwaggerPathItem.Parent">
             <summary>Gets the parent <see cref="T:NSwag.SwaggerDocument"/>.</summary>
         </member>
-        <member name="P:NSwag.SwaggerOperations.Parameters">
+        <member name="P:NSwag.SwaggerPathItem.Summary">
+            <summary>Gets or sets the summary (OpenApi only).</summary>
+        </member>
+        <member name="P:NSwag.SwaggerPathItem.Description">
+            <summary>Gets or sets the description (OpenApi only).</summary>
+        </member>
+        <member name="P:NSwag.SwaggerPathItem.Servers">
+            <summary>Gets or sets the servers (OpenAPI only).</summary>
+        </member>
+        <member name="P:NSwag.SwaggerPathItem.Parameters">
             <summary>Gets or sets the parameters.</summary>
         </member>
         <member name="T:NSwag.SwaggerResponse">
             <summary>The Swagger response.</summary>
         </member>
+        <member name="P:NSwag.SwaggerResponse.ExtensionData">
+            <summary>Gets or sets the extension data (i.e. additional properties which are not directly defined by the JSON object).</summary>
+        </member>
         <member name="P:NSwag.SwaggerResponse.Parent">
             <summary>Gets the parent <see cref="T:NSwag.SwaggerOperation"/>.</summary>
         </member>
+        <member name="P:NSwag.SwaggerResponse.ActualResponse">
+            <summary>Gets the actual response, either this or the referenced response.</summary>
+        </member>
         <member name="P:NSwag.SwaggerResponse.Description">
             <summary>Gets or sets the response's description.</summary>
-        </member>
-        <member name="P:NSwag.SwaggerResponse.Schema">
-            <summary>Gets or sets the response schema.</summary>
         </member>
         <member name="P:NSwag.SwaggerResponse.Headers">
             <summary>Gets or sets the headers.</summary>
@@ -500,34 +889,31 @@
         <member name="P:NSwag.SwaggerResponse.ActualResponseSchema">
             <summary>Gets the actual non-nullable response schema (either oneOf schema or the actual schema).</summary>
         </member>
-        <member name="P:NSwag.SwaggerResponse.ExtensionData">
-            <summary>Get or set the schema less extensions (this can be used as vendor extensions as well) in response schema.</summary>
-        </member>
         <member name="P:NSwag.SwaggerResponse.ExpectedSchemas">
             <summary>Gets or sets the expected child schemas of the base schema (can be used for generating enhanced typings/documentation).</summary>
         </member>
-        <member name="M:NSwag.SwaggerResponse.IsNullable(NJsonSchema.NullHandling)">
+        <member name="P:NSwag.SwaggerResponse.Content">
+            <summary>Gets or sets the descriptions of potential response payloads (OpenApi only).</summary>
+        </member>
+        <member name="P:NSwag.SwaggerResponse.Links">
+            <summary>Gets or sets the links that can be followed from the response (OpenApi only).</summary>
+        </member>
+        <member name="P:NSwag.SwaggerResponse.Schema">
+            <summary>Gets or sets the response schema (Swagger only).</summary>
+        </member>
+        <member name="P:NSwag.SwaggerResponse.Examples">
+            <summary>Gets or sets the headers (Swagger only).</summary>
+        </member>
+        <member name="M:NSwag.SwaggerResponse.IsNullable(NJsonSchema.SchemaType)">
             <summary>Determines whether the specified null handling is nullable (fallback value: false).</summary>
-            <param name="nullHandling">The null handling.</param>
+            <param name="schemaType">The schema type.</param>
             <returns>The result.</returns>
         </member>
-        <member name="M:NSwag.SwaggerResponse.IsNullable(NJsonSchema.NullHandling,System.Boolean)">
+        <member name="M:NSwag.SwaggerResponse.IsNullable(NJsonSchema.SchemaType,System.Boolean)">
             <summary>Determines whether the specified null handling is nullable.</summary>
-            <param name="nullHandling">The null handling.</param>
+            <param name="schemaType">The schema type.</param>
             <param name="fallbackValue">The fallback value when 'x-nullable' is not defined.</param>
             <returns>The result.</returns>
-        </member>
-        <member name="T:NSwag.JsonExpectedSchema">
-            <summary></summary>
-        </member>
-        <member name="P:NSwag.JsonExpectedSchema.Description">
-            <summary>Gets or sets the description.</summary>
-        </member>
-        <member name="P:NSwag.JsonExpectedSchema.Schema">
-            <summary>Gets or sets the schema.</summary>
-        </member>
-        <member name="T:NSwag.SwaggerResponses">
-            <summary>A collection of Swagger responses.</summary>
         </member>
         <member name="T:NSwag.SwaggerSchema">
             <summary>The enumeration of Swagger protocol schemes.</summary>
@@ -547,6 +933,20 @@
         <member name="F:NSwag.SwaggerSchema.Wss">
             <summary>The WSS schema.</summary>
         </member>
+        <member name="T:NSwag.SwaggerSchemaResolver">
+            <summary>Appends a JSON Schema to the Definitions of a Swagger document.</summary>
+        </member>
+        <member name="M:NSwag.SwaggerSchemaResolver.#ctor(NSwag.SwaggerDocument,NJsonSchema.Generation.JsonSchemaGeneratorSettings)">
+            <summary>Initializes a new instance of the <see cref="T:NSwag.SwaggerSchemaResolver" /> class.</summary>
+            <param name="document">The Swagger document.</param>
+            <param name="settings">The settings.</param>
+            <exception cref="T:System.ArgumentNullException"><paramref name="document" /> is <see langword="null" /></exception>
+        </member>
+        <member name="M:NSwag.SwaggerSchemaResolver.AppendSchema(NJsonSchema.JsonSchema4,System.String)">
+            <summary>Appends the schema to the root object.</summary>
+            <param name="schema">The schema to append.</param>
+            <param name="typeNameHint">The type name hint.</param>
+        </member>
         <member name="T:NSwag.SwaggerSecurityApiKeyLocation">
             <summary>Specifies the location of the API Key.</summary>
         </member>
@@ -559,6 +959,9 @@
         <member name="F:NSwag.SwaggerSecurityApiKeyLocation.Header">
             <summary>In the HTTP header.</summary>
         </member>
+        <member name="F:NSwag.SwaggerSecurityApiKeyLocation.Cookie">
+            <summary>In the HTTP cookie (OpenAPI only).</summary>
+        </member>
         <member name="T:NSwag.SwaggerSecurityRequirement">
             <summary>The operation security requirements.</summary>
         </member>
@@ -567,6 +970,7 @@
         </member>
         <member name="P:NSwag.SwaggerSecurityScheme.Type">
             <summary>Gets or sets the type of the security scheme.</summary>
+            <remarks>Changes the type to <see cref="F:NSwag.SwaggerSecuritySchemeType.Http"/> and the <see cref="P:NSwag.SwaggerSecurityScheme.Scheme"/> to "basic" set to <see cref="F:NSwag.SwaggerSecuritySchemeType.Basic"/>.</remarks>
         </member>
         <member name="P:NSwag.SwaggerSecurityScheme.Description">
             <summary>Gets or sets the short description for security scheme.</summary>
@@ -577,20 +981,30 @@
         <member name="P:NSwag.SwaggerSecurityScheme.In">
             <summary>Gets or sets the type of the API key.</summary>
         </member>
+        <member name="P:NSwag.SwaggerSecurityScheme.Scheme">
+            <summary>Gets or sets name of the HTTP Authorization scheme to be used in the Authorization header as defined in RFC7235 (OpenAPI only).</summary>
+        </member>
+        <member name="P:NSwag.SwaggerSecurityScheme.BearerFormat">
+            <summary>Gets or sets a hint to the client to identify how the bearer token is formatted. Bearer tokens are
+            usually generated by an authorization server, so this information is primarily for documentation purposes (OpenAPI only).</summary>
+        </member>
+        <member name="P:NSwag.SwaggerSecurityScheme.OpenIdConnectUrl">
+            <summary>Gets or sets the OpenId Connect URL to discover OAuth2 configuration values (OpenAPI only).</summary>
+        </member>
+        <member name="P:NSwag.SwaggerSecurityScheme.Flows">
+            <summary>Gets or sets the configuration information for the supported flow types (OpenAPI only).</summary>
+        </member>
         <member name="P:NSwag.SwaggerSecurityScheme.Flow">
-            <summary>Gets or sets the used by the OAuth2 security scheme.</summary>
+            <summary>Gets or sets the used by the OAuth2 security scheme (Swagger only).</summary>
         </member>
         <member name="P:NSwag.SwaggerSecurityScheme.AuthorizationUrl">
-            <summary>Gets or sets the authorization URL to be used for this flow.</summary>
+            <summary>Gets or sets the authorization URL to be used for this flow (Swagger only).</summary>
         </member>
         <member name="P:NSwag.SwaggerSecurityScheme.TokenUrl">
-            <summary>Gets or sets the token URL to be used for this flow. .</summary>
+            <summary>Gets or sets the token URL to be used for this flow (Swagger only).</summary>
         </member>
         <member name="P:NSwag.SwaggerSecurityScheme.Scopes">
-            <summary>Gets the available scopes for the OAuth2 security scheme.</summary>
-        </member>
-        <member name="P:NSwag.SwaggerSecurityScheme.ExtensionData">
-            <summary>Get or set the schema less extensions (this can be used as vendor extensions as well) in security schema</summary>
+            <summary>Gets the available scopes for the OAuth2 security scheme (Swagger only).</summary>
         </member>
         <member name="T:NSwag.SwaggerSecuritySchemeType">
             <summary></summary>
@@ -607,110 +1021,11 @@
         <member name="F:NSwag.SwaggerSecuritySchemeType.OAuth2">
             <summary>OAuth2 authentication.</summary>
         </member>
-        <member name="T:NSwag.SwaggerDocument">
-            <summary>Describes a JSON web service.</summary>
+        <member name="F:NSwag.SwaggerSecuritySchemeType.Http">
+            <summary>HTTP authentication (OpenAPI only).</summary>
         </member>
-        <member name="M:NSwag.SwaggerDocument.#ctor">
-            <summary>Initializes a new instance of the <see cref="T:NSwag.SwaggerDocument"/> class.</summary>
-        </member>
-        <member name="P:NSwag.SwaggerDocument.ToolchainVersion">
-            <summary>Gets the NSwag toolchain version.</summary>
-        </member>
-        <member name="P:NSwag.SwaggerDocument.DocumentPath">
-            <summary>Gets the document path (URI or file path).</summary>
-        </member>
-        <member name="P:NSwag.SwaggerDocument.Swagger">
-            <summary>Gets or sets the Swagger specification version being used.</summary>
-        </member>
-        <member name="P:NSwag.SwaggerDocument.Info">
-            <summary>Gets or sets the metadata about the API.</summary>
-        </member>
-        <member name="P:NSwag.SwaggerDocument.Host">
-            <summary>Gets or sets the host (name or ip) serving the API.</summary>
-        </member>
-        <member name="P:NSwag.SwaggerDocument.BasePath">
-            <summary>Gets or sets the base path on which the API is served, which is relative to the <see cref="P:NSwag.SwaggerDocument.Host"/>.</summary>
-        </member>
-        <member name="P:NSwag.SwaggerDocument.Schemes">
-            <summary>Gets or sets the schemes.</summary>
-        </member>
-        <member name="P:NSwag.SwaggerDocument.Consumes">
-            <summary>Gets or sets a list of MIME types the operation can consume.</summary>
-        </member>
-        <member name="P:NSwag.SwaggerDocument.Produces">
-            <summary>Gets or sets a list of MIME types the operation can produce.</summary>
-        </member>
-        <member name="P:NSwag.SwaggerDocument.Paths">
-            <summary>Gets or sets the operations.</summary>
-        </member>
-        <member name="P:NSwag.SwaggerDocument.Definitions">
-            <summary>Gets or sets the types.</summary>
-        </member>
-        <member name="P:NSwag.SwaggerDocument.Parameters">
-            <summary>Gets or sets the parameters which can be used for all operations.</summary>
-        </member>
-        <member name="P:NSwag.SwaggerDocument.Responses">
-            <summary>Gets or sets the responses which can be used for all operations.</summary>
-        </member>
-        <member name="P:NSwag.SwaggerDocument.SecurityDefinitions">
-            <summary>Gets or sets the security definitions.</summary>
-        </member>
-        <member name="P:NSwag.SwaggerDocument.Security">
-            <summary>Gets or sets a security description.</summary>
-        </member>
-        <member name="P:NSwag.SwaggerDocument.Tags">
-            <summary>Gets or sets the description.</summary>
-        </member>
-        <member name="P:NSwag.SwaggerDocument.BaseUrl">
-            <summary>Gets the base URL of the web service.</summary>
-        </member>
-        <member name="P:NSwag.SwaggerDocument.ExternalDocumentation">
-            <summary>Gets or sets the external documentation.</summary>
-        </member>
-        <member name="M:NSwag.SwaggerDocument.ToJson">
-            <summary>Converts the description object to JSON.</summary>
-            <returns>The JSON string.</returns>
-        </member>
-        <member name="M:NSwag.SwaggerDocument.ToJson(NJsonSchema.Generation.JsonSchemaGeneratorSettings)">
-            <summary>Converts the description object to JSON.</summary>
-            <param name="settings">The JSON Schema generator settings.</param>
-            <returns>The JSON string.</returns>
-        </member>
-        <member name="M:NSwag.SwaggerDocument.FromJsonAsync(System.String,System.String)">
-            <summary>Creates a Swagger specification from a JSON string.</summary>
-            <param name="data">The JSON data.</param>
-            <param name="documentPath">The document path (URL or file path) for resolving relative document references.</param>
-            <returns>The <see cref="T:NSwag.SwaggerDocument"/>.</returns>
-        </member>
-        <member name="M:NSwag.SwaggerDocument.FromFileAsync(System.String)">
-            <summary>Creates a Swagger specification from a JSON file.</summary>
-            <param name="filePath">The file path.</param>
-            <returns>The <see cref="T:NSwag.SwaggerDocument" />.</returns>
-        </member>
-        <member name="M:NSwag.SwaggerDocument.FromUrlAsync(System.String)">
-            <summary>Creates a Swagger specification from an URL.</summary>
-            <param name="url">The URL.</param>
-            <returns>The <see cref="T:NSwag.SwaggerDocument"/>.</returns>
-        </member>
-        <member name="P:NSwag.SwaggerDocument.Operations">
-            <summary>Gets the operations.</summary>
-        </member>
-        <member name="M:NSwag.SwaggerDocument.GenerateOperationIds">
-            <summary>Generates missing or non-unique operation IDs.</summary>
-        </member>
-        <member name="T:NSwag.SwaggerSchemaResolver">
-            <summary>Appends a JSON Schema to the Definitions of a Swagger document.</summary>
-        </member>
-        <member name="M:NSwag.SwaggerSchemaResolver.#ctor(NSwag.SwaggerDocument,NJsonSchema.Generation.JsonSchemaGeneratorSettings)">
-            <summary>Initializes a new instance of the <see cref="T:NSwag.SwaggerSchemaResolver" /> class.</summary>
-            <param name="document">The Swagger document.</param>
-            <param name="settings">The settings.</param>
-            <exception cref="T:System.ArgumentNullException"><paramref name="document" /> is <see langword="null" /></exception>
-        </member>
-        <member name="M:NSwag.SwaggerSchemaResolver.AppendSchema(NJsonSchema.JsonSchema4,System.String)">
-            <summary>Appends the schema to the root object.</summary>
-            <param name="schema">The schema to append.</param>
-            <param name="typeNameHint">The type name hint.</param>
+        <member name="F:NSwag.SwaggerSecuritySchemeType.OpenIdConnect">
+            <summary>OpenIdConnect authentication (OpenAPI only).</summary>
         </member>
         <member name="T:NSwag.SwaggerTag">
             <summary>Describes a Swagger tag.</summary>
@@ -723,9 +1038,6 @@
         </member>
         <member name="P:NSwag.SwaggerTag.ExternalDocumentation">
             <summary>Gets or sets the external documentation.</summary>
-        </member>
-        <member name="P:NSwag.SwaggerTag.ExtensionData">
-            <summary>Get or set the schema less extensions (this can be used as vendor extensions as well) in tag schema</summary>
         </member>
     </members>
 </doc>

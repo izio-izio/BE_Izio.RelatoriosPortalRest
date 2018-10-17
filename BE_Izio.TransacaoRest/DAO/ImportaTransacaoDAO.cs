@@ -11,6 +11,7 @@ using FastMember;
 using System.Data.SqlClient;
 using Newtonsoft.Json;
 using System.Data;
+using Izio.Biblioteca.Model;
 
 namespace TransacaoIzioRest.DAO
 {
@@ -21,15 +22,11 @@ namespace TransacaoIzioRest.DAO
     {
         #region Constantes Processamento Transacao
 
-        
-        private string ObjetoTransacaoVazio = "Objeto com os dados das vendas está vazio, impossível realizar o processamento.";
-        private string ObjetoItensTransacaoVazio = "Objeto com os itens das vendas está vazio, impossível realizar o processamento.";
-        
         private string ErroBancoDeDadosTransacao = "Erro na importação da venda do cupom";
         private string ErroVendaDuplicada = "A Compra já foi processada na base do Izio. Segue os dados da venda duplicada: ";
         private string ErroBancoDeDadosLoteTransacao = "Erro na importação do lote de transação";
         private string ErroDataMaiorDiaAtual = "Venda com data maior que a data do dia processamento.";
-        private string NaoExisteCodPessoa = "Codigo da pessoa informada, não existe na base do Izio";
+        
 
         #endregion
 
@@ -40,52 +37,65 @@ namespace TransacaoIzioRest.DAO
             sqlServer = new SqlServer(sNomeCliente);
             NomeClienteWs = sNomeCliente;
         }
-        
+
+        /// <summary>
+        /// Verifica se o cod. Pessoa informado, possui cadastro no Izio
+        /// </summary>
+        /// <param name="cod_pessoa"></param>
+        /// <param name="cupom"></param>
+        /// <param name="dat_compra"></param>
+        /// <param name="cod_loja"></param>
+        /// <returns></returns>
+        #region Verifica se o cod. Pessoa informado, possui cadastro no Izio
+        public Boolean VerificaCodPessoaExiste(long cod_pessoa,string cupom, DateTime dat_compra, long cod_loja)
+        {
+            int iCount = 0;
+
+            try
+            {
+                sqlServer.StartConnection();
+                //Verifica se o codigo da pessoa informado existe na base
+                sqlServer.Command.CommandType = System.Data.CommandType.Text;
+                sqlServer.Command.Parameters.Clear();
+                sqlServer.Command.CommandText = @"select count(1) from tab_pessoa with(nolock) where cod_pessoa  = " + cod_pessoa;
+
+                iCount = Convert.ToInt32(sqlServer.Command.ExecuteScalar());
+            }
+            catch(Exception ex)
+            {
+                DadosLog dadosLog = new DadosLog();
+                dadosLog.des_erro_tecnico = " VerificaCodPessoaExiste - [Loja: " + cod_loja +
+                                            "  Cupom: " + cupom +
+                                            "  Dat. Compra: " + dat_compra.ToString("dd/MM/yyyy HH:mm:ss") + " ], erro: " + ex.ToString();
+
+                Log.InserirLogIzio(NomeClienteWs, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
+            }
+            finally
+            {
+                sqlServer.CloseConnection();
+            }
+
+            return iCount > 0 ? true : false;
+        }
+
+        #endregion
+
         /// <summary>
         /// Processa de forma online pedido a pedido para as tabelas finais (tab_transacao e tab_transacao_cpf)
         ///  - Processamento sem controle de transalçao
         /// </summary>
-        /// <param name="sNomeCliente"></param>
         /// <param name="objTransacao"></param>
         /// <param name="IpOrigem"></param>
         /// <returns></returns>
         #region Processa vendas online - Os dados já são inseridos diretamente nas tabelas finais (tab_transacao e tab_transacao_cpf)
-        public RetornoDadosProcTransacao ImportaTransacao(DadosTransacaoOnline objTransacao,
-                                                          string IpOrigem)
+        public ApiErrors ImportaTransacao(DadosTransacaoOnline objTransacao,
+                                                        string IpOrigem)
         {
-            RetornoDadosProcTransacao retornoTransacao = new RetornoDadosProcTransacao();
-            retornoTransacao.errors = new List<ErrosTransacao>();
-            retornoTransacao.payload = new PayloadTransacao();
-
-            ListaErrosTransacao listaErros = new ListaErrosTransacao();
-            listaErros.errors = new List<ErrosTransacao>();
-
-            PayloadTransacao payloadSucesso = new PayloadTransacao();
-
+            ApiErrors listaErros = new ApiErrors();
+            listaErros.errors = new List<Erros>();
+            
             try
             {
-                //Valida se o objeto com as transações foi preenchido
-                if (objTransacao == null)
-                {
-                    listaErros.errors.Add(new ErrosTransacao { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ObjetoTransacaoVazio });
-                }
-                else if (objTransacao.ListaItens == null)
-                {
-                    listaErros.errors.Add(new ErrosTransacao { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ObjetoItensTransacaoVazio });
-                }
-                else if (objTransacao.ListaItens != null && objTransacao.ListaItens.Count == 0)
-                {
-                    listaErros.errors.Add(new ErrosTransacao { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ObjetoItensTransacaoVazio });
-                }
-
-                //Se a lista estiver preenchida, é por que foi encontrado erros na validação
-                if (listaErros.errors.Count > 0)
-                {
-                    retornoTransacao.errors = listaErros.errors;
-
-                    return retornoTransacao;
-                }
-
                 long lCodTransacao;
 
                 // Abre a conexao com o banco de dados
@@ -102,27 +112,19 @@ namespace TransacaoIzioRest.DAO
                     //Seta o codigo da pessoa do CPF informado
                     objTransacao.cod_pessoa = Convert.ToInt32(sqlServer.Command.ExecuteScalar());
                 }
-                else if (objTransacao.cod_pessoa > 0)
-                {
-                    //Verifica se o codigo da pessoa informado existe na base
-                    sqlServer.Command.CommandType = System.Data.CommandType.Text;
-                    sqlServer.Command.Parameters.Clear();
-                    sqlServer.Command.CommandText = @"select count(1) from tab_pessoa with(nolock) where cod_pessoa  = " + objTransacao.cod_pessoa.ToString();
-                    Int32 iCount = 0;
+                //else if (objTransacao.cod_pessoa > 0)
+                //{
+                //    //Verifica se o codigo da pessoa informado existe na base
+                //    sqlServer.Command.CommandType = System.Data.CommandType.Text;
+                //    sqlServer.Command.Parameters.Clear();
+                //    sqlServer.Command.CommandText = @"select count(1) from tab_pessoa with(nolock) where cod_pessoa  = " + objTransacao.cod_pessoa.ToString();
+                //    Int32 iCount = 0;
 
-                    iCount = Convert.ToInt32(sqlServer.Command.ExecuteScalar());
+                //    iCount = Convert.ToInt32(sqlServer.Command.ExecuteScalar());
 
-                    if (iCount == 0)
-                    {
-                        listaErros.errors.Add(new ErrosTransacao { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = NaoExisteCodPessoa });
-                        //Log.inserirLogException(NomeClienteWs, new Exception(NaoExisteCodPessoa), 0);
+                //    throw new System.Exception(NaoExisteCodPessoa);
 
-                        retornoTransacao.errors = listaErros.errors;
-
-                        return retornoTransacao;
-                    }
-
-                }
+                //}
 
                 //Inicia o controle de transacao
                 sqlServer.BeginTransaction();
@@ -294,7 +296,7 @@ namespace TransacaoIzioRest.DAO
                         {
                             sqlServer.Command.Parameters.AddWithValue("@vlr_desconto_item", DBNull.Value);
                         }
-                        
+
                         //Executa a procedure
                         sqlServer.Command.ExecuteNonQuery();
                     }
@@ -346,12 +348,12 @@ namespace TransacaoIzioRest.DAO
 
                     //Array com os NSUs da compra paga com cartão, cria array para 10 pagamentos em cartão
                     string[] arrayCodNSU = new string[10];
-                    Boolean bArrayPreechido = false;
+//                    Boolean bArrayPreechido = false;
 
                     if (!string.IsNullOrEmpty(objTransacao.nsu_transacao))
                     {
                         arrayCodNSU = objTransacao.nsu_transacao.Split(';');
-                        bArrayPreechido = true;
+                        //bArrayPreechido = true;
                     }
 
                     foreach (string meioPagto in ListaMeioPagto)
@@ -394,10 +396,10 @@ namespace TransacaoIzioRest.DAO
                         }
 
                         posSplitNSU += 1;
-                        
+
                         sqlServer.Command.Parameters.AddWithValue("@nom_tipo_pagamento", nomePagamennto.Split('@').Count() == 1 ? nomePagamennto : nomePagamennto.Split('@')[1]);
-                        
-                        
+
+
                         //Executa a procedure
                         sqlServer.Command.ExecuteNonQuery();
                     }
@@ -407,65 +409,43 @@ namespace TransacaoIzioRest.DAO
 
                 //Commit na trnasacao
                 sqlServer.Commit();
-
-                //Seta o retorno com sucesso
-                payloadSucesso.code = Convert.ToInt32(HttpStatusCode.Accepted).ToString();
-                payloadSucesso.message = "Transação Importada com sucesso.";
-
             }
             catch (System.Exception ex)
             {
                 sqlServer.Rollback();
 
+                DadosLog dadosLog = new DadosLog();
+                dadosLog.des_erro_tecnico = "Cupom: [" + objTransacao.cupom + "] " + ex.Message;
+
+                Log.InserirLogIzio(NomeClienteWs, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
+
+                var jsonTransacao = JsonConvert.SerializeObject(objTransacao);
+                dadosLog.des_erro_tecnico = "Json: " + jsonTransacao.ToString();
+
+                Log.InserirLogIzio(NomeClienteWs, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
+
                 if (ex.Message.Contains("unq_transacao_001"))
                 {
-                    //Seta a lista de erros com o erro
-                    listaErros.errors.Add(new ErrosTransacao
-                    {
-                        code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(),
-                        message = ErroVendaDuplicada + " [ Loja: " + objTransacao.cod_loja + 
-                                                       "   Cupom: " + objTransacao.cupom +
-                                                       "   Dat. Compra: " + objTransacao.dat_compra.ToString("dd/MM/yyyy HH:mm:ss") +
-                                                       "   Vlr. Compra: " + objTransacao.vlr_compra +
-                                                       "   Qtd. Itens Compra: " + objTransacao.qtd_itens_compra +
-                                                       "   Cpf: " + objTransacao.cod_cpf + " ], favor contactar o administrador."
-                    });
+                    ErroVendaDuplicada += " [ Loja: " + objTransacao.cod_loja +
+                                                      "   Cupom: " + objTransacao.cupom +
+                                                      "   Dat. Compra: " + objTransacao.dat_compra.ToString("dd/MM/yyyy HH:mm:ss") +
+                                                      "   Vlr. Compra: " + objTransacao.vlr_compra +
+                                                      "   Qtd. Itens Compra: " + objTransacao.qtd_itens_compra + " ], favor contactar o administrador.";
+
+                    listaErros.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ErroVendaDuplicada });
                 }
                 else
                 {
                     //Seta a lista de erros com o erro
-                    listaErros.errors.Add(new ErrosTransacao { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ErroBancoDeDadosTransacao + " [" + objTransacao.cupom + "], favor contactar o administrador" });
+                    throw new System.Exception(ErroBancoDeDadosTransacao + " [" + objTransacao.cupom + "] , favor contactar o administrador");
                 }
-
-                if (objTransacao != null)
-                {
-                    var jsonTransacao = JsonConvert.SerializeObject(objTransacao);
-
-                    //Salva o Json da requisição
-                    Log.inserirLogException(NomeClienteWs, new System.Exception("Cupom: [" + objTransacao.cupom + "] " + ex.Message, new System.Exception(jsonTransacao.ToString())), 0);
-                }
-                else
-                {
-                    //Insere o erro na sis_log
-                    Log.inserirLogException(NomeClienteWs, new System.Exception("Cupom: [" + objTransacao.cupom + "] " + ex.Message, new System.Exception(ex.ToString())), 0);
-                }
-                
             }
             finally
             {
                 sqlServer.CloseConnection();
             }
 
-            if (listaErros.errors != null && listaErros.errors.Count > 0)
-            {
-                retornoTransacao.errors = listaErros.errors;
-            }
-            else
-            {
-                retornoTransacao.payload = payloadSucesso;
-            }
-
-            return retornoTransacao;
+            return listaErros;
         }
         #endregion
 
@@ -473,47 +453,21 @@ namespace TransacaoIzioRest.DAO
         /// Processa as vendas em lote de até mil compras, inserido os registros na tabela intermediaria viewizio_3
         ///  - Processamento utiliza controle de transação
         /// </summary>
-        /// <param name="sNomeCliente"></param>
         /// <param name="objTransacao"></param>
         /// <param name="IpOrigem"></param>
         /// <returns></returns>
         #region Importa as vendas para tabela intermediaria viewizio_3, para ser processado em um segundo momento, pela API REST - RUNDECK
-        public RetornoDadosProcTransacao ImportaLoteTransacao(List<DadosTransacaoLote> objTransacao,
+        public ApiErrors ImportaLoteTransacao(List<DadosTransacaoLote> objTransacao,
                                                               string IpOrigem)
         {
-            RetornoDadosProcTransacao retornoTransacao = new RetornoDadosProcTransacao();
-            retornoTransacao.errors = new List<ErrosTransacao>();
-            retornoTransacao.payload = new PayloadTransacao();
-
-            ListaErrosTransacao listaErros = new ListaErrosTransacao();
-            listaErros.errors = new List<ErrosTransacao>();
-
-            PayloadTransacao payloadSucesso = new PayloadTransacao();
+            ApiErrors listaErros = new ApiErrors();
+            listaErros.errors = new List<Erros>();
 
             //Lista padrão para bulkt Insert na viewizio_3
             List<DadosLoteViewizio_3> listaViewizio_3 = new List<DadosLoteViewizio_3>();
 
             try
             {
-                //Valida se o objeto com as transações foi preenchido
-                if (objTransacao == null)
-                {
-                    listaErros.errors.Add(new ErrosTransacao { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ObjetoTransacaoVazio });
-                }
-                else if (objTransacao.Count == 0)
-                {
-                    listaErros.errors.Add(new ErrosTransacao { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ObjetoItensTransacaoVazio });
-                }
-
-                //Se a lista estiver preenchida, é por que foi encontrado erros na validação
-                if (listaErros.errors.Count > 0)
-                {
-                    retornoTransacao.errors = listaErros.errors;
-
-                    return retornoTransacao;
-                }
-
-
                 // Abre a conexao com o banco de dados
                 sqlServer.StartConnection();
 
@@ -559,7 +513,7 @@ namespace TransacaoIzioRest.DAO
 
                 using (var bcp = new SqlBulkCopy
                             (
-                    //Para utilizar o controle de transacao
+                            //Para utilizar o controle de transacao
                             sqlServer.Command.Connection,
                             SqlBulkCopyOptions.TableLock |
                             SqlBulkCopyOptions.FireTriggers,
@@ -597,38 +551,28 @@ namespace TransacaoIzioRest.DAO
                 }
 
                 #endregion
-                
-                sqlServer.Commit();
 
-                //Seta o retorno com sucesso
-                payloadSucesso.code = Convert.ToInt32(HttpStatusCode.Accepted).ToString();
-                payloadSucesso.message = "Lote de Transações Importado com sucesso.";
+                sqlServer.Commit();
             }
             catch (System.Exception ex)
             {
                 sqlServer.Rollback();
 
-                //Seta a lista de erros com o erro
-                listaErros.errors.Add(new ErrosTransacao { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ErroBancoDeDadosLoteTransacao + ", favor contactar o administrador" });
+                DadosLog dadosLog = new DadosLog();
+                dadosLog.des_erro_tecnico = ex.ToString();
 
-                //Insere o erro na sis_log
-                Log.inserirLogException(NomeClienteWs, ex, 0);
+                //Pegar a mensagem padrão retornada da api, caso não tenha mensagem de negocio para devolver na API
+                Log.InserirLogIzio(NomeClienteWs, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
+
+                //Seta a lista de erros com o erro
+                listaErros.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ErroBancoDeDadosLoteTransacao + ", favor contactar o administrador" });
             }
             finally
             {
                 sqlServer.CloseConnection();
             }
 
-            if (listaErros.errors != null && listaErros.errors.Count > 0)
-            {
-                retornoTransacao.errors = listaErros.errors;
-            }
-            else
-            {
-                retornoTransacao.payload = payloadSucesso;
-            }
-
-            return retornoTransacao;
+            return listaErros;
 
         }
         #endregion
@@ -642,18 +586,12 @@ namespace TransacaoIzioRest.DAO
         /// <param name="jsonRequisicao"></param>
         /// <returns></returns>
         #region Importa as vendas para tabela intermediaria viewizio_3 SEM CONTROLE DE TRANSACAO, para ser processado em um segundo momento, pela API REST - RUNDECK
-        public RetornoDadosProcTransacao ImportaLoteTransacaoSemTransacao(List<DadosTransacaoLote> objTransacao,
+        public ApiErrors ImportaLoteTransacaoSemTransacao(List<DadosTransacaoLote> objTransacao,
                                                                           string IpOrigem,
                                                                           string jsonRequisicao = "")
         {
-            RetornoDadosProcTransacao retornoTransacao = new RetornoDadosProcTransacao();
-            retornoTransacao.errors = new List<ErrosTransacao>();
-            retornoTransacao.payload = new PayloadTransacao();
-
-            ListaErrosTransacao listaErros = new ListaErrosTransacao();
-            listaErros.errors = new List<ErrosTransacao>();
-
-            PayloadTransacao payloadSucesso = new PayloadTransacao();
+            ApiErrors listaErros = new ApiErrors();
+            listaErros.errors = new List<Erros>();
 
             //Lista padrão para bulkt Insert na viewizio_3
             List<DadosLoteViewizio_3> listaViewizio_3 = new List<DadosLoteViewizio_3>();
@@ -663,26 +601,7 @@ namespace TransacaoIzioRest.DAO
 
             try
             {
-                jsonRequisicao = JsonConvert.SerializeObject(objTransacao); 
-
-                //Valida se o objeto com as transações foi preenchido
-                if (objTransacao == null)
-                {
-                    listaErros.errors.Add(new ErrosTransacao { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ObjetoTransacaoVazio });
-                }
-                else if (objTransacao.Count == 0)
-                {
-                    listaErros.errors.Add(new ErrosTransacao { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ObjetoItensTransacaoVazio });
-                }
-
-                //Se a lista estiver preenchida, é por que foi encontrado erros na validação
-                if (listaErros.errors.Count > 0)
-                {
-                    retornoTransacao.errors = listaErros.errors;
-
-                    return retornoTransacao;
-                }
-
+                jsonRequisicao = JsonConvert.SerializeObject(objTransacao);
 
                 // Abre a conexao com o banco de dados
                 sqlServer.StartConnection();
@@ -835,81 +754,46 @@ namespace TransacaoIzioRest.DAO
                 #endregion
 
                 //sqlServer.Commit();
-
-                //Seta o retorno com sucesso
-                payloadSucesso.code = Convert.ToInt32(HttpStatusCode.Accepted).ToString();
-                payloadSucesso.message = "Lote de Transações Importado com sucesso.";
+               
             }
             catch (System.Exception ex)
             {
                 //sqlServer.Rollback();
 
+                DadosLog dadosLog = new DadosLog();
+
                 if (DataMaiorQueDiaAtual)
                 {
-                    //Seta a lista de erros com o erro
-                    listaErros.errors.Add(new ErrosTransacao
-                    {
-                        code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(),
-                        message = ErroDataMaiorDiaAtual +
+                    dadosLog.des_erro_tecnico = ErroDataMaiorDiaAtual +
                         " {Loja = " + cod_loja + " | Dat.Compra = " + dat_compra + " | Cupom " + cupom + " | Vlr.Compra = " + vlr_compra + " | Qtd.Itens.Compra = " + qtd_itens_compra + " } " +
-                        ", favor contactar o administrador"
-                    });
+                        ", favor contactar o administrador";
+
+                    //Pegar a mensagem padrão retornada da api, caso não tenha mensagem de negocio para devolver na API
+                    Log.InserirLogIzio(NomeClienteWs, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
+
+                    listaErros.errors.Add(new Erros { code = "500", message = dadosLog.des_erro_tecnico });
                 }
                 else
                 {
                     //Seta a lista de erros com o erro
-                    listaErros.errors.Add(new ErrosTransacao { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ErroBancoDeDadosLoteTransacao + ", favor contactar o administrador" });
+                    dadosLog.des_erro_tecnico = ex.ToString();
+
+                    //Pegar a mensagem padrão retornada da api, caso não tenha mensagem de negocio para devolver na API
+                    Log.InserirLogIzio(NomeClienteWs, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
+
+                    throw new System.Exception(ErroBancoDeDadosLoteTransacao + ", favor contactar o administrador");
                 }
 
-                //Insere o erro na sis_log
-                Log.inserirLogException(NomeClienteWs, ex, 0);
+
             }
             finally
             {
                 sqlServer.CloseConnection();
             }
 
-            if (listaErros.errors != null && listaErros.errors.Count > 0)
-            {
-                retornoTransacao.errors = listaErros.errors;
-            }
-            else
-            {
-                retornoTransacao.payload = payloadSucesso;
-            }
-
-            return retornoTransacao;
+            return listaErros;
 
         }
         #endregion
-
-        #region Remove Acentos e caracteres especiais antes do envio do SMS
-
-        public string GetStringNoAccents(string str)
-        {
-            /** Troca os caracteres acentuados por não acentuados **/
-            string[] acentos = new string[] { "ç", "Ç", "á", "é", "í", "ó", "ú", "ý", "Á", "É", "Í", "Ó", "Ú", "Ý", "à", "è", "ì", "ò", "ù", "À", "È", "Ì", "Ò", "Ù", "ã", "õ", "ñ", "ä", "ë", "ï", "ö", "ü", "ÿ", "Ä", "Ë", "Ï", "Ö", "Ü", "Ã", "Õ", "Ñ", "â", "ê", "î", "ô", "û", "Â", "Ê", "Î", "Ô", "Û" };
-            string[] semAcento = new string[] { "c", "C", "a", "e", "i", "o", "u", "y", "A", "E", "I", "O", "U", "Y", "a", "e", "i", "o", "u", "A", "E", "I", "O", "U", "a", "o", "n", "a", "e", "i", "o", "u", "y", "A", "E", "I", "O", "U", "A", "O", "N", "a", "e", "i", "o", "u", "A", "E", "I", "O", "U" };
-            for (int i = 0; i < acentos.Length; i++)
-            {
-                str = str.Replace(acentos[i], semAcento[i]);
-            }
-            /** Troca os caracteres especiais da string por "" **/
-            string[] caracteresEspeciais = { "\\.", "-", ":", "\\(", "\\)", "ª", "\\|", "\\\\", "°", "'" };
-            for (int i = 0; i < caracteresEspeciais.Length; i++)
-            {
-                str = str.Replace(caracteresEspeciais[i], "");
-            }
-            /** Troca os espaços no início por "" **/
-            str = str.Replace("^\\s+", "");
-            /** Troca os espaços no início por "" **/
-            str = str.Replace("\\s+$", "");
-            /** Troca os espaços duplicados, tabulações e etc por  " " **/
-            str = str.Replace("\\s+", " ");
-            return str;
-        }
-
-        #endregion
-
     }
 }

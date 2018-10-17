@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.27428.2037
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BE_Izio.TransacaoIzioRest", "BE_Izio.TransacaoRest\BE_Izio.TransacaoIzioRest.csproj", "{8BDF046E-CD0A-4FA7-AECA-172FED03BB67}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TransacaoIzioRest", "BE_Izio.TransacaoRest\TransacaoIzioRest.csproj", "{8BDF046E-CD0A-4FA7-AECA-172FED03BB67}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TransacaoIzioRest.Models", "TransacaoIzioRest.Models\TransacaoIzioRest.Models.csproj", "{E9F5E8D2-03A5-4AC3-ACAC-DC3B84AA101F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,8 +17,15 @@ Global
 		{8BDF046E-CD0A-4FA7-AECA-172FED03BB67}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8BDF046E-CD0A-4FA7-AECA-172FED03BB67}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8BDF046E-CD0A-4FA7-AECA-172FED03BB67}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E9F5E8D2-03A5-4AC3-ACAC-DC3B84AA101F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E9F5E8D2-03A5-4AC3-ACAC-DC3B84AA101F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E9F5E8D2-03A5-4AC3-ACAC-DC3B84AA101F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E9F5E8D2-03A5-4AC3-ACAC-DC3B84AA101F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {67CA2960-B761-4A42-BC1C-E7DF1105EA2A}
 	EndGlobalSection
 EndGlobal
