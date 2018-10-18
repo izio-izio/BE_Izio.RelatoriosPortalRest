@@ -1,1 +1,0 @@
-C:\github_izio\BE_Izio.TransacaoRest\BE_Izio.ValidaBiblioteca\bin\Debug\BE_Izio.ValidaBiblioteca.exe.config
