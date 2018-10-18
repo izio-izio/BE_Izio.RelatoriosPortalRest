@@ -1,8 +1,8 @@
-﻿namespace TransacaoIzioRest.Models
-{
-    using System;
-    using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
+namespace TransacaoIzioRest.Models
+{
     #region Dados da Transacao
     /// <summary>
     /// Objeto de retorno para quando a execução ocorrer com sucesso
