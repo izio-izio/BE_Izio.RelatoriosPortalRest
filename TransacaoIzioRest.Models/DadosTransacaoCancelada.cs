@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 //using System.ComponentModel.DataAnnotations;
 
 namespace TransacaoRest.Models
@@ -11,31 +12,31 @@ namespace TransacaoRest.Models
         /// <summary>
         /// Data e hora da realização da compra
         /// </summary>
-        ////[Required]
+        [JsonRequired]
         public DateTime dat_compra { get; set; }
 
         /// <summary>
         /// Valor da compra
         /// </summary>
-        ////[Required]
+        [JsonRequired]
         public decimal vlr_compra { get; set; }
 
         /// <summary>
         /// Codigo da loja que foi realizado a compra
         /// </summary>
-        ////[Required]
+        [JsonRequired]
         public long cod_loja { get; set; }
 
         /// <summary>
         /// Quantidade de itens da compra
         /// </summary>
-        ////[Required]
+        [JsonRequired]
         public Int32 qtd_itens_compra { get; set; }
 
         /// <summary>
         /// Numero do cupom fiscal 
         /// </summary>
-        ////[Required]
+        [JsonRequired]
         public string cupom { get; set; }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 //using System.ComponentModel.DataAnnotations;
 
@@ -12,7 +13,7 @@ namespace TransacaoRest.Models
         /// <summary>
         /// Codigo do CPF preenchido no PDV no inicio da compra
         /// </summary>
-        ////[Required]
+        [JsonRequired]
         public string cod_cpf { get; set; }
         /// <summary>
         /// Codigo da equipe (enviar 100)
@@ -27,25 +28,25 @@ namespace TransacaoRest.Models
         /// <summary>
         /// Data e hora da realização da compra
         /// </summary>
-        ////[Required]
+        [JsonRequired]
         public DateTime dat_compra { get; set; }
 
         /// <summary>
         /// Valor da compra
         /// </summary>
-        ////[Required]
+        [JsonRequired]
         public decimal vlr_compra { get; set; }
 
         /// <summary>
         /// Meios de pagamentos utilizados na compra (quando tiver mais de 1, separar eles por ";". Ex: Cartão Visa; Cartão Master; Dinheiro)
         /// </summary>
-        ////[Required]
+        [JsonRequired]
         public string nom_tipo_pagamento { get; set; }
 
         /// <summary>
         /// Codigo da loja que foi realizado a compra
         /// </summary>
-        ////[Required]
+        [JsonRequired]
         public long cod_loja { get; set; }
 
         /// <summary>
@@ -56,7 +57,7 @@ namespace TransacaoRest.Models
         /// <summary>
         /// Quantidade de itens da compra
         /// </summary>
-        ////[Required]
+        [JsonRequired]
         public Int32 qtd_itens_compra { get; set; }
 
         /// <summary>
@@ -67,7 +68,7 @@ namespace TransacaoRest.Models
         /// <summary>
         /// Numero do cupom fiscal 
         /// </summary>
-        ////[Required]
+        [JsonRequired]
         public string cupom { get; set; }
 
         /// <summary>
@@ -88,7 +89,7 @@ namespace TransacaoRest.Models
         /// <summary>
         /// Lista com os itens da compra
         /// </summary>
-        ////[Required]
+        [JsonRequired]
         public List<DadosItensTransacao> ListaItens { get; set; }
     }
 
@@ -100,31 +101,31 @@ namespace TransacaoRest.Models
         /// <summary>
         /// Codigo interno do produto
         /// </summary>
-        ////[Required]
+        [JsonRequired]
         public long cod_produto { get; set; }
 
         /// <summary>
         /// Nome completo do produto
         /// </summary>
-        //[Required]
+        [JsonRequired]
         public string des_produto { get; set; }
 
         /// <summary>
         /// Codigo de barras do produto, quando não tiver enviar o mesmo do codigo do produto
         /// </summary>
-        //[Required]
+        [JsonRequired]
         public string cod_ean { get; set; }
 
         /// <summary>
         /// Valor de venda do produto
         /// </summary>
-        //[Required]
+        [JsonRequired]
         public decimal vlr_item_compra { get; set; }
 
         /// <summary>
         /// Quantidade de produtos comprados
         /// </summary>
-        //[Required]
+        [JsonRequired]
         public decimal qtd_item_compra { get; set; }
 
         /// <summary>
@@ -141,31 +142,31 @@ namespace TransacaoRest.Models
         /// <summary>
         /// Codigo da pessoa, se não tiver enviar 0
         /// </summary>
-        //[Required]
+        [JsonRequired]
         public long cod_pessoa { get; set; }
 
         /// <summary>
         /// Codigo do cpf do cliente informado no PDV
         /// </summary>
-        //[Required]
+        [JsonRequired]
         public string cod_cpf { get; set; }
 
         /// <summary>
         /// Data e hora da compra
         /// </summary>
-        //[Required]
+        [JsonRequired]
         public DateTime dat_compra { get; set; }
 
         /// <summary>
         /// Valor da compra
         /// </summary>
-        //[Required]
+        [JsonRequired]
         public decimal vlr_compra { get; set; }
 
         /// <summary>
         /// Numero do cupom fiscal
         /// </summary>
-        //[Required]
+        [JsonRequired]
         public string cupom { get; set; }
 
         /// <summary>
@@ -186,13 +187,13 @@ namespace TransacaoRest.Models
         /// <summary>
         /// Meios de pagamanto da compra. Quando tiver mais de 1 separar com ";". Ex: Cartão Visa; Cartão Master; Dinheiro
         /// </summary>
-        //[Required]
+        [JsonRequired]
         public string des_tipo_pagamento { get; set; }
 
         /// <summary>
         /// Quantidade de itens da compra
         /// </summary>
-        //[Required]
+        [JsonRequired]
         public Int32 qtd_itens_compra { get; set; }
 
         /// <summary>
@@ -203,25 +204,25 @@ namespace TransacaoRest.Models
         /// <summary>
         /// Codigo de barras. Se não tiver enviar o codigo interno do produto
         /// </summary>
-        //[Required]
+        [JsonRequired]
         public string cod_ean { get; set; }
 
         /// <summary>
         /// Codigo interno do produto
         /// </summary>
-        //[Required]
+        [JsonRequired]
         public string cod_produto { get; set; }
 
         /// <summary>
         /// Nome Completo do produto
         /// </summary>
-        //[Required]
+        [JsonRequired]
         public string des_produto { get; set; }
 
         /// <summary>
         /// Valor de venda do produto
         /// </summary>
-        //[Required]
+        [JsonRequired]
         public decimal vlr_item_compra { get; set; }
 
         /// <summary>
@@ -232,19 +233,19 @@ namespace TransacaoRest.Models
         /// <summary>
         /// Quantidade do produto comprado
         /// </summary>
-        //[Required]
+        [JsonRequired]
         public decimal qtd_item_compra { get; set; }
 
         /// <summary>
         /// Numero do item na compra. Ex: Compra com 10 itens, teremos o item 1, item2, etc...
         /// </summary>
-        //[Required]
+        [JsonRequired]
         public decimal nro_item_compra { get; set; }
 
         /// <summary>
         /// Codigo da loja que foi realizado a compra
         /// </summary>
-        //[Required]
+        [JsonRequired]
         public long cod_loja { get; set; }
 
         /// <summary>
