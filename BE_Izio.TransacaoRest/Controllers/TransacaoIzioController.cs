@@ -50,6 +50,7 @@
 
             //Objeto de retorno contendo os erros da execução da API
             ApiErrors listaErros = new ApiErrors();
+            listaErros.errors = new List<Erros>();
 
             try
             {
@@ -72,7 +73,7 @@
                 }
                 else
                 {
-                    listaErros.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = DadosNaoEncontrados + "." });
+                    listaErros.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = DadosNaoEncontrados});
                     return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
                 }
             }
@@ -124,6 +125,7 @@
 
             //Objeto de retorno contendo os erros da execução da API
             ApiErrors listaErros = new ApiErrors();
+            listaErros.errors = new List<Erros>();
 
             try
             {
@@ -490,6 +492,7 @@
 
             //Objeto de retorno contendo os erros da execução da API
             ApiErrors listaErros = new ApiErrors();
+            listaErros.errors = new List<Erros>();
 
             try
             {
