@@ -2,7 +2,9 @@
 using System.Web;
 using System.Web.Http;
 using System.Web.Routing;
+using NSwag;
 using NSwag.AspNet.Owin;
+using NSwag.SwaggerGeneration.Processors.Security;
 
 namespace TransacaoIzioRest
 {
@@ -10,11 +12,24 @@ namespace TransacaoIzioRest
     {
         protected void Application_Start()
         {
+
             RouteTable.Routes.MapOwinPath("swagger", app =>
             {
-                app.UseSwaggerUi(typeof(WebApiApplication).Assembly, new SwaggerUiOwinSettings
+                app.UseSwaggerUi3(typeof(WebApiApplication).Assembly, s =>
                 {
-                    MiddlewareBasePath = "/swagger"
+                    s.MiddlewareBasePath = "/swagger";
+                    s.GeneratorSettings.DocumentProcessors.Add(new SecurityDefinitionAppender("tokenAutenticacao", new SwaggerSecurityScheme
+                    {
+                        Type = SwaggerSecuritySchemeType.ApiKey,
+                        Name = "tokenAutenticacao",
+                        In = SwaggerSecurityApiKeyLocation.Header,
+                        Description = "tokenAutenticacao"
+                    }));
+                    s.GeneratorSettings.OperationProcessors.Add(new OperationSecurityScopeProcessor("tokenAutenticacao"));
+                    s.PostProcess = document =>
+                    {
+                        document.Info.Title = HttpContext.Current.ApplicationInstance.GetType().BaseType.Assembly.GetName().Name.ToString();
+                    };
                 });
             });
 

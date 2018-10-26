@@ -13,6 +13,7 @@
     using Izio.Biblioteca.Model;
     using TransacaoIzioRest.Models;
     using System.Linq;
+    using NSwag.Annotations;
 
     public class TransacaoIzioController : ApiController
     {
@@ -26,6 +27,8 @@
         // POST: api/Pessoa/Autenticar
         [HttpGet, Utilidades.ValidaTokenAutenticacao]
         [Route("api/TransacaoIzio/ConsultaUltimasCompras/{tokenAutenticacao}/{codigoPessoa}/{anoMes}")]
+        [SwaggerResponse("200", typeof(RetornoConsultaTransacao))]
+        [SwaggerResponse("500", typeof(ApiErrors))]
         public HttpResponseMessage ConsultaUltimasCompras([FromUri]string tokenAutenticacao,[FromUri] string codigoPessoa, [FromUri] string anoMes)
         {
             string sNomeCliente = "";
@@ -89,7 +92,7 @@
         }
 
         /// <summary>
-        /// Metodo para retonar os itens de uma compra
+        /// Metodo para consultar os itens de uma compra
         /// </summary>
         /// <param name="tokenAutenticacao">Token de autorizacao para utilizacao da API</param>
         /// <param name="codigoTransacao">Codigo da transacao para a consulta dos itens da compra</param>
@@ -97,6 +100,8 @@
         // POST: api/Pessoa/Autenticar
         [HttpGet, Utilidades.ValidaTokenAutenticacao]
         [Route("api/TransacaoIzio/ConsultaItensCompra/{tokenAutenticacao}/{codigoTransacao}")]
+        [SwaggerResponse("200", typeof(RetornoDadosItensTransacao))]
+        [SwaggerResponse("500", typeof(ApiErrors))]
         public HttpResponseMessage ConsultaItensCompra([FromUri]string tokenAutenticacao, [FromUri] string codigoTransacao)
         {
             string sNomeCliente = "";
@@ -165,6 +170,8 @@
         /// <returns></returns>
         [HttpPost, Utilidades.ValidaTokenAutenticacao]
         [Route("api/TransacaoIzio/ImportaTransacao/{tokenAutenticacao}")]
+        [SwaggerResponse("200", typeof(RetornoPayloadTransacao))]
+        [SwaggerResponse("500", typeof(ListaErrosTransacao))]
         public HttpResponseMessage ImportaTransacao([FromBody] DadosTransacaoOnline objTransacao, [FromUri] string tokenAutenticacao)
         {
             //Nome do cliente que esta executando a API, gerado após validação do Token
@@ -242,6 +249,8 @@
         /// <returns></returns>
         [HttpPost, Utilidades.ValidaTokenAutenticacao]
         [Route("api/TransacaoIzio/ImportaLoteTransacoes/{tokenAutenticacao}")]
+        [SwaggerResponse("200", typeof(RetornoPayloadTransacao))]
+        [SwaggerResponse("500", typeof(ListaErrosTransacao))]
         public HttpResponseMessage ImportaLoteTransacoes([FromBody] List<DadosTransacaoLote> objTransacao, [FromUri] string tokenAutenticacao)
         {
             //Nome do cliente que esta executando a API, gerado após validação do Token
@@ -317,6 +326,8 @@
         /// <returns></returns>
         [HttpPost, Utilidades.ValidaTokenAutenticacao]
         [Route("api/TransacaoIzio/ExcluirRegistrosCompraCancelada/{tokenAutenticacao}")]
+        [SwaggerResponse("200", typeof(RetornoSucessoRemoverTransacao))]
+        [SwaggerResponse("500", typeof(ApiErrors))]
         public HttpResponseMessage ExcluirRegistrosCompraCancelada([FromBody] DadosTransacaoCancelada objTransacao, [FromUri] string tokenAutenticacao)
         {
             //Nome do cliente que esta executando a API, gerado após validação do Token
@@ -388,7 +399,8 @@
         [HttpPost, Utilidades.ValidaTokenAutenticacao]
         [Route("api/TransacaoIzio/ExcluirRegistrosIntermediarios/{tokenAutenticacao}")]
         [ApiExplorerSettings(IgnoreApi = true)]
-        [ResponseType(typeof(ApiSuccess))]
+        [SwaggerResponse("200", typeof(ApiSuccess))]
+        [SwaggerResponse("500", typeof(ApiErrors))]
         public HttpResponseMessage ExcluirRegistrosIntermediarios([FromUri] string tokenAutenticacao, [FromUri] string dataProcessamento = "")
         {
             //Nome do cliente que esta executando a API, gerado após validação do Token
@@ -450,7 +462,8 @@
         /// <returns></returns>
         [HttpGet, Utilidades.ValidaTokenAutenticacao]
         [Route("api/TransacaoIzio/ConsultarTransacoesCarregadaEmLote/{tokenAutenticacao}/{dataImportacao}")]
-        [ResponseType(typeof(RetornoDadosTermino))]
+        [SwaggerResponse("200", typeof(RetornoDadosTermino))]
+        [SwaggerResponse("500", typeof(ApiErrors))]
         public HttpResponseMessage ConsultarTransacoesCarregadaEmLote([FromUri] string tokenAutenticacao, [FromUri] string dataImportacao)
         {
             //Nome do cliente que esta executando a API, gerado após validação do Token
