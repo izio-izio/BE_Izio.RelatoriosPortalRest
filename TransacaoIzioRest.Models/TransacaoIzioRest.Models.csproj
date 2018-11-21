@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyName>TransacaoIzioRest</AssemblyName>
+    <AssemblyName>TransacaoIzioRest.Models</AssemblyName>
     <RootNamespace>TransacaoRest</RootNamespace>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -10,11 +10,11 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile>TransacaoRestModels.xml</DocumentationFile>
+    <DocumentationFile>TransacaoIzioRest.Models.xml</DocumentationFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DocumentationFile>bin\Release\netstandard2.0\TransacaoIzioRestModels.xml</DocumentationFile>
+    <DocumentationFile>TransacaoIzioRest.Models.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -22,7 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="TransacaoRestModels.xml">
+    <None Update="TransacaoIzioRest.Models.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
