@@ -1,9 +1,11 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-//using System.ComponentModel.DataAnnotations;
 
-namespace TransacaoRest.Models
+/// <summary>
+/// Classe para importação das vendas dos clientes. Online (compra a compra no final da venda) ou em lote (de tempos em tempos)
+/// </summary>
+namespace TransacaoIzioRest.Models
 {
     /// <summary>
     /// Dados da transação importada On-Line

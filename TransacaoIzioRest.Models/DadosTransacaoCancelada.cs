@@ -1,8 +1,10 @@
 ﻿using Newtonsoft.Json;
 using System;
-//using System.ComponentModel.DataAnnotations;
 
-namespace TransacaoRest.Models
+/// <summary>
+/// Classe responsável por realizar a exclusão (cancelamento) da compra na base do Izio
+/// </summary>
+namespace TransacaoIzioRest.Models
 {
     /// <summary>
     /// Objeto com os dados da compra cancelada

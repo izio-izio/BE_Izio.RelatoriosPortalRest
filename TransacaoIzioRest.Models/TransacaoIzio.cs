@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 
+// <summary>
+// Classe para consulta das ultimas compras do cliente
+// </summary>
 namespace TransacaoIzioRest.Models
 {
     #region Dados da Transacao
@@ -106,13 +109,13 @@ namespace TransacaoIzioRest.Models
     /// </summary>
     public class PayloadItensTransacao
     {
-        public List<DadosItensTransacao> listaItensTransacao { get; set; }
+        public List<DadosConsultaItensTransacao> listaItensTransacao { get; set; }
     }
 
     /// <summary>
     /// Dados com os itens da transacao
     /// </summary>
-    public class DadosItensTransacao
+    public class DadosConsultaItensTransacao
     {
         /// <summary>
         /// Codigo da Transação - Chave para os itens da compra

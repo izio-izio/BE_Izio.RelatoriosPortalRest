@@ -1,9 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Web;
 
+/// <summary>
+/// Classe utilizada para quando as vendas são enviadas em lote
+///  - Retorna a quantidade de compras importadas em lote na viewizio_3 do dia informado
+/// </summary>
 namespace TransacaoIzioRest.Models
 {
-
     /// <summary>
     /// Objeto de retorno para quando a execução ocorrer com sucesso
     /// </summary>
