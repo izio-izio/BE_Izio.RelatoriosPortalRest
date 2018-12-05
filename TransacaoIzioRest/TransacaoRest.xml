@@ -158,5 +158,26 @@
             </summary>
             <returns></returns>
         </member>
+        <member name="T:TransacaoRest.Controllers.TransacaoCabecalhoController">
+            <summary>
+            Api das transações cabeçalhos
+            </summary>
+        </member>
+        <member name="M:TransacaoRest.Controllers.TransacaoCabecalhoController.CadastrarTransacaoCabecalho(System.Collections.Generic.List{TransacaoIzioRest.Models.DadosTransacaoCabecalho})">
+            <summary>
+            Cadastrar uma ou mais Transações de Cabeçalho
+            </summary>
+            <param name="listaTransacaoCabecalhos">Lista com os dados das transações cabeçalho</param>        
+            <remarks>Cadastrar uma ou mais Transações de Cabeçalho</remarks>
+            <response code="400">Bad request</response>
+            <response code="500">Internal Server Error</response>
+        </member>
+        <member name="M:TransacaoRest.DAO.TransacaoCabecalhoDAO.CadastrarTransacaoCabecalho(System.Collections.Generic.List{TransacaoIzioRest.Models.DadosTransacaoCabecalho})">
+            <summary>
+            Inserção no banco de dados a lista de transações cabeçalhos
+            </summary>
+            <param name="listaTransacaoCabecalhos"></param>
+            <returns></returns>
+        </member>
     </members>
 </doc>
