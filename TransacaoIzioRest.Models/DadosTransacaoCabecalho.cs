@@ -69,4 +69,61 @@ namespace TransacaoIzioRest.Models
         /// </summary>
         public List<DadosTransacaoCabecalho> payload { get; set; }
     }
+
+    /// <summary>
+    /// Objeto com os campos para a consulta em lote e paginada das transações cabeçalhos
+    /// </summary>
+    public class DadosConsultaPaginadoTransacaoCabecalho
+    {
+        /// <summary>
+        /// Data e hora para inicio da consulta
+        /// </summary>
+        public DateTime dat_inicio_consulta { get; set; }
+
+        /// <summary>
+        /// Data e hora para o final da consulta
+        /// </summary>
+        public DateTime dat_final_consulta { get; set; }
+
+        /// <summary>
+        /// Pagina inicial da consulta (inicia em 1)
+        /// </summary>
+        public int pageIndex { get; set; }
+
+        /// <summary>
+        /// Tamanho maximo da página (lote)
+        ///    - limitado a 1000 por página (lote)
+        /// </summary>
+        public int pageSize { get; set; }
+    }
+
+    /// <summary>
+    /// Dados da consulta em lote e paginada de pessoas
+    /// </summary>
+    public class DadosLoteTransacaoCabecalhoPaginado
+    {
+        /// <summary>
+        /// Quantidade de Pessoas encontradas na consulta
+        /// </summary>
+        public int totalRegistros { get; set; }
+        /// <summary>
+        /// Total de paginas, para a busca paginada
+        /// </summary>
+        public int totalPaginas { get; set; }
+        /// <summary>
+        /// Lista paginada (lote) das transações cabeçalhos
+        /// </summary>
+        public List<DadosTransacaoCabecalho> listaTransacaoCabecalho { get; set; }
+    }
+
+    /// <summary>
+    /// Objeto de retorno de sucesso na consulta em lote e paginada das transações cabeçalhos
+    /// </summary>
+    public class RetornoLotePaginado
+    {
+        /// <summary>
+        /// Payload de saida do lote paginado
+        /// </summary>
+        public DadosLoteTransacaoCabecalhoPaginado payload { get; set; }
+    }
 }

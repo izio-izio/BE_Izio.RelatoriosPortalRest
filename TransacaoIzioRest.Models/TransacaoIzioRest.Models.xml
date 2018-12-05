@@ -394,6 +394,62 @@
             Lista com os dados das transações cabeçalho
             </summary>
         </member>
+        <member name="T:TransacaoIzioRest.Models.DadosConsultaPaginadoTransacaoCabecalho">
+            <summary>
+            Objeto com os campos para a consulta em lote e paginada das transações cabeçalhos
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosConsultaPaginadoTransacaoCabecalho.dat_inicio_consulta">
+            <summary>
+            Data e hora para inicio da consulta
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosConsultaPaginadoTransacaoCabecalho.dat_final_consulta">
+            <summary>
+            Data e hora para o final da consulta
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosConsultaPaginadoTransacaoCabecalho.pageIndex">
+            <summary>
+            Pagina inicial da consulta (inicia em 1)
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosConsultaPaginadoTransacaoCabecalho.pageSize">
+            <summary>
+            Tamanho maximo da página (lote)
+               - limitado a 1000 por página (lote)
+            </summary>
+        </member>
+        <member name="T:TransacaoIzioRest.Models.DadosLoteTransacaoCabecalhoPaginado">
+            <summary>
+            Dados da consulta em lote e paginada de pessoas
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosLoteTransacaoCabecalhoPaginado.totalRegistros">
+            <summary>
+            Quantidade de Pessoas encontradas na consulta
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosLoteTransacaoCabecalhoPaginado.totalPaginas">
+            <summary>
+            Total de paginas, para a busca paginada
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosLoteTransacaoCabecalhoPaginado.listaTransacaoCabecalho">
+            <summary>
+            Lista paginada (lote) das transações cabeçalhos
+            </summary>
+        </member>
+        <member name="T:TransacaoIzioRest.Models.RetornoLotePaginado">
+            <summary>
+            Objeto de retorno de sucesso na consulta em lote e paginada das transações cabeçalhos
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.RetornoLotePaginado.payload">
+            <summary>
+            Payload de saida do lote paginado
+            </summary>
+        </member>
         <member name="T:TransacaoIzioRest.Models.DadosTransacaoCancelada">
             <summary>
             Objeto com os dados da compra cancelada
