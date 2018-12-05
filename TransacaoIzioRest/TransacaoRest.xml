@@ -1,0 +1,183 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>TransacaoRest</name>
+    </assembly>
+    <members>
+        <member name="M:TransacaoIzioRest.Controllers.TransacaoIzioRestController.ConsultaUltimasCompras(System.String,System.String,System.String)">
+            <summary>
+            Metodo para retonar as compras dos ultimos 6 meses do cliente
+            </summary>
+            <param name="tokenAutenticacao">Token de autorizacao para utilizacao da API</param>
+            <param name="codigoPessoa">Codigo da pessoa para a consulta das compras</param>
+            <param name="anoMes">Ano e mês (yyyyMM) para consulta das compras neste periodo</param>
+        </member>
+        <member name="M:TransacaoIzioRest.Controllers.TransacaoIzioRestController.ConsultaItensCompra(System.String,System.String)">
+            <summary>
+            Metodo para consultar os itens de uma compra
+            </summary>
+            <param name="tokenAutenticacao">Token de autorizacao para utilizacao da API</param>
+            <param name="codigoTransacao">Codigo da transacao para a consulta dos itens da compra</param>
+        </member>
+        <member name="M:TransacaoIzioRest.Controllers.TransacaoIzioRestController.ImportaTransacao(TransacaoIzioRest.Models.DadosTransacaoOnline,System.String)">
+            <summary>
+            Realiza a importação da transação on-line para as tabelas finais do Izio
+            </summary>
+            <remarks>
+            Importa as vendas para as tabelas finais do Izio
+            Processamento On-line das Vendas.
+            </remarks>
+            <param name="objTransacao">Json com os dados de 1 venda (capa e os itens)</param>
+            <param name="tokenAutenticacao">Token de autorizacao para utilizacao da api</param>
+            <returns></returns>
+        </member>
+        <member name="M:TransacaoIzioRest.Controllers.TransacaoIzioRestController.ImportaLoteTransacoes(System.Collections.Generic.List{TransacaoIzioRest.Models.DadosTransacaoLote},System.String)">
+            <summary>
+            Realiza a importação em lote das transações carregadas em lotes para tabela intermediária do Izio
+            </summary>
+            <remarks>
+            Método para importar as vendas em lote de 1000 em 1000 registros para a tabela intermediária do Izio
+            
+            As vendas importadas por este método serão processadas para as tabelas finais do Izio em processamento back.
+            </remarks>
+            <param name="objTransacao">Lote em Json com as vendas</param>
+            <param name="tokenAutenticacao">Token de autorizacao para utilizacao da api</param>
+            <returns></returns>
+        </member>
+        <member name="M:TransacaoIzioRest.Controllers.TransacaoIzioRestController.ExcluirRegistrosCompraCancelada(TransacaoIzioRest.Models.DadosTransacaoCancelada,System.String)">
+            <summary>
+            Realiza a exclusão dos registros de uma compra cancelada
+            </summary>
+            <param name="objTransacao">Dados da compra cancelada</param>
+            <param name="tokenAutenticacao">Token de autorizacao para utilizacao da api</param>
+            <returns></returns>
+        </member>
+        <member name="M:TransacaoIzioRest.Controllers.TransacaoIzioRestController.ExcluirRegistrosIntermediarios(System.String,System.String)">
+            <summary>
+            Realiza a exclusão dos registros intermediários para reprocessamento.
+            </summary>
+            <param name="tokenAutenticacao">Token de autorizacao para utilizacao da api</param>
+            <param name="dataProcessamento">Data (yyyy-MM-dd) para exclusão processamento (deixar em branco para deletar tudo)</param>
+            <returns></returns>
+        </member>
+        <member name="M:TransacaoIzioRest.Controllers.TransacaoIzioRestController.ConsultarTransacoesCarregadaEmLote(System.String,System.String)">
+            <summary>
+            Método para consultar os registros que foram enviados para Izio para a tabela intermédiária.
+            </summary>
+            <remarks>
+            Consultar o total das vendas importadas em lote no Izio. As Vendas que foram carregadas na tabela intermediária
+            </remarks>
+            <param name="tokenAutenticacao">Token de autorizacao para utilizacao da api</param>
+            <param name="dataImportacao">Data (yyyyMMdd) para consulta das transações (vendas) importadas em lote</param>
+            <returns></returns>
+        </member>
+        <member name="T:TransacaoIzioRest.DAO.ImportaTransacaoDAO">
+            <summary>
+            Classe para importação online do Izio - Os dados já são carregados nas tabelas finais de vendas: TAB_TRANSACAO e TAB_TRANSACAO_CPF
+            </summary>
+        </member>
+        <member name="M:TransacaoIzioRest.DAO.ImportaTransacaoDAO.VerificaCodPessoaExiste(System.Int64,System.String,System.DateTime,System.Int64)">
+            <summary>
+            Verifica se o cod. Pessoa informado, possui cadastro no Izio
+            </summary>
+            <param name="cod_pessoa"></param>
+            <param name="cupom"></param>
+            <param name="dat_compra"></param>
+            <param name="cod_loja"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TransacaoIzioRest.DAO.ImportaTransacaoDAO.ImportaTransacao(TransacaoIzioRest.Models.DadosTransacaoOnline,System.String)">
+            <summary>
+            Processa de forma online pedido a pedido para as tabelas finais (tab_transacao e tab_transacao_cpf)
+             - Processamento sem controle de transalçao
+            </summary>
+            <param name="objTransacao"></param>
+            <param name="IpOrigem"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TransacaoIzioRest.DAO.ImportaTransacaoDAO.ImportaLoteTransacao(System.Collections.Generic.List{TransacaoIzioRest.Models.DadosTransacaoLote},System.String)">
+            <summary>
+            Processa as vendas em lote de até mil compras, inserido os registros na tabela intermediaria viewizio_3
+             - Processamento utiliza controle de transação
+            </summary>
+            <param name="objTransacao"></param>
+            <param name="IpOrigem"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TransacaoIzioRest.DAO.ImportaTransacaoDAO.ImportaLoteTransacaoSemTransacao(System.Collections.Generic.List{TransacaoIzioRest.Models.DadosTransacaoLote},System.String,System.String)">
+            <summary>
+            Processa as vendas em lote de até mil compras, inserido os registros na tabela intermediaria viewizio_3
+             - Processamento utiliza SEM controle de transação
+            </summary>
+            <param name="objTransacao"></param>
+            <param name="IpOrigem"></param>
+            <param name="jsonRequisicao"></param>
+            <returns></returns>
+        </member>
+        <member name="T:TransacaoIzioRest.DAO.TransacaoCanceladaDAO">
+            <summary>
+            Classe para remover os registros de uma venda cancelada
+             - Remove o registra da venda na Viewizio_3
+             - Remove o registra da venda na tab_transacao/tab_transacao_itens
+             - Remove o registra da venda na tab_transacao_cpf/tab_transacao_itens_cpf
+            </summary>
+        </member>
+        <member name="M:TransacaoIzioRest.DAO.TransacaoCanceladaDAO.ExcluirRegistrosCompraCancelada(TransacaoIzioRest.Models.DadosTransacaoCancelada,System.String)">
+            <summary>
+            Apaga os registros da venda cancela no Izio:
+             - Remove o registra da venda na Viewizio_3
+             - Remove o registra da venda na tab_transacao/tab_transacao_itens
+             - Remove o registra da venda na tab_transacao_cpf/tab_transacao_itens_cpf
+            </summary>
+            <param name="objTransacao"></param>
+            <param name="IpOrigem"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TransacaoIzioRest.DAO.TransacaoCanceladaDAO.ExcluirRegistrosIntermediarios(System.String)">
+            <summary>
+             - Remove o registra da venda na Viewizio_3
+            </summary>
+            <param name="dataProcessamento"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TransacaoIzioRest.DAO.TransacaoDAO.ConsultaUltimasTransacao(System.Int64,System.String)">
+            <summary>
+            Metodo retorna as compras do mês informado
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:TransacaoIzioRest.DAO.TransacaoDAO.ConsultaItensTransacao(System.Int64)">
+            <summary>
+            Metodo retorna os itens de uma compra
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:TransacaoIzioRest.DAO.TransacaoDAO.ConsultarTransacoesCarregadaEmLote(System.DateTime)">
+            <summary>
+            Consultar os registros que foram enviados para Izio para a tabela intermédiária - Viewizio_3.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:TransacaoRest.Controllers.TransacaoCabecalhoController">
+            <summary>
+            Api das transações cabeçalhos
+            </summary>
+        </member>
+        <member name="M:TransacaoRest.Controllers.TransacaoCabecalhoController.CadastrarTransacaoCabecalho(System.Collections.Generic.List{TransacaoIzioRest.Models.DadosTransacaoCabecalho})">
+            <summary>
+            Cadastrar uma ou mais Transações de Cabeçalho
+            </summary>
+            <param name="listaTransacaoCabecalhos">Lista com os dados das transações cabeçalho</param>        
+            <remarks>Cadastrar uma ou mais Transações de Cabeçalho</remarks>
+            <response code="400">Bad request</response>
+            <response code="500">Internal Server Error</response>
+        </member>
+        <member name="M:TransacaoRest.DAO.TransacaoCabecalhoDAO.CadastrarTransacaoCabecalho(System.Collections.Generic.List{TransacaoIzioRest.Models.DadosTransacaoCabecalho})">
+            <summary>
+            Inserção no banco de dados a lista de transações cabeçalhos
+            </summary>
+            <param name="listaTransacaoCabecalhos"></param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>

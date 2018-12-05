@@ -1,0 +1,503 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>TransacaoIzioRest</name>
+    </assembly>
+    <members>
+        <member name="T:TransacaoIzioRest.Models.DadosTransacaoOnline">
+            <summary>
+            Dados da transação importada On-Line
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoOnline.cod_cpf">
+            <summary>
+            Codigo do CPF preenchido no PDV no inicio da compra
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoOnline.cod_equipe">
+            <summary>
+            Codigo da equipe (enviar 100)
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoOnline.cod_pessoa">
+            <summary>
+            Codigo da pessoa,se não tiver enviar 0
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoOnline.dat_compra">
+            <summary>
+            Data e hora da realização da compra
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoOnline.vlr_compra">
+            <summary>
+            Valor da compra
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoOnline.nom_tipo_pagamento">
+            <summary>
+            Meios de pagamentos utilizados na compra (quando tiver mais de 1, separar eles por ";". Ex: Cartão Visa; Cartão Master; Dinheiro)
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoOnline.cod_loja">
+            <summary>
+            Codigo da loja que foi realizado a compra
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoOnline.cod_usuario">
+            <summary>
+            Codigo do usuario (enviar 1)
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoOnline.qtd_itens_compra">
+            <summary>
+            Quantidade de itens da compra
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoOnline.vlr_total_desconto">
+            <summary>
+            Valor total de desconto aplicado nos itens vendidos
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoOnline.cupom">
+            <summary>
+            Numero do cupom fiscal 
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoOnline.nsu_transacao">
+            <summary>
+            Nsu da transação quando for pago em cartão. Caso a compra seja paga em mais de um cartão, os NSU precisam vir separados por ";"
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoOnline.dat_geracao_nsu">
+            <summary>
+            Data e Hota da geração Nsu da transação quando for pago em cartão. Caso a compra seja paga em mais de um cartão, as datas de geração do NSU precisam vir separados por ";"
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoOnline.des_bin_cartao">
+            <summary>
+            BIN do cartão utilizado no pagamento da venda. Caso a compra seja paga em mais de um cartão, os BINs precisam vir separados por ";"
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoOnline.ListaItens">
+            <summary>
+            Lista com os itens da compra
+            </summary>
+        </member>
+        <member name="T:TransacaoIzioRest.Models.DadosItensTransacao">
+            <summary>
+            Itens da transação para importacao On-Line
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosItensTransacao.cod_produto">
+            <summary>
+            Codigo interno do produto
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosItensTransacao.des_produto">
+            <summary>
+            Nome completo do produto
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosItensTransacao.cod_ean">
+            <summary>
+            Codigo de barras do produto, quando não tiver enviar o mesmo do codigo do produto
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosItensTransacao.vlr_item_compra">
+            <summary>
+            Valor de venda do produto
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosItensTransacao.qtd_item_compra">
+            <summary>
+            Quantidade de produtos comprados
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosItensTransacao.vlr_desconto_item">
+            <summary>
+            Valor do desconto aplicado no item
+            </summary>
+        </member>
+        <member name="T:TransacaoIzioRest.Models.DadosTransacaoLote">
+            <summary>
+            Dados para importação em Lote das vendas Vendas
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoLote.cod_pessoa">
+            <summary>
+            Codigo da pessoa, se não tiver enviar 0
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoLote.cod_cpf">
+            <summary>
+            Codigo do cpf do cliente informado no PDV
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoLote.dat_compra">
+            <summary>
+            Data e hora da compra
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoLote.vlr_compra">
+            <summary>
+            Valor da compra
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoLote.cupom">
+            <summary>
+            Numero do cupom fiscal
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoLote.nsu_transacao">
+            <summary>
+            Nsu da transação quando for pago em cartão. Caso a compra seja paga em mais de um cartão, os NSU precisam vir separados por ";"
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoLote.dat_geracao_nsu">
+            <summary>
+            Data e Hota da geração Nsu da transação quando for pago em cartão. Caso a compra seja paga em mais de um cartão, as datas de geração do NSU precisam vir separados por ";"
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoLote.Pdv">
+            <summary>
+            Numero do PDV da realização da compraS
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoLote.des_tipo_pagamento">
+            <summary>
+            Meios de pagamanto da compra. Quando tiver mais de 1 separar com ";". Ex: Cartão Visa; Cartão Master; Dinheiro
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoLote.qtd_itens_compra">
+            <summary>
+            Quantidade de itens da compra
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoLote.vlr_total_desconto">
+            <summary>
+            Valor total de desconto aplicado nos itens vendidos
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoLote.cod_ean">
+            <summary>
+            Codigo de barras. Se não tiver enviar o codigo interno do produto
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoLote.cod_produto">
+            <summary>
+            Codigo interno do produto
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoLote.des_produto">
+            <summary>
+            Nome Completo do produto
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoLote.vlr_item_compra">
+            <summary>
+            Valor de venda do produto
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoLote.vlr_desconto_item">
+            <summary>
+            Valor do desconto aplicado no item
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoLote.qtd_item_compra">
+            <summary>
+            Quantidade do produto comprado
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoLote.nro_item_compra">
+            <summary>
+            Numero do item na compra. Ex: Compra com 10 itens, teremos o item 1, item2, etc...
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoLote.cod_loja">
+            <summary>
+            Codigo da loja que foi realizado a compra
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoLote.des_bin_cartao">
+            <summary>
+            BIN do cartão utilizado no pagamento da venda. Caso a compra seja paga em mais de um cartão, os BINs precisam vir separados por ";"
+            </summary>
+        </member>
+        <member name="T:TransacaoIzioRest.Models.DadosLoteViewizio_3">
+            <summary>
+            Classe padrão com os campos viewizio_3
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosLoteViewizio_3.vlr_total_desconto">
+            <summary>
+            Valor total de desconto aplicado nos itens vendidos
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosLoteViewizio_3.item">
+            <summary>
+            Numero do item na compra. Ex: Compra com 10 itens, teremos o item 1, item2, etc...
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosLoteViewizio_3.nsu_transacao">
+            <summary>
+            Nsu da transação quando for pago em cartão. Caso a compra seja paga em mais de um cartão, os NSU precisam vir separados por ";"
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosLoteViewizio_3.dat_geracao_nsu">
+            <summary>
+            Data e Hota da geração Nsu da transação quando for pago em cartão. Caso a compra seja paga em mais de um cartão, as datas de geração do NSU precisam vir separados por ";"
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosLoteViewizio_3.des_bin_cartao">
+            <summary>
+            BIN do cartão utilizado no pagamento da venda. Caso a compra seja paga em mais de um cartão, os BINs precisam vir separados por ";"
+            </summary>
+        </member>
+        <member name="T:TransacaoIzioRest.Models.RetornoDadosTermino">
+            <summary>
+            Objeto de retorno para quando a execução ocorrer com sucesso
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.RetornoDadosTermino.payload">
+            <summary>
+            Payload de Retorno.
+            </summary>
+        </member>
+        <member name="T:TransacaoIzioRest.Models.PayloadTermino">
+            <summary>
+            Objeto de Retorno para utilização interna, para o processamento na DAO
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.PayloadTermino.qtd_registros_importados">
+            <summary>
+            Quantidade de registros importados.
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.PayloadTermino.qtd_vendas">
+            <summary>
+            Quantidade de vendas importadas.
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.PayloadTermino.vlr_total_vendas">
+            <summary>
+            Somatório do valor de compras do dia importado.
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.PayloadTermino.dat_compra">
+            <summary>
+            Data das vendas
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.PayloadTermino.lst_lojas">
+            <summary>
+            Lista de detalhamento dos valores por loja.
+            </summary>
+        </member>
+        <member name="T:TransacaoIzioRest.Models.ComprasLoja">
+            <summary>
+            Dados de Compras da Loja
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.ComprasLoja.cod_loja">
+            <summary>
+            Código da Loja
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.ComprasLoja.vlr_vendas">
+            <summary>
+            Somatório das compras da Loja.
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.ComprasLoja.qtd_vendas">
+            <summary>
+            Quantidade de vendas importadas.
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoTermino.qtde_registros">
+            <summary>
+            Quantidade de registros enviados para processamento.
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoTermino.vlr_compras">
+            <summary>
+            Somatório do valor de compras do dia enviado.
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoTermino.lstLoja">
+            <summary>
+            Lista de detalhamento dos valores por loja.
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.ComprasLojaTermino.cod_loja">
+            <summary>
+            Código da Loja
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.ComprasLojaTermino.vlr_loja">
+            <summary>
+            Somatório das compras da Loja.
+            </summary>
+        </member>
+        <member name="T:TransacaoIzioRest.Models.DadosTransacaoCancelada">
+            <summary>
+            Objeto com os dados da compra cancelada
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoCancelada.dat_compra">
+            <summary>
+            Data e hora da realização da compra
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoCancelada.vlr_compra">
+            <summary>
+            Valor da compra
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoCancelada.cod_loja">
+            <summary>
+            Codigo da loja que foi realizado a compra
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoCancelada.qtd_itens_compra">
+            <summary>
+            Quantidade de itens da compra
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoCancelada.cupom">
+            <summary>
+            Numero do cupom fiscal 
+            </summary>
+        </member>
+        <member name="T:TransacaoIzioRest.Models.RetornoConsultaTransacao">
+            <summary>
+            Objeto de retorno para quando a execução ocorrer com sucesso
+            </summary>
+        </member>
+        <member name="T:TransacaoIzioRest.Models.DadosConsultaTransacao">
+            <summary>
+            Objeto de Retorno para utilização interna, para o processamento na DAO
+            </summary>
+        </member>
+        <member name="T:TransacaoIzioRest.Models.Payload">
+            <summary>
+            Objeto padrão de retorno da API Rest
+            </summary>
+        </member>
+        <member name="T:TransacaoIzioRest.Models.DadosTransacao">
+            <summary>
+            Dados da Transacao
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacao.cod_transacao">
+            <summary>
+            Codigo da Transação
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacao.cod_pessoa">
+            <summary>
+            Codigo da pessoa 
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacao.dat_compra">
+            <summary>
+            Data e hora da compra
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacao.vlr_compra">
+            <summary>
+            Valor da compra
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacao.vlr_total_desconto">
+            <summary>
+            Valor total de desconto aplicado nos itens vendidos
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacao.cod_loja">
+            <summary>
+            Código da Loja
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacao.des_loja">
+            <summary>
+            Nome da loja
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacao.qtd_itens_compra">
+            <summary>
+            Quantidade de Itens da Compra
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacao.cupom">
+            <summary>
+            Numero do cupom da compra
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacao.vlr_credito_cashback">
+            <summary>
+            Valor de cashback gerado na compra
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacao.dat_validade_cashback">
+            <summary>
+            Data de validade para o cashback gerado na compra
+            </summary>
+        </member>
+        <member name="T:TransacaoIzioRest.Models.RetornoDadosItensTransacao">
+            <summary>
+            Objeto de retorno para quando a execução ocorrer com sucesso
+            </summary>
+        </member>
+        <member name="T:TransacaoIzioRest.Models.PayloadItensTransacao">
+            <summary>
+            Objeto padrão de retorno da API Rest
+            </summary>
+        </member>
+        <member name="T:TransacaoIzioRest.Models.DadosConsultaItensTransacao">
+            <summary>
+            Dados com os itens da transacao
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosConsultaItensTransacao.cod_transacao">
+            <summary>
+            Codigo da Transação - Chave para os itens da compra
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosConsultaItensTransacao.cod_plu">
+            <summary>
+            Código interno do produto
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosConsultaItensTransacao.cod_ean">
+            <summary>
+            Codigo de barras
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosConsultaItensTransacao.des_produto">
+            <summary>
+            Nome do produto
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosConsultaItensTransacao.vlr_item_compra">
+            <summary>
+            Valor de venda do produto
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosConsultaItensTransacao.qtd_item_compra">
+            <summary>
+            Quantidade de itens vendidas do produto
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosConsultaItensTransacao.img_produto">
+            <summary>
+            Imagem do produto em Base64
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosConsultaItensTransacao.vlr_desconto_item">
+            <summary>
+            Valor do desconto aplicado no item
+            </summary>
+        </member>
+    </members>
+</doc>
