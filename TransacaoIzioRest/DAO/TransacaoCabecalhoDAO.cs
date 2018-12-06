@@ -15,6 +15,10 @@ namespace TransacaoRest.DAO
         readonly SqlServer sqlServer;
         readonly string NomeClienteWs;
 
+        /// <summary>
+        /// Construtor da classe TransacaoCabecalhoDAO
+        /// </summary>
+        /// <param name="sNomeCliente"></param>
         public TransacaoCabecalhoDAO(string sNomeCliente)
         {
             sqlServer = new SqlServer(sNomeCliente);
@@ -22,64 +26,7 @@ namespace TransacaoRest.DAO
         }
 
         /// <summary>
-        /// Inserção no banco de dados a lista de transações cabeçalhos
-        /// </summary>
-        /// <param name="listaTransacaoCabecalhos"></param>
-        /// <returns></returns>
-        public void ImportaLoteTransacaoCabecalho(List<DadosTransacaoCabecalho> listaTransacaoCabecalhos)
-        {
-            try
-            {
-                sqlServer.StartConnection();
-                sqlServer.BeginTransaction();
-
-                #region Bulk Insert da lista
-                using (var bcp = new SqlBulkCopy
-                            (
-                            //Para utilizar o controle de transacao
-                            sqlServer.Command.Connection,
-                            SqlBulkCopyOptions.TableLock |
-                            SqlBulkCopyOptions.FireTriggers,
-                            sqlServer.Trans
-                            ))
-                using (
-                    var reader = ObjectReader.Create(listaTransacaoCabecalhos,
-                    "cod_transacao_cabecalho",
-                    "cod_cpf",
-                    "cupom",
-                    "cod_loja",
-                    "dat_compra",
-                    "vlr_compra",
-                    "qtd_itens_compra",
-                    "dat_cadastro"))
-                {
-                    bcp.BulkCopyTimeout = ConfigurationManager.AppSettings["TimeoutExecucao"] != null ? Convert.ToInt32(ConfigurationManager.AppSettings["TimeoutExecucao"]) : 600;
-                    bcp.DestinationTableName = "tab_transacao_cabecalho";
-                    bcp.WriteToServer(reader);
-                }
-                #endregion
-
-                sqlServer.Commit();
-            }
-            catch (Exception ex)
-            {
-                sqlServer.Rollback();
-
-                DadosLog dadosLog = new DadosLog
-                {
-                    des_erro_tecnico = ex.ToString()
-                };
-
-                Log.InserirLogIzio(NomeClienteWs, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
-            }
-            finally
-            {
-                sqlServer.CloseConnection();
-            }
-        }
-
-        /// <summary>
-        /// Faz o insert no banco de dado da transação cabeçalho
+        /// Inserção no banco de dado da transação cabeçalho
         /// </summary>
         /// <param name="dadosTransacaoCabecalho"></param>
         /// <returns></returns>
@@ -144,7 +91,7 @@ namespace TransacaoRest.DAO
         }
 
         /// <summary>
-        /// Faz a consulta no banco de dados com os parâmetros opcionais
+        /// Consulta no banco de dados com os parâmetros opcionais
         /// </summary>
         /// <param name="codCpf"></param>
         /// <param name="dataProcessamento"></param>
@@ -198,6 +145,58 @@ namespace TransacaoRest.DAO
 
                     sqlServer.CloseConnection();
                 }
+            }
+        }
+
+        /// <summary>
+        /// Inserção no banco de dados da lista de transações cabeçalhos
+        /// </summary>
+        /// <param name="listaTransacoesCabecalhos"></param>
+        /// <returns></returns>
+        public void ImportarLoteTransacaoCabecalho(List<DadosTransacaoCabecalho> listaTransacoesCabecalhos)
+        {
+            try
+            {
+                sqlServer.StartConnection();
+                sqlServer.BeginTransaction();
+
+                #region Bulk Insert da lista
+                using (var bcp = new SqlBulkCopy
+                            (
+                            //Para utilizar o controle de transacao
+                            sqlServer.Command.Connection,
+                            SqlBulkCopyOptions.TableLock |
+                            SqlBulkCopyOptions.FireTriggers,
+                            sqlServer.Trans
+                            ))
+                using (
+                    var reader = ObjectReader.Create(listaTransacoesCabecalhos,
+                    "cod_transacao_cabecalho",
+                    "cod_cpf",
+                    "cupom",
+                    "cod_loja",
+                    "dat_compra",
+                    "vlr_compra",
+                    "qtd_itens_compra",
+                    "dat_cadastro"))
+                {
+                    bcp.BulkCopyTimeout = ConfigurationManager.AppSettings["TimeoutExecucao"] != null ? Convert.ToInt32(ConfigurationManager.AppSettings["TimeoutExecucao"]) : 600;
+                    bcp.DestinationTableName = "tab_transacao_cabecalho";
+                    bcp.WriteToServer(reader);
+                }
+                #endregion
+
+                sqlServer.Commit();
+            }
+            catch (Exception ex)
+            {
+                sqlServer.Rollback();
+
+                throw;
+            }
+            finally
+            {
+                sqlServer.CloseConnection();
             }
         }
     }

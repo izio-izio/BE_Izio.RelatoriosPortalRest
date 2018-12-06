@@ -163,15 +163,6 @@
             Api das transações cabeçalhos
             </summary>
         </member>
-        <member name="M:TransacaoRest.Controllers.TransacaoCabecalhoController.ImportaLoteTransacaoCabecalho(System.Collections.Generic.List{TransacaoIzioRest.Models.DadosTransacaoCabecalho})">
-            <summary>
-            Cadastrar uma ou mais Transações de Cabeçalho
-            </summary>
-            <param name="listaTransacaoCabecalhos">Lista com os dados das transações cabeçalho</param>        
-            <remarks>Cadastrar uma ou mais Transações de Cabeçalho</remarks>
-            <response code="400">Bad request</response>
-            <response code="500">Internal Server Error</response>
-        </member>
         <member name="M:TransacaoRest.Controllers.TransacaoCabecalhoController.CadastrarTransacaoCabecalho(TransacaoIzioRest.Models.DadosTransacaoCabecalho)">
             <summary>
             Cadastrar uma ou mais Transações de Cabeçalhos
@@ -188,26 +179,44 @@
             <param name="dataProcessamento">Data para o processamento (yyyyMMdd)</param>
             <returns></returns>
         </member>
-        <member name="M:TransacaoRest.DAO.TransacaoCabecalhoDAO.ImportaLoteTransacaoCabecalho(System.Collections.Generic.List{TransacaoIzioRest.Models.DadosTransacaoCabecalho})">
+        <member name="M:TransacaoRest.Controllers.TransacaoCabecalhoController.ImportarLoteTransacaoCabecalho(System.Collections.Generic.List{TransacaoIzioRest.Models.DadosTransacaoCabecalho})">
             <summary>
-            Inserção no banco de dados a lista de transações cabeçalhos
+            Realiza a importação em lote das transações cabeçalhos
             </summary>
-            <param name="listaTransacaoCabecalhos"></param>
-            <returns></returns>
+            <param name="listaTransacoesCabecalhos">Lista com os dados das transações cabeçalho</param>        
+            <remarks>
+            Método para importar as vendas em lote de 1000 em 1000 registros
+            Cadastrar uma ou mais Transações de Cabeçalho
+            </remarks>
+            <response code="400">Bad request</response>
+            <response code="500">Internal Server Error</response>
+        </member>
+        <member name="M:TransacaoRest.DAO.TransacaoCabecalhoDAO.#ctor(System.String)">
+            <summary>
+            Construtor da classe TransacaoCabecalhoDAO
+            </summary>
+            <param name="sNomeCliente"></param>
         </member>
         <member name="M:TransacaoRest.DAO.TransacaoCabecalhoDAO.CadastrarTransacaoCabecalho(TransacaoIzioRest.Models.DadosTransacaoCabecalho)">
             <summary>
-            Faz o insert no banco de dado da transação cabeçalho
+            Inserção no banco de dado da transação cabeçalho
             </summary>
             <param name="dadosTransacaoCabecalho"></param>
             <returns></returns>
         </member>
         <member name="M:TransacaoRest.DAO.TransacaoCabecalhoDAO.ConsultarTransacaoCabecalho(System.String,System.String)">
             <summary>
-            Faz a consulta no banco de dados com os parâmetros opcionais
+            Consulta no banco de dados com os parâmetros opcionais
             </summary>
             <param name="codCpf"></param>
             <param name="dataProcessamento"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TransacaoRest.DAO.TransacaoCabecalhoDAO.ImportarLoteTransacaoCabecalho(System.Collections.Generic.List{TransacaoIzioRest.Models.DadosTransacaoCabecalho})">
+            <summary>
+            Inserção no banco de dados da lista de transações cabeçalhos
+            </summary>
+            <param name="listaTransacoesCabecalhos"></param>
             <returns></returns>
         </member>
     </members>
