@@ -172,7 +172,15 @@
             <response code="400">Bad request</response>
             <response code="500">Internal Server Error</response>
         </member>
-        <member name="M:TransacaoRest.Controllers.TransacaoCabecalhoController.ConsultaTransacaoCabecalho(System.String,System.String)">
+        <member name="M:TransacaoRest.Controllers.TransacaoCabecalhoController.CadastrarTransacaoCabecalho(TransacaoIzioRest.Models.DadosTransacaoCabecalho)">
+            <summary>
+            Cadastrar uma ou mais Transações de Cabeçalhos
+            </summary>
+            <param name="dadosTransacaoCabecalho">Lista com os dados da transação cabeçalho</param>        
+            <response code="400">Bad request</response>
+            <response code="500">Internal Server Error</response>
+        </member>
+        <member name="M:TransacaoRest.Controllers.TransacaoCabecalhoController.ConsultarTransacaoCabecalho(System.String,System.String)">
             <summary>
             Consultar uma ou mais Transações Cabeçalhos
             </summary>
@@ -180,14 +188,21 @@
             <param name="dataProcessamento">Data para o processamento (yyyyMMdd)</param>
             <returns></returns>
         </member>
-        <member name="M:TransacaoRest.DAO.TransacaoCabecalhoDAO.CadastrarTransacaoCabecalho(System.Collections.Generic.List{TransacaoIzioRest.Models.DadosTransacaoCabecalho})">
+        <member name="M:TransacaoRest.DAO.TransacaoCabecalhoDAO.ImportaLoteTransacaoCabecalho(System.Collections.Generic.List{TransacaoIzioRest.Models.DadosTransacaoCabecalho})">
             <summary>
             Inserção no banco de dados a lista de transações cabeçalhos
             </summary>
             <param name="listaTransacaoCabecalhos"></param>
             <returns></returns>
         </member>
-        <member name="M:TransacaoRest.DAO.TransacaoCabecalhoDAO.ConsultaTransacaoCabecalho(System.String,System.String)">
+        <member name="M:TransacaoRest.DAO.TransacaoCabecalhoDAO.CadastrarTransacaoCabecalho(TransacaoIzioRest.Models.DadosTransacaoCabecalho)">
+            <summary>
+            Faz o insert no banco de dado da transação cabeçalho
+            </summary>
+            <param name="dadosTransacaoCabecalho"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TransacaoRest.DAO.TransacaoCabecalhoDAO.ConsultarTransacaoCabecalho(System.String,System.String)">
             <summary>
             Faz a consulta no banco de dados com os parâmetros opcionais
             </summary>

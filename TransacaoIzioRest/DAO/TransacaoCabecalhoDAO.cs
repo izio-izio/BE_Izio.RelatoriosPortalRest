@@ -26,7 +26,7 @@ namespace TransacaoRest.DAO
         /// </summary>
         /// <param name="listaTransacaoCabecalhos"></param>
         /// <returns></returns>
-        public void CadastrarTransacaoCabecalho(List<DadosTransacaoCabecalho> listaTransacaoCabecalhos)
+        public void ImportaLoteTransacaoCabecalho(List<DadosTransacaoCabecalho> listaTransacaoCabecalhos)
         {
             try
             {
@@ -79,12 +79,77 @@ namespace TransacaoRest.DAO
         }
 
         /// <summary>
+        /// Faz o insert no banco de dado da transação cabeçalho
+        /// </summary>
+        /// <param name="dadosTransacaoCabecalho"></param>
+        /// <returns></returns>
+        public List<DadosTransacaoCabecalho> CadastrarTransacaoCabecalho(DadosTransacaoCabecalho dadosTransacaoCabecalho)
+        {
+            try
+            {
+                sqlServer.StartConnection();
+
+                sqlServer.Command.CommandType = CommandType.Text;
+
+                sqlServer.Command.CommandText = $@"INSERT dbo.tab_transacao_cabecalho
+                                                   (
+                                                       --cod_transacao_cabecalho - this column value is auto-generated
+                                                       cod_cpf,
+                                                       cupom,
+                                                       cod_loja,
+                                                       dat_compra,
+                                                       vlr_compra,
+                                                       qtd_itens_compra,
+                                                       dat_cadastro
+                                                   )
+                                                   VALUES
+                                                   (
+                                                       -- cod_transacao_cabecalho - int
+                                                       '{dadosTransacaoCabecalho.cod_cpf}', -- cod_cpf - varchar
+                                                       '{dadosTransacaoCabecalho.cupom}', -- cupom - varchar
+                                                       {dadosTransacaoCabecalho.cod_loja}, -- cod_loja - int
+                                                       '{dadosTransacaoCabecalho.dat_compra}', -- dat_compra - datetime
+                                                       '{dadosTransacaoCabecalho.vlr_compra}', -- vlr_compra - decimal
+                                                       {dadosTransacaoCabecalho.qtd_itens_compra}, -- qtd_itens_compra - int
+                                                       '{dadosTransacaoCabecalho.dat_compra}' -- dat_cadastro - datetime
+                                                   );
+                                                   SELECT @@IDENTITY;";
+
+                dadosTransacaoCabecalho.cod_transacao_cabecalho = Convert.ToInt32(sqlServer.Command.ExecuteScalar());
+
+                List<DadosTransacaoCabecalho> listaTransacaoCabecalhos = new List<DadosTransacaoCabecalho>
+                {
+                    dadosTransacaoCabecalho
+                };
+
+                return listaTransacaoCabecalhos;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+            finally
+            {
+                if (sqlServer != null)
+                {
+                    if (sqlServer.Reader != null)
+                    {
+                        sqlServer.Reader.Close();
+                        sqlServer.Reader.Dispose();
+                    }
+
+                    sqlServer.CloseConnection();
+                }
+            }
+        }
+
+        /// <summary>
         /// Faz a consulta no banco de dados com os parâmetros opcionais
         /// </summary>
         /// <param name="codCpf"></param>
         /// <param name="dataProcessamento"></param>
         /// <returns></returns>
-        public List<DadosTransacaoCabecalho> ConsultaTransacaoCabecalho(string codCpf, string dataProcessamento)
+        public List<DadosTransacaoCabecalho> ConsultarTransacaoCabecalho(string codCpf, string dataProcessamento)
         {
             #region Monta a condição da query com os parâmetros
             string where = codCpf != "" ? $" WHERE ttc.cod_cpf = '{codCpf}'" : "";

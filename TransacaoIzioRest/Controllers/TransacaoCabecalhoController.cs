@@ -26,7 +26,7 @@ namespace TransacaoRest.Controllers
         /// <response code="400">Bad request</response>
         /// <response code="500">Internal Server Error</response>
         [HttpPost, Utilidades.ValidaTokenAutenticacao]
-        [Route("api/ImportaLoteTransacaoCabecalho/")]
+        [Route("api/ImportaLoteTransacaoCabecalho")]
         [SwaggerResponse("200", typeof(RetornoDadosTransacaoCabecalho))]
         [SwaggerResponse("500", typeof(ApiErrors))]
         [SwaggerResponse("401", typeof(ApiErrors))]
@@ -90,7 +90,7 @@ namespace TransacaoRest.Controllers
                     if (!string.IsNullOrEmpty(sNomeCliente))
                     {
                         TransacaoCabecalhoDAO transacaoCabecalhoDAO = new TransacaoCabecalhoDAO(sNomeCliente);
-                        transacaoCabecalhoDAO.CadastrarTransacaoCabecalho(listaTransacaoCabecalhos);
+                        transacaoCabecalhoDAO.ImportaLoteTransacaoCabecalho(listaTransacaoCabecalhos);
 
                         RetornoDadosTransacaoCabecalho retornoDadosTransacaoCabecalho = new RetornoDadosTransacaoCabecalho
                         {
@@ -145,17 +145,207 @@ namespace TransacaoRest.Controllers
         }
 
         /// <summary>
+        /// Cadastrar uma ou mais Transações de Cabeçalhos
+        /// </summary>
+        /// <param name="dadosTransacaoCabecalho">Lista com os dados da transação cabeçalho</param>        
+        /// <response code="400">Bad request</response>
+        /// <response code="500">Internal Server Error</response>
+        [HttpPost, Utilidades.ValidaTokenAutenticacao]
+        [Route("api/TransacaoCabecalho")]
+        [SwaggerResponse("200", typeof(RetornoDadosTransacaoCabecalho))]
+        [SwaggerResponse("500", typeof(ApiErrors))]
+        [SwaggerResponse("401", typeof(ApiErrors))]
+        public HttpResponseMessage CadastrarTransacaoCabecalho([FromBody] DadosTransacaoCabecalho dadosTransacaoCabecalho)
+        {
+            #region Variáveis e objetos usados no processamento
+            var re = Request;
+            var headers = re.Headers;
+
+            string tokenAutenticacao = "";
+            string sNomeCliente = null;
+
+            //Lista com os erros ocorridos no Metodo
+            ApiErrors listaErros = new ApiErrors()
+            {
+                errors = new List<Erros>()
+            };
+            #endregion
+
+            try
+            {
+                if (headers.Contains("tokenAutenticacao"))
+                {
+                    #region Valida o Nome do Cliente no Izio
+                    try
+                    {
+                        tokenAutenticacao = Request.Headers.GetValues("tokenAutenticacao").First();
+                        sNomeCliente = Utilidades.AutenticarTokenApiRest(tokenAutenticacao);
+                    }
+                    catch (Exception)
+                    {
+                        listaErros.errors.Add(
+                            new Erros
+                            {
+                                code = Convert.ToInt32(HttpStatusCode.Unauthorized).ToString(),
+                                message = "Erro na captura do 'sNomeCliente' na Izio."
+                            });
+
+                        return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
+                    }
+                    #endregion
+
+                    #region Valida os Campos Obrigatórios
+                    if (dadosTransacaoCabecalho == null)
+                    {
+                        listaErros.errors.Add(
+                            new Erros
+                            {
+                                code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(),
+                                message = "Objeto com a transação cabeçalho precisa estar formatado e não pode ser nulo."
+                            });
+                    }
+
+                    if (string.IsNullOrEmpty(dadosTransacaoCabecalho.cod_cpf))
+                    {
+                        listaErros.errors.Add(
+                            new Erros
+                            {
+                                code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(),
+                                message = "O campo 'cod_cpf' não pode ser nulo ou vazio."
+                            });
+                    }
+
+                    if (string.IsNullOrEmpty(dadosTransacaoCabecalho.cupom))
+                    {
+                        listaErros.errors.Add(
+                            new Erros
+                            {
+                                code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(),
+                                message = "O campo 'cupom' não pode ser nulo ou vazio."
+                            });
+                    }
+
+                    if (dadosTransacaoCabecalho.cod_loja == 0)
+                    {
+                        listaErros.errors.Add(
+                            new Erros
+                            {
+                                code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(),
+                                message = "O campo 'cod_loja' não pode ser nulo e precisa de um valor maior que 0."
+                            });
+                    }
+
+                    if (dadosTransacaoCabecalho.vlr_compra == 0)
+                    {
+                        listaErros.errors.Add(new Erros
+                        {
+                            code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(),
+                            message = "O campo 'vlr_compra' não pode ser nulo e precisa de um valor maior que 0."
+                        });
+                    }
+
+                    if (dadosTransacaoCabecalho.qtd_itens_compra == 0)
+                    {
+                        listaErros.errors.Add(new Erros
+                        {
+                            code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(),
+                            message = "O campo 'qtd_itens_compra' não pode ser nulo e precisa de um valor maior que 0."
+                        });
+                    }
+
+                    if (dadosTransacaoCabecalho.dat_compra == DateTime.MinValue)
+                    {
+                        listaErros.errors.Add(new Erros
+                        {
+                            code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(),
+                            message = "O campo 'dat_compra' não pode ser nulo ou vazio."
+                        });
+                    }
+
+                    if (dadosTransacaoCabecalho.dat_cadastro == DateTime.MinValue)
+                    {
+                        listaErros.errors.Add(new Erros
+                        {
+                            code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(),
+                            message = "O campo 'dat_cadastro' não pode ser nulo ou vazio."
+                        });
+                    }
+
+                    if (listaErros.errors.Count > 0)
+                    {
+                        return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
+                    }
+                    #endregion
+
+                    #region Realiza a busca no banco de dados e retorna o resultado
+                    if (!string.IsNullOrEmpty(sNomeCliente))
+                    {
+                        TransacaoCabecalhoDAO transacaoCabecalhoDAO = new TransacaoCabecalhoDAO(sNomeCliente);
+                        
+                        RetornoDadosTransacaoCabecalho retornoDadosTransacaoCabecalho = new RetornoDadosTransacaoCabecalho
+                        {
+                            payload = transacaoCabecalhoDAO.CadastrarTransacaoCabecalho(dadosTransacaoCabecalho)
+                        };
+
+                        return Request.CreateResponse(HttpStatusCode.OK, retornoDadosTransacaoCabecalho);
+                    }
+                    else
+                    {
+                        listaErros.errors.Add(
+                            new Erros
+                            {
+                                code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(),
+                                message = "Não foi possível buscar o Nome do Cliente."
+                            });
+
+                        return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
+                    }
+                    #endregion
+                }
+                else
+                {
+                    listaErros.errors.Add(
+                        new Erros
+                        {
+                            code = Convert.ToInt32(HttpStatusCode.Unauthorized).ToString(),
+                            message = "Request Não autorizado. Token Inválido ou Nulo."
+                        });
+
+                    return Request.CreateResponse(HttpStatusCode.Unauthorized, listaErros);
+                }
+            }
+            catch (Exception ex)
+            {
+                DadosLog dadosLog = new DadosLog
+                {
+                    des_erro_tecnico = ex.Message
+                };
+
+                Log.InserirLogIzio(sNomeCliente, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
+
+                listaErros.errors.Add(
+                    new Erros
+                    {
+                        code = Convert.ToInt32(HttpStatusCode.Unauthorized).ToString(),
+                        message = "Não foi possível cadastrar a transação do cabeçalho. Por favor, tente novamente ou entre em contato com o administrador."
+                    });
+
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
+            }
+        }
+
+        /// <summary>
         /// Consultar uma ou mais Transações Cabeçalhos
         /// </summary>
         /// <param name="codCpf">Cpf do cliente</param>
         /// <param name="dataProcessamento">Data para o processamento (yyyyMMdd)</param>
         /// <returns></returns>
         [HttpGet, Utilidades.ValidaTokenAutenticacao]
-        [Route("api/TransacaoCabecalho/")]
+        [Route("api/TransacaoCabecalho")]
         [SwaggerResponse("200", typeof(RetornoDadosTransacaoCabecalho))]
         [SwaggerResponse("500", typeof(ApiErrors))]
         [SwaggerResponse("401", typeof(ApiErrors))]
-        public HttpResponseMessage ConsultaTransacaoCabecalho([FromUri] string codCpf = "", [FromUri] string dataProcessamento = "")
+        public HttpResponseMessage ConsultarTransacaoCabecalho([FromUri] string codCpf = "", [FromUri] string dataProcessamento = "")
         {
             #region Variáveis e objetos usados no processamento
             var re = Request;
@@ -219,7 +409,7 @@ namespace TransacaoRest.Controllers
 
                         RetornoDadosTransacaoCabecalho retornoDadosTransacaoCabecalho = new RetornoDadosTransacaoCabecalho
                         {
-                            payload = transacaoCabecalhoDAO.ConsultaTransacaoCabecalho(codCpf, dataProcessamento)
+                            payload = transacaoCabecalhoDAO.ConsultarTransacaoCabecalho(codCpf, dataProcessamento)
                         };
 
                         if (retornoDadosTransacaoCabecalho.payload == null || retornoDadosTransacaoCabecalho.payload.Count == 0)

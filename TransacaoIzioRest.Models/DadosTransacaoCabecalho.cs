@@ -38,7 +38,7 @@ namespace TransacaoIzioRest.Models
         /// Valor da compra
         /// </summary>
         [JsonRequired]
-        public int vlr_compra { get; set; }
+        public decimal vlr_compra { get; set; }
 
         /// <summary>
         /// Quantidade de itens da compra
