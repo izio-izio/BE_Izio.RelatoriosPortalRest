@@ -165,7 +165,7 @@
         </member>
         <member name="M:TransacaoRest.Controllers.TransacaoCabecalhoController.CadastrarTransacaoCabecalho(TransacaoIzioRest.Models.DadosTransacaoCabecalho)">
             <summary>
-            Cadastrar uma ou mais Transações de Cabeçalhos
+            Cadastrar uma ou mais Transações Cabeçalhos
             </summary>
             <param name="dadosTransacaoCabecalho">Lista com os dados da transação cabeçalho</param>        
             <response code="400">Bad request</response>
@@ -183,10 +183,10 @@
             <summary>
             Realiza a importação em lote das transações cabeçalhos
             </summary>
-            <param name="listaTransacoesCabecalhos">Lista com os dados das transações cabeçalho</param>        
+            <param name="listaTransacoesCabecalhos">Lista com os dados das transações cabeçalhos</param>        
             <remarks>
             Método para importar as vendas em lote de 1000 em 1000 registros
-            Cadastrar uma ou mais Transações de Cabeçalho
+            Cadastrar uma ou mais Transações Cabeçalhos
             </remarks>
             <response code="400">Bad request</response>
             <response code="500">Internal Server Error</response>
