@@ -20,7 +20,7 @@ namespace TransacaoRest.Controllers
     public class TransacaoCabecalhoController : ApiController
     {
         /// <summary>
-        /// Cadastrar uma ou mais Transações Cabeçalhos
+        /// Cadastrar uma Transação Cabeçalho
         /// </summary>
         /// <param name="dadosTransacaoCabecalho">Lista com os dados da transação cabeçalho</param>        
         /// <response code="400">Bad request</response>
@@ -210,7 +210,7 @@ namespace TransacaoRest.Controllers
         }
 
         /// <summary>
-        /// Consultar uma ou mais Transações Cabeçalhos
+        /// Consultar uma Transação Cabeçalho
         /// </summary>
         /// <param name="codCpf">Cpf do cliente</param>
         /// <param name="dataProcessamento">Data para o processamento (yyyyMMdd)</param>
