@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Formatting;
 using System.Text.RegularExpressions;
 using System.Web.Http;
 using TransacaoIzioRest.Models;
@@ -473,6 +474,139 @@ namespace TransacaoRest.Controllers
                     {
                         code = Convert.ToInt32(HttpStatusCode.Unauthorized).ToString(),
                         message = "Não foi possível atualizar a transação do cabeçalho. Por favor, tente novamente ou entre em contato com o administrador."
+                    });
+
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
+            }
+        }
+
+        /// <summary>
+        /// Deletar uma Transação Cabeçalho
+        /// </summary>
+        /// <param name="codTransacaoCabecalho">Código da Transação Cabeçalho</param>        
+        /// <response code="400">Bad request</response>
+        /// <response code="500">Internal Server Error</response>
+        [HttpDelete, Utilidades.ValidaTokenAutenticacao]
+        [Route("api/TransacaoCabecalho")]
+        [SwaggerResponse("200", typeof(ApiSuccess))]
+        [SwaggerResponse("500", typeof(ApiErrors))]
+        [SwaggerResponse("401", typeof(ApiErrors))]
+        public HttpResponseMessage DeletarTransacaoCabecalho([FromUri] int codTransacaoCabecalho)
+        {
+            #region Variáveis e objetos usados no processamento
+            var re = Request;
+            var headers = re.Headers;
+
+            string tokenAutenticacao = "";
+            string sNomeCliente = null;
+
+            //Lista com os erros ocorridos no Metodo
+            ApiErrors listaErros = new ApiErrors()
+            {
+                errors = new List<Erros>()
+            };
+            #endregion
+
+            try
+            {
+                if (headers.Contains("tokenAutenticacao"))
+                {
+                    #region Valida o Nome do Cliente no Izio
+                    try
+                    {
+                        tokenAutenticacao = Request.Headers.GetValues("tokenAutenticacao").First();
+                        sNomeCliente = Utilidades.AutenticarTokenApiRest(tokenAutenticacao);
+                    }
+                    catch (Exception)
+                    {
+                        listaErros.errors.Add(
+                            new Erros
+                            {
+                                code = Convert.ToInt32(HttpStatusCode.Unauthorized).ToString(),
+                                message = "Erro na captura do 'sNomeCliente' na Izio."
+                            });
+
+                        return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
+                    }
+                    #endregion
+
+                    #region Valida os Campos Obrigatórios
+                    if (codTransacaoCabecalho == 0)
+                    {
+                        listaErros.errors.Add(
+                            new Erros
+                            {
+                                code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(),
+                                message = "O campo 'codTransacaoCabecalho' precisa de um valor maior que 0."
+                            });
+                    }
+
+                    if (listaErros.errors.Count > 0)
+                    {
+                        return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
+                    }
+                    #endregion
+
+                    #region Realiza a busca no banco de dados e retorna o resultado
+                    if (!string.IsNullOrEmpty(sNomeCliente))
+                    {
+                        TransacaoCabecalhoDAO transacaoCabecalhoDAO = new TransacaoCabecalhoDAO(sNomeCliente);
+                        transacaoCabecalhoDAO.DeletarTransacaoCabecalho(codTransacaoCabecalho);
+
+                        ApiSuccess retornoTransacaoCabecalho = new ApiSuccess()
+                        {
+                            payload = new Sucesso
+                            {
+                                code = "200",
+                                message = "A Transação Cabeçalho " + codTransacaoCabecalho + " foi excluida com sucesso."
+                            }
+                        };
+
+                        return new HttpResponseMessage()
+                        {
+                            StatusCode = HttpStatusCode.OK,
+                            Content = new ObjectContent<ApiSuccess>(retornoTransacaoCabecalho, new JsonMediaTypeFormatter())
+                        };
+                    }
+                    else
+                    {
+                        listaErros.errors.Add(
+                            new Erros
+                            {
+                                code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(),
+                                message = "Não foi possível buscar o Nome do Cliente."
+                            });
+
+                        return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
+                    }
+                    #endregion
+                }
+                else
+                {
+                    listaErros.errors.Add(
+                        new Erros
+                        {
+                            code = Convert.ToInt32(HttpStatusCode.Unauthorized).ToString(),
+                            message = "Request Não autorizado. Token Inválido ou Nulo."
+                        });
+
+                    return Request.CreateResponse(HttpStatusCode.Unauthorized, listaErros);
+                }
+            }
+            catch (Exception ex)
+            {
+                DadosLog dadosLog = new DadosLog
+                {
+                    des_erro_tecnico = ex.Message
+                };
+
+                Log.InserirLogIzio(sNomeCliente, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
+
+                listaErros.errors.Add(
+                    new Erros
+                    {
+                        code = Convert.ToInt32(HttpStatusCode.Unauthorized).ToString(),
+                        message = "Não foi possível excluir a transação do cabeçalho. Por favor, tente novamente ou entre em contato com o administrador."
                     });
 
                 return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);

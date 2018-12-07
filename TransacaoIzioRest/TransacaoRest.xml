@@ -187,6 +187,14 @@
             <response code="400">Bad request</response>
             <response code="500">Internal Server Error</response>
         </member>
+        <member name="M:TransacaoRest.Controllers.TransacaoCabecalhoController.DeletarTransacaoCabecalho(System.Int32)">
+            <summary>
+            Deletar uma Transação Cabeçalho
+            </summary>
+            <param name="codTransacaoCabecalho">Código da Transação Cabeçalho</param>        
+            <response code="400">Bad request</response>
+            <response code="500">Internal Server Error</response>
+        </member>
         <member name="M:TransacaoRest.Controllers.TransacaoCabecalhoController.ImportarLoteTransacaoCabecalho(System.Collections.Generic.List{TransacaoIzioRest.Models.DadosTransacaoCabecalho})">
             <summary>
             Realiza a importação em lote das transações cabeçalhos
@@ -224,7 +232,14 @@
             <summary>
             Alteração parcial no banco de dado da transação cabeçalho
             </summary>
-            <param name="dadosTransacaoCabecalho"></param>
+            <param name="dadosTransacaoCabecalhoPatch"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TransacaoRest.DAO.TransacaoCabecalhoDAO.DeletarTransacaoCabecalho(System.Int32)">
+            <summary>
+            Realiza a exclusão da Transação Cabeçalho
+            </summary>
+            <param name="codTransacaoCabecalho"></param>
             <returns></returns>
         </member>
         <member name="M:TransacaoRest.DAO.TransacaoCabecalhoDAO.ImportarLoteTransacaoCabecalho(System.Collections.Generic.List{TransacaoIzioRest.Models.DadosTransacaoCabecalho})">

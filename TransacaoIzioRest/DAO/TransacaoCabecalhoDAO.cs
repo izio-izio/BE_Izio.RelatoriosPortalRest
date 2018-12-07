@@ -228,6 +228,40 @@ namespace TransacaoRest.DAO
         }
 
         /// <summary>
+        /// Realiza a exclusão da Transação Cabeçalho
+        /// </summary>
+        /// <param name="codTransacaoCabecalho"></param>
+        /// <returns></returns>
+        public void DeletarTransacaoCabecalho(int codTransacaoCabecalho)
+        {
+            try
+            {
+                sqlServer.StartConnection();
+
+                // 20 minutos para o timeout
+                sqlServer.Command.CommandTimeout = 1200;
+
+                sqlServer.Command.CommandType = CommandType.Text;
+
+                sqlServer.Command.CommandText = $@"DELETE FROM dbo.tab_transacao_cabecalho
+                                                   WHERE dbo.tab_transacao_cabecalho.cod_transacao_cabecalho = {codTransacaoCabecalho};";
+
+                sqlServer.Command.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+            finally
+            {
+                if (sqlServer != null)
+                {
+                    sqlServer.CloseConnection();
+                }
+            }
+        }
+
+        /// <summary>
         /// Inserção no banco de dados da lista de transações cabeçalhos
         /// </summary>
         /// <param name="listaTransacoesCabecalhos"></param>
