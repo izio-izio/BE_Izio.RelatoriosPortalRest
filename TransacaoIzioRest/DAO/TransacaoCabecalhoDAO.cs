@@ -1,6 +1,5 @@
 ﻿using FastMember;
 using Izio.Biblioteca;
-using Izio.Biblioteca.Model;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -143,6 +142,120 @@ namespace TransacaoRest.DAO
                         sqlServer.Reader.Dispose();
                     }
 
+                    sqlServer.CloseConnection();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Alteração parcial no banco de dado da transação cabeçalho
+        /// </summary>
+        /// <param name="dadosTransacaoCabecalhoPatch"></param>
+        /// <returns></returns>
+        public DadosTransacaoCabecalhoPatch AtualizarTransacaoCabecalho(DadosTransacaoCabecalhoPatch dadosTransacaoCabecalhoPatch)
+        {
+            try
+            {
+                sqlServer.StartConnection();
+
+                string set = "";
+                string where = "";
+
+                #region Parâmetros Patch
+                if (dadosTransacaoCabecalhoPatch.cod_transacao_cabecalho != 0)
+                {
+                    where = $"dbo.tab_transacao_cabecalho.cod_transacao_cabecalho = {dadosTransacaoCabecalhoPatch.cod_transacao_cabecalho}";
+                }
+
+                if (!string.IsNullOrEmpty(dadosTransacaoCabecalhoPatch.cod_cpf))
+                {
+                    set += $" dbo.tab_transacao_cabecalho.cod_cpf = '{dadosTransacaoCabecalhoPatch.cod_cpf}',";
+                }
+
+                if (!string.IsNullOrEmpty(dadosTransacaoCabecalhoPatch.cupom))
+                {
+                    set += $" dbo.tab_transacao_cabecalho.cupom = '{dadosTransacaoCabecalhoPatch.cupom}',";
+                }
+
+                if (dadosTransacaoCabecalhoPatch.cod_loja != null)
+                {
+                    set += $" dbo.tab_transacao_cabecalho.cod_loja = {dadosTransacaoCabecalhoPatch.cod_loja},";
+                }
+
+                if (dadosTransacaoCabecalhoPatch.vlr_compra != null)
+                {
+                    set += $" dbo.tab_transacao_cabecalho.vlr_compra = '{dadosTransacaoCabecalhoPatch.vlr_compra}',";
+                }
+
+                if (dadosTransacaoCabecalhoPatch.qtd_itens_compra != null)
+                {
+                    set += $" dbo.tab_transacao_cabecalho.qtd_itens_compra = {dadosTransacaoCabecalhoPatch.qtd_itens_compra},";
+                }
+
+                if (dadosTransacaoCabecalhoPatch.dat_compra != null)
+                {
+                    set += $" dbo.tab_transacao_cabecalho.dat_cadastro = {dadosTransacaoCabecalhoPatch.dat_compra},";
+                }
+
+                if (set.Contains(","))
+                {
+                    set = set.Remove(set.LastIndexOf(","), 1);
+                }
+                #endregion
+
+                sqlServer.Command.CommandType = CommandType.Text;
+
+                sqlServer.Command.CommandText = $@"UPDATE dbo.tab_transacao_cabecalho
+                                                   SET 
+                                                       {set}
+                                                   WHERE {where};";
+
+                sqlServer.Command.ExecuteNonQuery();
+
+                return dadosTransacaoCabecalhoPatch;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+            finally
+            {
+                if (sqlServer != null)
+                {
+                    sqlServer.CloseConnection();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Realiza a exclusão da Transação Cabeçalho
+        /// </summary>
+        /// <param name="codTransacaoCabecalho"></param>
+        /// <returns></returns>
+        public void DeletarTransacaoCabecalho(int codTransacaoCabecalho)
+        {
+            try
+            {
+                sqlServer.StartConnection();
+
+                // 20 minutos para o timeout
+                sqlServer.Command.CommandTimeout = 1200;
+
+                sqlServer.Command.CommandType = CommandType.Text;
+
+                sqlServer.Command.CommandText = $@"DELETE FROM dbo.tab_transacao_cabecalho
+                                                   WHERE dbo.tab_transacao_cabecalho.cod_transacao_cabecalho = {codTransacaoCabecalho};";
+
+                sqlServer.Command.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+            finally
+            {
+                if (sqlServer != null)
+                {
                     sqlServer.CloseConnection();
                 }
             }
