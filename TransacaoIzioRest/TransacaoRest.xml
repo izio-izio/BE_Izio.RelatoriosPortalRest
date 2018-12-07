@@ -179,6 +179,14 @@
             <param name="dataProcessamento">Data para o processamento (yyyyMMdd)</param>
             <returns></returns>
         </member>
+        <member name="M:TransacaoRest.Controllers.TransacaoCabecalhoController.AtualizarTransacaoCabecalho(TransacaoIzioRest.Models.DadosTransacaoCabecalhoPatch)">
+            <summary>
+            Atualizar parcialmente a Transação Cabeçalho
+            </summary>
+            <param name="dadosTransacaoCabecalhoPatch">Lista com os dados para atualização da transação cabeçalho</param>        
+            <response code="400">Bad request</response>
+            <response code="500">Internal Server Error</response>
+        </member>
         <member name="M:TransacaoRest.Controllers.TransacaoCabecalhoController.ImportarLoteTransacaoCabecalho(System.Collections.Generic.List{TransacaoIzioRest.Models.DadosTransacaoCabecalho})">
             <summary>
             Realiza a importação em lote das transações cabeçalhos
@@ -210,6 +218,13 @@
             </summary>
             <param name="codCpf"></param>
             <param name="dataProcessamento"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TransacaoRest.DAO.TransacaoCabecalhoDAO.AtualizarTransacaoCabecalho(TransacaoIzioRest.Models.DadosTransacaoCabecalhoPatch)">
+            <summary>
+            Alteração parcial no banco de dado da transação cabeçalho
+            </summary>
+            <param name="dadosTransacaoCabecalho"></param>
             <returns></returns>
         </member>
         <member name="M:TransacaoRest.DAO.TransacaoCabecalhoDAO.ImportarLoteTransacaoCabecalho(System.Collections.Generic.List{TransacaoIzioRest.Models.DadosTransacaoCabecalho})">
