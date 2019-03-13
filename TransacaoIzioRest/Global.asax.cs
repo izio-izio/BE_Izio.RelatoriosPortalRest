@@ -2,6 +2,7 @@
 using NSwag.AspNet.Owin;
 using NSwag.SwaggerGeneration.Processors.Security;
 using System.Web;
+using System;
 using System.Web.Http;
 using System.Web.Routing;
 
@@ -33,6 +34,10 @@ namespace TransacaoIzioRest
             });
 
             GlobalConfiguration.Configure(WebApiConfig.Register);
+        }
+
+        protected void Application_BeginRequest(Object sender, EventArgs e)
+        {
         }
     }
 }
