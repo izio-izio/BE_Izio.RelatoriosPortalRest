@@ -128,7 +128,8 @@ namespace TransacaoIzioRest.Controllers
             try
             {
                 //Valida o token
-                sNomeCliente = Utilidades.AutenticarTokenApiRest(tokenAutenticacao);
+                sNomeCliente = Request.Headers.GetValues("sNomeCliente").First();
+                tokenAutenticacao = Request.Headers.GetValues("tokenAutenticacao").First();
 
                 //Executa metodo para consulta das transacações
                 DAO.TransacaoDAO consulta = new DAO.TransacaoDAO(sNomeCliente);
