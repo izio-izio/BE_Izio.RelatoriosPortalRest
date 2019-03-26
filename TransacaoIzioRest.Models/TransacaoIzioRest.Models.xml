@@ -339,6 +339,111 @@
             Somatório das compras da Loja.
             </summary>
         </member>
+        <member name="T:TransacaoIzioRest.Models.DadosTransacaoCabecalho">
+            <summary>
+            Dados das transações cabeçalhos
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoCabecalho.cod_transacao_cabecalho">
+            <summary>
+            Primary key da tabela tab_transacao_cabecalho
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoCabecalho.cod_cpf">
+            <summary>
+            Codigo do CPF preenchido no PDV no inicio da compra
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoCabecalho.cupom">
+            <summary>
+            Número do cupom fiscal
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoCabecalho.cod_loja">
+            <summary>
+            Código da loja que foi realizado a compra
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoCabecalho.vlr_compra">
+            <summary>
+            Valor da compra
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoCabecalho.qtd_itens_compra">
+            <summary>
+            Quantidade de itens da compra
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoCabecalho.dat_compra">
+            <summary>
+            Data e hora da compra (yyyy-MM-dd HH:mm:ss)
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoCabecalho.dat_cadastro">
+            <summary>
+            Data da inserção do registro
+            </summary>
+        </member>
+        <member name="T:TransacaoIzioRest.Models.RetornoDadosTransacaoCabecalho">
+            <summary>
+            Objeto de retorno com os dados das transacões cabeçalhos
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.RetornoDadosTransacaoCabecalho.payload">
+            <summary>
+            Lista com os dados das transações cabeçalhos
+            </summary>
+        </member>
+        <member name="T:TransacaoIzioRest.Models.DadosTransacaoCabecalhoPatch">
+            <summary>
+            Dados para atualização da transação cabeçalho
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoCabecalhoPatch.cod_transacao_cabecalho">
+            <summary>
+            Primary key da tabela tab_transacao_cabecalho
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoCabecalhoPatch.cod_cpf">
+            <summary>
+            Codigo do CPF preenchido no PDV no inicio da compra
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoCabecalhoPatch.cupom">
+            <summary>
+            Número do cupom fiscal
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoCabecalhoPatch.cod_loja">
+            <summary>
+            Código da loja que foi realizado a compra
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoCabecalhoPatch.vlr_compra">
+            <summary>
+            Valor da compra
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoCabecalhoPatch.qtd_itens_compra">
+            <summary>
+            Quantidade de itens da compra
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoCabecalhoPatch.dat_compra">
+            <summary>
+            Data e hora da compra (yyyy-MM-dd HH:mm:ss)
+            </summary>
+        </member>
+        <member name="T:TransacaoIzioRest.Models.RetornoPatchTransacaoCabecalho">
+            <summary>
+            Objeto de retorno com os dados atualizado da transacão cabeçalho
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.RetornoPatchTransacaoCabecalho.payload">
+            <summary>
+            Lista com os dados da transação cabeçalho
+            </summary>
+        </member>
         <member name="T:TransacaoIzioRest.Models.DadosTransacaoCancelada">
             <summary>
             Objeto com os dados da compra cancelada

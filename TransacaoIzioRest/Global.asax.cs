@@ -1,6 +1,7 @@
 ﻿using NSwag;
 using NSwag.AspNet.Owin;
 using NSwag.SwaggerGeneration.Processors.Security;
+using System.Configuration;
 using System.Web;
 using System;
 using System.Web.Http;
@@ -29,6 +30,7 @@ namespace TransacaoIzioRest
                     s.PostProcess = document =>
                     {
                         document.Info.Title = HttpContext.Current.ApplicationInstance.GetType().BaseType.Assembly.GetName().Name.ToString();
+                        document.Info.Version = ConfigurationManager.AppSettings.Get("apiVersion") ?? "1.0.0";
                     };
                 });
             });

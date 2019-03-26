@@ -188,8 +188,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="Controllers\TransacaoCabecalhoController.cs" />
     <Compile Include="Controllers\TransacaoIzioController.cs" />
     <Compile Include="DAO\ImportaTransacaoDAO.cs" />
+    <Compile Include="DAO\TransacaoCabecalhoDAO.cs" />
     <Compile Include="DAO\TransacaoCanceladaDAO.cs" />
     <Compile Include="DAO\TransacaoDAO.cs" />
     <Compile Include="Global.asax.cs">
