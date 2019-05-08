@@ -165,7 +165,7 @@
         </member>
         <member name="M:TransacaoRest.Controllers.TransacaoCabecalhoController.CadastrarTransacaoCabecalho(TransacaoIzioRest.Models.DadosTransacaoCabecalho)">
             <summary>
-            Cadastrar uma ou mais Transações Cabeçalhos
+            Cadastrar uma Transação Cabeçalho
             </summary>
             <param name="dadosTransacaoCabecalho">Lista com os dados da transação cabeçalho</param>        
             <response code="400">Bad request</response>
@@ -173,7 +173,7 @@
         </member>
         <member name="M:TransacaoRest.Controllers.TransacaoCabecalhoController.ConsultarTransacaoCabecalho(System.String,System.String)">
             <summary>
-            Consultar uma ou mais Transações Cabeçalhos
+            Consultar uma Transação Cabeçalho
             </summary>
             <param name="codCpf">Cpf do cliente</param>
             <param name="dataProcessamento">Data para o processamento (yyyyMMdd)</param>
