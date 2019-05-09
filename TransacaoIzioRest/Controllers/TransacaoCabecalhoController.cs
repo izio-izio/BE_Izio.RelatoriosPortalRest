@@ -54,7 +54,7 @@ namespace TransacaoRest.Controllers
                     try
                     {
                         tokenAutenticacao = Request.Headers.GetValues("tokenAutenticacao").First();
-                        sNomeCliente = Utilidades.AutenticarTokenApiRest(tokenAutenticacao);
+                        sNomeCliente = Request.Headers.GetValues("sNomeCliente").First();
                     }
                     catch (Exception)
                     {
@@ -244,7 +244,7 @@ namespace TransacaoRest.Controllers
                     try
                     {
                         tokenAutenticacao = Request.Headers.GetValues("tokenAutenticacao").First();
-                        sNomeCliente = Utilidades.AutenticarTokenApiRest(tokenAutenticacao);
+                        sNomeCliente = Request.Headers.GetValues("sNomeCliente").First();
                     }
                     catch (Exception)
                     {
@@ -381,7 +381,7 @@ namespace TransacaoRest.Controllers
                     try
                     {
                         tokenAutenticacao = Request.Headers.GetValues("tokenAutenticacao").First();
-                        sNomeCliente = Utilidades.AutenticarTokenApiRest(tokenAutenticacao);
+                        sNomeCliente = Request.Headers.GetValues("sNomeCliente").First();
                     }
                     catch (Exception)
                     {
@@ -515,7 +515,7 @@ namespace TransacaoRest.Controllers
                     try
                     {
                         tokenAutenticacao = Request.Headers.GetValues("tokenAutenticacao").First();
-                        sNomeCliente = Utilidades.AutenticarTokenApiRest(tokenAutenticacao);
+                        sNomeCliente = Request.Headers.GetValues("sNomeCliente").First();
                     }
                     catch (Exception)
                     {
@@ -652,7 +652,7 @@ namespace TransacaoRest.Controllers
                     try
                     {
                         tokenAutenticacao = Request.Headers.GetValues("tokenAutenticacao").First();
-                        sNomeCliente = Utilidades.AutenticarTokenApiRest(tokenAutenticacao);
+                        sNomeCliente = Request.Headers.GetValues("sNomeCliente").First();
                     }
                     catch (Exception)
                     {

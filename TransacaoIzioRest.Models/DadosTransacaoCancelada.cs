@@ -41,4 +41,30 @@ namespace TransacaoIzioRest.Models
         [JsonRequired]
         public string cupom { get; set; }
     }
+
+    /// <summary>
+    /// Objeto para cancelar o crédito gerado na marketpay
+    /// </summary>
+    public class DadosCancelamentoMarketPAy
+    {
+        public string cnpjEstabelecimento { get; set; }
+        public Dadostransacaooriginal dadosTransacaoOriginal { get; set; }
+        public string dataHoraTransacao { get; set; }
+        public int idCartao { get; set; }
+        public string nsuOrigem { get; set; }
+        public int tipoTransacao { get; set; }
+        public decimal valor { get; set; }
+    }
+
+    /// <summary>
+    /// Dados da transação que gerou o crédito
+    /// </summary>
+    public class Dadostransacaooriginal
+    {
+        public string dataHoraTransacao { get; set; }
+        public string nsuTransacaoOriginal { get; set; }
+        public int tipoTransacaoOriginal { get; set; }
+    }
+
+
 }
