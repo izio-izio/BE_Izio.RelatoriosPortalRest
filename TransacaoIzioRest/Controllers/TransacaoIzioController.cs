@@ -430,7 +430,7 @@ namespace TransacaoIzioRest.Controllers
                 #endregion
 
                 //Cria objeto para processamento das transacoes
-                TransacaoCanceladaDAO excluiTransacao = new TransacaoCanceladaDAO(sNomeCliente);
+                TransacaoCanceladaDAO excluiTransacao = new TransacaoCanceladaDAO(sNomeCliente,tokenAutenticacao);
                 listaErros = excluiTransacao.ExcluirRegistrosCompraCancelada(objTransacao, HttpContext.Current.Request.ServerVariables["REMOTE_ADDR"]);
 
                 if (listaErros.errors != null && listaErros.errors.Count > 0)
@@ -502,7 +502,7 @@ namespace TransacaoIzioRest.Controllers
                 #endregion
 
                 //Cria objeto para processamento das transacoes
-                TransacaoCanceladaDAO excluiTransacao = new TransacaoCanceladaDAO(sNomeCliente);
+                TransacaoCanceladaDAO excluiTransacao = new TransacaoCanceladaDAO(sNomeCliente, tokenAutenticacao);
                 excluiTransacao.ExcluirRegistrosIntermediarios(dataProcessamento);
 
                 ApiSuccess success = new ApiSuccess();

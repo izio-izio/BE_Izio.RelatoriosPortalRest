@@ -56,6 +56,9 @@
     <DocumentationFile>TransacaoRest.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="EmailRest.Models, Version=1.0.7032.18035, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\EmailRest.Models.20190416.45.0\lib\netstandard2.0\EmailRest.Models.dll</HintPath>
+    </Reference>
     <Reference Include="FastMember, Version=1.4.1.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\FastMember.1.4.1\lib\net461\FastMember.dll</HintPath>
     </Reference>
