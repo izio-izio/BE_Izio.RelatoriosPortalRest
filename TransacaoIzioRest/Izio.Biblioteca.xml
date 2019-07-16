@@ -100,7 +100,27 @@
             <param name="WORKSPACE_ID">workspace</param>
             <returns>Tendo como retorno uma url encurtada</returns>
         </member>
-        <member name="M:Izio.Biblioteca.ExportacaoArquivo.ExportarArquivo``1(System.String,System.Collections.Generic.IEnumerable{``0},System.String,System.String,Izio.Biblioteca.TipoArquivoExportacao)">
+        <member name="P:Izio.Biblioteca.ExecucaoMultiBase.ParametroExecucaoCustomizada.isUtilizarToken">
+            <summary>
+            Indicador se o contrutor da classe utiliza token
+            </summary>
+        </member>
+        <member name="P:Izio.Biblioteca.ExecucaoMultiBase.ParametroExecucaoCustomizada.paramMetodoExecutar">
+            <summary>
+            propriedade opcional para receber os parametros que serão utilizados na execução do metodo
+            </summary>
+        </member>
+        <member name="P:Izio.Biblioteca.ExecucaoMultiBase.ParametroExecucaoCustomizada.sqlConsultaCliente">
+            <summary>
+            propriedade opcional para consultar clientes de forma customizada
+            </summary>
+        </member>
+        <member name="P:Izio.Biblioteca.ExecucaoMultiBase.ParametroExecucaoCustomizada.numExecucaoParallelForeach">
+            <summary>
+            propriedade opcional para limitar o numero de execuções simultaneas (valor padrão 10)
+            </summary>
+        </member>
+        <member name="M:Izio.Biblioteca.ExportacaoArquivo.ExportarArquivo``1(System.String,System.Collections.Generic.IEnumerable{``0},System.String,System.String,Izio.Biblioteca.TipoArquivoExportacao,System.Boolean)">
             <summary>
             Metodo responsavel por gerar arquivo no formato csv e encaminhar por email
             </summary>
@@ -113,6 +133,7 @@
             <param name="des_email">email para enviar a url do arquivo</param>
             <param name="nomeArquivo">Propriedade opcional para informar o nome do arquivo</param>
             <param name="tipoExportacao">Enumerador de Tipo de Arquivo de Exportação</param>
+            <param name="retornaUrlArquivo">Caso o valor seja true retornará apenas a URL do arquivo CSV e nao enviará o email.</param>
         </member>
         <member name="T:Izio.Biblioteca.Model.ApiErrors">
             <summary>
@@ -301,6 +322,12 @@
             <param name="dtSet"></param>
             <param name="caminhoGeracaoArquivo"></param>
             <param name="nomeArquivo"></param>
+        </member>
+        <member name="M:Izio.Biblioteca.Utilidades.ConverteObjectListParaHtmlTable(System.Object)">
+            <summary>
+            Recebe um objeto e devolve uma table em html
+            </summary>
+            <param name="obj">Objeto com os dados para montar a table</param>
         </member>
         <member name="M:Izio.Biblioteca.Utilidades.CalcularGrupoControle(System.Int32)">
             <summary>
