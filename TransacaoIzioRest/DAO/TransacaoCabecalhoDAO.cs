@@ -37,6 +37,16 @@ namespace TransacaoRest.DAO
 
                 sqlServer.Command.CommandType = CommandType.Text;
 
+                sqlServer.Command.Parameters.Clear();
+                sqlServer.Command.Parameters.AddWithValue("@cod_cpf", dadosTransacaoCabecalho.cod_cpf);
+                sqlServer.Command.Parameters.AddWithValue("@cupom", dadosTransacaoCabecalho.cupom);
+                sqlServer.Command.Parameters.AddWithValue("@cod_loja", dadosTransacaoCabecalho.cod_loja);
+                sqlServer.Command.Parameters.AddWithValue("@dat_compra", dadosTransacaoCabecalho.dat_compra);
+                sqlServer.Command.Parameters.AddWithValue("@vlr_compra", dadosTransacaoCabecalho.vlr_compra);
+                sqlServer.Command.Parameters.AddWithValue("@qtd_itens_compra", dadosTransacaoCabecalho.qtd_itens_compra);
+                sqlServer.Command.Parameters.AddWithValue("@dat_cadastro", dadosTransacaoCabecalho.dat_cadastro);
+
+
                 sqlServer.Command.CommandText = $@"INSERT dbo.tab_transacao_cabecalho
                                                    (
                                                        --cod_transacao_cabecalho - this column value is auto-generated
@@ -51,13 +61,13 @@ namespace TransacaoRest.DAO
                                                    VALUES
                                                    (
                                                        -- cod_transacao_cabecalho - int
-                                                       '{dadosTransacaoCabecalho.cod_cpf}', -- cod_cpf - varchar
-                                                       '{dadosTransacaoCabecalho.cupom}', -- cupom - varchar
-                                                       {dadosTransacaoCabecalho.cod_loja}, -- cod_loja - int
-                                                       '{dadosTransacaoCabecalho.dat_compra}', -- dat_compra - datetime
-                                                       '{dadosTransacaoCabecalho.vlr_compra}', -- vlr_compra - decimal
-                                                       {dadosTransacaoCabecalho.qtd_itens_compra}, -- qtd_itens_compra - int
-                                                       '{dadosTransacaoCabecalho.dat_compra}' -- dat_cadastro - datetime
+                                                       @cod_cpf, -- cod_cpf - varchar
+                                                       @cupom, -- cupom - varchar
+                                                       @cod_loja, -- cod_loja - int
+                                                       @dat_compra, -- dat_compra - datetime
+                                                       @vlr_compra, -- vlr_compra - decimal
+                                                       @qtd_itens_compra, -- qtd_itens_compra - int
+                                                       @dat_cadastro -- dat_cadastro - datetime
                                                    );
                                                    SELECT @@IDENTITY;";
 

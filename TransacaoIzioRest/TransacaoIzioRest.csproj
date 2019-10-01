@@ -62,8 +62,8 @@
     <Reference Include="FastMember, Version=1.4.1.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\FastMember.1.4.1\lib\net461\FastMember.dll</HintPath>
     </Reference>
-    <Reference Include="Izio.Biblioteca, Version=1.1.7034.20720, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Izio.Biblioteca.20190405.18.0\lib\net461\Izio.Biblioteca.dll</HintPath>
+    <Reference Include="Izio.Biblioteca, Version=1.1.7123.19311, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Izio.Biblioteca.20190703.25.0\lib\net461\Izio.Biblioteca.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Azure.KeyVault.Core, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Azure.KeyVault.Core.3.0.1\lib\net452\Microsoft.Azure.KeyVault.Core.dll</HintPath>
