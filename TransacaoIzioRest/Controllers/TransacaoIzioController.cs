@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.Http;
 using System.Web.Http.Description;
@@ -215,19 +216,23 @@ namespace TransacaoIzioRest.Controllers
                 {
                     listaErros.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ObjetoTransacaoVazio });
                 }
-                else if (objTransacao.ListaItens == null)
+                else
                 {
-                    listaErros.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ObjetoItensTransacaoVazio });
-                }
-                else if (objTransacao.ListaItens != null && objTransacao.ListaItens.Count == 0)
-                {
-                    listaErros.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ObjetoItensTransacaoVazio });
-                }
-                else if (objTransacao.cod_pessoa > 0 && !impTransacao.VerificaCodPessoaExiste(objTransacao.cod_pessoa, objTransacao.cupom, objTransacao.dat_compra, objTransacao.cod_loja))
-                {
-                    listaErros.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = NaoExisteCodPessoa });
-                }
+                    objTransacao.cod_cpf = Regex.Replace(objTransacao.cod_cpf, "[^0-9,]", ""); 
 
+                    if (objTransacao.ListaItens == null)
+                    {
+                        listaErros.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ObjetoItensTransacaoVazio });
+                    }
+                    else if (objTransacao.ListaItens != null && objTransacao.ListaItens.Count == 0)
+                    {
+                        listaErros.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ObjetoItensTransacaoVazio });
+                    }
+                    else if (objTransacao.cod_pessoa > 0 && !impTransacao.VerificaCodPessoaExiste(objTransacao.cod_pessoa, objTransacao.cupom, objTransacao.dat_compra, objTransacao.cod_loja))
+                    {
+                        listaErros.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = NaoExisteCodPessoa });
+                    }
+                }
                 //Se a lista estiver preenchida, é por que foi encontrado erros na validação
                 if (listaErros.errors.Count > 0)
                 {
