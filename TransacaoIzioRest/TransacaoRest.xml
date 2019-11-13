@@ -76,7 +76,7 @@
             Classe para importação online do Izio - Os dados já são carregados nas tabelas finais de vendas: TAB_TRANSACAO e TAB_TRANSACAO_CPF
             </summary>
         </member>
-        <member name="M:TransacaoIzioRest.DAO.ImportaTransacaoDAO.VerificaCodPessoaExiste(System.Int64,System.String,System.DateTime,System.Int64)">
+        <member name="M:TransacaoIzioRest.DAO.ImportaTransacaoDAO.VerificaCodPessoaExiste(System.Nullable{System.Int64},System.String,System.DateTime,System.Nullable{System.Int64})">
             <summary>
             Verifica se o cod. Pessoa informado, possui cadastro no Izio
             </summary>
