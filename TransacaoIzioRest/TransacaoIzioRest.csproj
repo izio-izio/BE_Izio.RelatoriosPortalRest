@@ -219,10 +219,6 @@
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\TransacaoCabecalhoController.cs" />
     <Compile Include="Controllers\TransacaoIzioController.cs" />
-    <Compile Include="DAO\ImportaTransacaoDAO.cs" />
-    <Compile Include="DAO\TransacaoCabecalhoDAO.cs" />
-    <Compile Include="DAO\TransacaoCanceladaDAO.cs" />
-    <Compile Include="DAO\TransacaoDAO.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -242,6 +238,10 @@
     <Folder Include="App_Data\" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\TransacaoIzioRest.DAO\TransacaoIzioRest.DAO.csproj">
+      <Project>{f8b3da4f-5811-4d19-aa40-032367cc8c34}</Project>
+      <Name>TransacaoIzioRest.DAO</Name>
+    </ProjectReference>
     <ProjectReference Include="..\TransacaoIzioRest.Models\TransacaoIzioRest.Models.csproj">
       <Project>{72e29550-f83a-41b7-84d6-4d04f011a47a}</Project>
       <Name>TransacaoIzioRest.Models</Name>
