@@ -341,5 +341,92 @@ namespace TransacaoIzioRest.DAO
 
         #endregion
 
+
+        /// <summary>
+        /// Metodo retorna total de desconto da pessoa por periodo
+        /// </summary>
+        /// <returns></returns>
+        #region Consulta Total Descontos    
+
+        public DadosConsultaDesconto ConsultaTotalDesconto(long cod_pessoa, int qtdMes)
+        {
+            DadosConsultaDesconto retornoConsulta = new DadosConsultaDesconto();
+
+            try
+            {
+                //Abre a conexao com o banco da dados
+                sqlServer.StartConnection();
+
+                //Verifica se o usuario e a senha informado esta correto
+                sqlServer.Command.CommandText = @"SELECT tp.cod_pessoa,
+                                                  		COUNT(DISTINCT tt.cod_transacao) as qtd_transacao,
+                                                         SUM(tti.vlr_desconto_item) AS vlr_total_desconto
+                                                  FROM dbo.tab_transacao AS tt WITH (NOLOCK)
+                                                      INNER JOIN dbo.tab_transacao_itens AS tti
+                                                          ON tti.cod_transacao = tt.cod_transacao
+                                                      INNER JOIN dbo.tab_pessoa AS tp
+                                                          ON tp.cod_pessoa = tt.cod_pessoa
+                                                  WHERE tt.dat_compra BETWEEN DATEADD(MONTH, @qtdmes, GETDATE()) AND GETDATE() AND tp.cod_pessoa = @cod_pessoa GROUP BY tp.cod_pessoa";
+
+                // **********************************************************************************
+                //Monta os parametros
+                //Codigo da Pessoa
+                IDbDataParameter pcod_cpf = sqlServer.Command.CreateParameter();
+                pcod_cpf.ParameterName = "@cod_pessoa";
+                pcod_cpf.Value = cod_pessoa;
+                sqlServer.Command.Parameters.Add(pcod_cpf);
+
+                sqlServer.Command.Parameters.AddWithValue("@qtdmes", qtdMes * -1);
+                // **********************************************************************************
+                // **********************************************************************************
+
+                //Executa a consulta
+                sqlServer.Reader = sqlServer.Command.ExecuteReader();
+
+                if (sqlServer.Reader.HasRows)
+                {
+                    //Cria o payload de retorno
+                   //retornoConsulta.payload = new PayloadTotalDesconto();
+
+                    retornoConsulta.payload = new Izio.Biblioteca.ModuloClasse().PreencheClassePorDataReader<TransacaoIzioRest.Models.DadosConsultaTotalDesconto>(sqlServer.Reader);
+                }
+
+            }
+            catch (System.Exception ex)
+            {
+                if (sqlServer.Reader != null && !sqlServer.Reader.IsClosed)
+                {
+                    sqlServer.Reader.Close();
+                }
+
+                sqlServer.Rollback();
+
+                DadosLog dadosLog = new DadosLog();
+                dadosLog.des_erro_tecnico = ex.ToString();
+
+                //Pegar a mensagem padrão retornada da api, caso não tenha mensagem de negocio para devolver na API
+                Log.InserirLogIzio(NomeClienteWs, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
+
+                throw;
+            }
+            finally
+            {
+                if (sqlServer != null)
+                {
+                    if (sqlServer.Reader != null && !sqlServer.Reader.IsClosed)
+                    {
+                        sqlServer.Reader.Close();
+                        sqlServer.Reader.Dispose();
+                    }
+
+                    sqlServer.CloseConnection();
+
+                }
+            }
+            return retornoConsulta;
+        }
+        #endregion
+
+
     }
 }

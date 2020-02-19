@@ -71,6 +71,13 @@
             <param name="dataImportacao">Data (yyyyMMdd) para consulta das transações (vendas) importadas em lote</param>
             <returns></returns>
         </member>
+        <member name="M:TransacaoIzioRest.Controllers.TransacaoIzioRestController.ConsultaTotalDesconto(System.Int64,System.Int32)">
+            <summary>
+            Metodo para retonar as compras dos ultimos 6 meses do cliente
+            </summary>
+            <param name="codigoPessoa">Codigo da pessoa para a consulta das compras</param>
+            <param name="qtdMes"> consulta das compras neste periodo</param>
+        </member>
         <member name="T:TransacaoRest.Controllers.TransacaoCabecalhoController">
             <summary>
             Api das transações cabeçalhos
