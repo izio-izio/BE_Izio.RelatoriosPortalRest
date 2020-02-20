@@ -735,7 +735,7 @@ namespace TransacaoIzioRest.Controllers
                 if (!ex.Message.ToUpper().Contains("TOKEN"))
                 {
                     DadosLog dadosLog = new DadosLog();
-                    dadosLog.des_erro_tecnico = "Parametro Invalido: Cod. Pessoa: " + codigoPessoa.ToString() + " | Ano Mes: ";
+                    dadosLog.des_erro_tecnico = "Parametro Invalido: Cod. Pessoa: " + codigoPessoa.ToString() ;
                     Log.InserirLogIzio(sNomeCliente, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
 
                     dadosLog.des_erro_tecnico = ex.ToString();
