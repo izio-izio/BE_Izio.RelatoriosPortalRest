@@ -71,8 +71,9 @@
             <param name="dataImportacao">Data (yyyyMMdd) para consulta das transações (vendas) importadas em lote</param>
             <returns></returns>
         </member>
-        <member name="T:TransacaoIzioRest.DAO.ImportaTransacaoDAO">
+        <member name="M:TransacaoIzioRest.Controllers.TransacaoIzioRestController.ConsultaTotalDesconto(System.Int64,System.Int32)">
             <summary>
+<<<<<<< HEAD
             Classe para importação online do Izio - Os dados já são carregados nas tabelas finais de vendas: TAB_TRANSACAO e TAB_TRANSACAO_CPF
             </summary>
         </member>
@@ -161,8 +162,12 @@
         <member name="M:TransacaoIzioRest.DAO.TransacaoDAO.ConsultarTransacoesCarregadaEmLote(System.DateTime)">
             <summary>
             Consultar os registros que foram enviados para Izio para a tabela intermédiária - Viewizio_3.
+=======
+            Metodo para retonar as compras dos ultimos 6 meses do cliente
+>>>>>>> higor-totaldesconto
             </summary>
-            <returns></returns>
+            <param name="codigoPessoa">Codigo da pessoa para a consulta das compras</param>
+            <param name="qtdMes"> consulta das compras neste periodo</param>
         </member>
         <member name="T:TransacaoRest.Controllers.TransacaoCabecalhoController">
             <summary>
@@ -212,48 +217,6 @@
             </remarks>
             <response code="400">Bad request</response>
             <response code="500">Internal Server Error</response>
-        </member>
-        <member name="M:TransacaoRest.DAO.TransacaoCabecalhoDAO.#ctor(System.String)">
-            <summary>
-            Construtor da classe TransacaoCabecalhoDAO
-            </summary>
-            <param name="sNomeCliente"></param>
-        </member>
-        <member name="M:TransacaoRest.DAO.TransacaoCabecalhoDAO.CadastrarTransacaoCabecalho(TransacaoIzioRest.Models.DadosTransacaoCabecalho)">
-            <summary>
-            Inserção no banco de dado da transação cabeçalho
-            </summary>
-            <param name="dadosTransacaoCabecalho"></param>
-            <returns></returns>
-        </member>
-        <member name="M:TransacaoRest.DAO.TransacaoCabecalhoDAO.ConsultarTransacaoCabecalho(System.String,System.String)">
-            <summary>
-            Consulta no banco de dados com os parâmetros opcionais
-            </summary>
-            <param name="codCpf"></param>
-            <param name="dataProcessamento"></param>
-            <returns></returns>
-        </member>
-        <member name="M:TransacaoRest.DAO.TransacaoCabecalhoDAO.AtualizarTransacaoCabecalho(TransacaoIzioRest.Models.DadosTransacaoCabecalhoPatch)">
-            <summary>
-            Alteração parcial no banco de dado da transação cabeçalho
-            </summary>
-            <param name="dadosTransacaoCabecalhoPatch"></param>
-            <returns></returns>
-        </member>
-        <member name="M:TransacaoRest.DAO.TransacaoCabecalhoDAO.DeletarTransacaoCabecalho(System.Int32)">
-            <summary>
-            Realiza a exclusão da Transação Cabeçalho
-            </summary>
-            <param name="codTransacaoCabecalho"></param>
-            <returns></returns>
-        </member>
-        <member name="M:TransacaoRest.DAO.TransacaoCabecalhoDAO.ImportarLoteTransacaoCabecalho(System.Collections.Generic.List{TransacaoIzioRest.Models.DadosTransacaoCabecalho})">
-            <summary>
-            Inserção no banco de dados da lista de transações cabeçalhos
-            </summary>
-            <param name="listaTransacoesCabecalhos"></param>
-            <returns></returns>
         </member>
     </members>
 </doc>

@@ -627,5 +627,124 @@ namespace TransacaoIzioRest.Controllers
 
             }
         }
+
+        /// <summary>
+        /// Metodo para retonar as compras dos ultimos 6 meses do cliente
+        /// </summary>
+        /// <param name="codigoPessoa">Codigo da pessoa para a consulta das compras</param>
+        /// <param name="qtdMes"> consulta das compras neste periodo</param>
+        [HttpGet, Utilidades.ValidaTokenAutenticacao]
+        [Route("api/TransacaoIzio/ConsultaTotalDesconto/{codigoPessoa}")]
+        [SwaggerResponse("200", typeof(RetornoDadosTotalDesconto))]
+        [SwaggerResponse("401", typeof(ApiErrors))]
+        [SwaggerResponse("500", typeof(ApiErrors))]
+        public HttpResponseMessage ConsultaTotalDesconto([FromUri] long codigoPessoa, int qtdMes = 3 )
+        {
+            var re = Request;
+            var headers = re.Headers;
+
+            string tokenAutenticacao = "";
+            string sNomeCliente = null;
+
+            //Objeto de retorno do metodo com os publicos cadastrados na campanha
+            RetornoDadosTotalDesconto retornoConsulta = new RetornoDadosTotalDesconto();
+
+            //Objeto para processamento local da API
+            DadosConsultaDesconto dadosConsulta = new DadosConsultaDesconto();
+
+            //Objeto de retorno contendo os erros da execução da API
+            ApiErrors listaErros = new ApiErrors();
+            listaErros.errors = new List<Erros>();
+
+            try
+            {
+                //Valida Token no Izio
+                #region Valida Token no Izio
+
+                if (headers.Contains("tokenAutenticacao"))
+                {
+                    #region Valida o Nome do Cliente no Izio
+                    try
+                    {
+                        tokenAutenticacao = Request.Headers.GetValues("tokenAutenticacao").First();
+                        sNomeCliente = Request.Headers.GetValues("sNomeCliente").First();
+                    }
+                    catch (Exception)
+                    {
+                        listaErros.errors.Add(
+                            new Erros
+                            {
+                                code = Convert.ToInt32(HttpStatusCode.Unauthorized).ToString(),
+                                message = "Erro na captura do 'sNomeCliente' na Izio."
+                            });
+
+                        return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
+                    }
+                    #endregion
+                }
+                else
+                {
+                    listaErros.errors.Add(
+                        new Erros
+                        {
+                            code = Convert.ToInt32(HttpStatusCode.Unauthorized).ToString(),
+                            message = "Request Não autorizado. Token Inválido ou Nulo."
+                        });
+
+                    return Request.CreateResponse(HttpStatusCode.Unauthorized, listaErros);
+                }
+
+                #endregion
+
+                if (qtdMes < 1 || qtdMes > 6)
+                {
+                    listaErros.errors.Add(
+                       new Erros
+                       {
+                           code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(),
+                           message = "Permitido apenas entre 1 e 6 meses."
+                       });
+
+                    return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
+                }
+
+                //Executa metodo para consulta das transacações
+                DAO.TransacaoDAO consulta = new DAO.TransacaoDAO(sNomeCliente);
+                dadosConsulta = consulta.ConsultaTotalDesconto(codigoPessoa, qtdMes);
+
+                if (dadosConsulta.payload != null && (dadosConsulta.payload != null && dadosConsulta.payload.Count > 0))
+                {
+                    retornoConsulta.payload = dadosConsulta.payload;
+                    return Request.CreateResponse(HttpStatusCode.OK, retornoConsulta);
+                }
+                else
+                {
+                    listaErros.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = DadosNaoEncontrados + "." });
+                    return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
+                }
+            }
+            catch (Exception ex)
+            {
+                if (listaErros.errors == null)
+                {
+                    listaErros.errors = new List<Erros>();
+                }
+                //Seta o Objeto com o Erro ocorrido
+                listaErros.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = "Parametro Invalido: Cod. Pessoa: " + codigoPessoa.ToString()  });
+
+                if (!ex.Message.ToUpper().Contains("TOKEN"))
+                {
+                    DadosLog dadosLog = new DadosLog();
+                    dadosLog.des_erro_tecnico = "Parametro Invalido: Cod. Pessoa: " + codigoPessoa.ToString() ;
+                    Log.InserirLogIzio(sNomeCliente, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
+
+                    dadosLog.des_erro_tecnico = ex.ToString();
+                    //Pegar a mensagem padrão retornada da api, caso não tenha mensagem de negocio para devolver na API
+                    Log.InserirLogIzio(sNomeCliente, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
+                }
+
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
+            }
+        }
     }
 }

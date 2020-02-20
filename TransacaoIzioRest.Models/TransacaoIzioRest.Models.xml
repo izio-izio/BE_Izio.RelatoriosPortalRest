@@ -614,5 +614,40 @@
             Valor do desconto aplicado no item
             </summary>
         </member>
+        <member name="T:TransacaoIzioRest.Models.RetornoDadosTotalDesconto">
+            <summary>
+            Objeto de retorno para quando a execução ocorrer com sucesso
+            </summary>
+        </member>
+        <member name="T:TransacaoIzioRest.Models.DadosConsultaDesconto">
+            <summary>
+            Objeto de Retorno para utilização interna, para o processamento na DAO
+            </summary>
+        </member>
+        <member name="T:TransacaoIzioRest.Models.PayloadTotalDesconto">
+            <summary>
+            Objeto padrão de retorno da API Rest
+            </summary>
+        </member>
+        <member name="T:TransacaoIzioRest.Models.DadosConsultaTotalDesconto">
+            <summary>
+            Dados com os itens da transacao
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosConsultaTotalDesconto.cod_pessoa">
+            <summary>
+            Codigo da pessoa 
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosConsultaTotalDesconto.qtd_transacao">
+            <summary>
+            Codigo da Transação - Chave para os itens da compra
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosConsultaTotalDesconto.vlr_total_desconto">
+            <summary>
+            Código interno do produto
+            </summary>
+        </member>
     </members>
 </doc>
