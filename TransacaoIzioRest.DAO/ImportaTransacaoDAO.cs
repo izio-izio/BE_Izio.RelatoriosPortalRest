@@ -416,17 +416,7 @@ namespace TransacaoIzioRest.DAO
             {
                 sqlServer.Rollback();
 
-                DadosLog dadosLog = new DadosLog();
-                dadosLog.des_erro_tecnico = "Cupom: [" + objTransacao.cupom + "] " + ex.Message;
-
-                Log.InserirLogIzio(NomeClienteWs, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
-
-                var jsonTransacao = JsonConvert.SerializeObject(objTransacao);
-                dadosLog.des_erro_tecnico = "Json: " + jsonTransacao.ToString();
-
-                Log.InserirLogIzio(NomeClienteWs, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
-
-                if (ex.Message.Contains("unq_transacao_001"))
+                if (ex.Message.Contains("unq_transacao_001") && (!NomeClienteWs.ToLower().Contains("perim") && !NomeClienteWs.ToLower().Contains("hiperideal") && !NomeClienteWs.ToLower().Contains("panelao")))
                 {
                     ErroVendaDuplicada += " [ Loja: " + objTransacao.cod_loja +
                                                       "   Cupom: " + objTransacao.cupom +
@@ -434,12 +424,40 @@ namespace TransacaoIzioRest.DAO
                                                       "   Vlr. Compra: " + objTransacao.vlr_compra +
                                                       "   Qtd. Itens Compra: " + objTransacao.qtd_itens_compra + " ], favor contactar o administrador.";
 
-                    listaErros.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ErroVendaDuplicada });
+                    DadosLog dadosLog = new DadosLog();
+                    dadosLog.des_erro_tecnico = "Cupom: [" + objTransacao.cupom + "] " + ex.Message;
+
+                    Log.InserirLogIzio(NomeClienteWs, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
+
+                    var jsonTransacao = JsonConvert.SerializeObject(objTransacao);
+                    dadosLog.des_erro_tecnico = "Json: " + jsonTransacao.ToString();
+
+                    Log.InserirLogIzio(NomeClienteWs, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
+
+                    listaErros.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ErroVendaDuplicada + dadosLog.des_erro_tecnico });
                 }
                 else
                 {
-                    //Seta a lista de erros com o erro
-                    throw new System.Exception(ErroBancoDeDadosTransacao + " [" + objTransacao.cupom + "] , favor contactar o administrador");
+                    if ((NomeClienteWs.ToLower().Contains("perim") || NomeClienteWs.ToLower().Contains("hiperideal") || NomeClienteWs.ToLower().Contains("panelao")))
+                    {
+                        var jsonTransacao = JsonConvert.SerializeObject(objTransacao);
+                        listaErros.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ErroVendaDuplicada + "Json: " + jsonTransacao.ToString()});
+                    }
+                    else
+                    {
+                        DadosLog dadosLog = new DadosLog();
+                        dadosLog.des_erro_tecnico = "Cupom: [" + objTransacao.cupom + "] " + ex.Message;
+
+                        Log.InserirLogIzio(NomeClienteWs, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
+
+                        var jsonTransacao = JsonConvert.SerializeObject(objTransacao);
+                        dadosLog.des_erro_tecnico = "Json: " + jsonTransacao.ToString();
+
+                        Log.InserirLogIzio(NomeClienteWs, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
+
+                        //Seta a lista de erros com o erro
+                        throw new System.Exception(ErroBancoDeDadosTransacao + " [" + objTransacao.cupom + "] , favor contactar o administrador");
+                    }
                 }
             }
             finally
