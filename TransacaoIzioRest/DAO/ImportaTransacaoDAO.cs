@@ -12,6 +12,7 @@ using System.Data.SqlClient;
 using Newtonsoft.Json;
 using System.Data;
 using Izio.Biblioteca.Model;
+using System.Text.RegularExpressions;
 
 namespace TransacaoIzioRest.DAO
 {
@@ -378,7 +379,7 @@ namespace TransacaoIzioRest.DAO
                         if (arrayCodNSU.ElementAtOrDefault(posSplitNSU) != null)
                         {
                             sqlServer.Command.Parameters.AddWithValue("@cod_nsu_cartao", arrayCodNSU[posSplitNSU]);
-                            sqlServer.Command.Parameters.AddWithValue("@dat_nsu_cartao", string.IsNullOrEmpty(objTransacao.dat_geracao_nsu.Split(';')[posSplitNSU]) ? "" : objTransacao.dat_geracao_nsu.Split(';')[posSplitNSU]);
+                            sqlServer.Command.Parameters.AddWithValue("@dat_nsu_cartao", (string.IsNullOrEmpty(objTransacao.dat_geracao_nsu)) || string.IsNullOrEmpty(objTransacao.dat_geracao_nsu.Split(';')[posSplitNSU]) ? (object)DBNull.Value : objTransacao.dat_geracao_nsu.Split(';')[posSplitNSU]);
                         }
                         else
                         {
@@ -388,7 +389,8 @@ namespace TransacaoIzioRest.DAO
 
                         if (string.IsNullOrEmpty(objTransacao.des_bin_cartao))
                         {
-                            sqlServer.Command.Parameters.AddWithValue("@des_bin_cartao", nomePagamennto.Split('@').Count() == 1 ? "" : nomePagamennto.Split('@')[0]);
+                            var des_bin_cartao = Regex.Replace(nomePagamennto.Split('@').Count() == 1 ? "" : nomePagamennto.Split('@')[0], @"\D", "");
+                            sqlServer.Command.Parameters.AddWithValue("@des_bin_cartao",des_bin_cartao);
                         }
                         else
                         {
