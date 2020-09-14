@@ -49,6 +49,11 @@
             Codigo da loja que foi realizado a compra
             </summary>
         </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoOnline.cod_pdv">
+            <summary>
+            Numero do PDV da realização da compraS
+            </summary>
+        </member>
         <member name="P:TransacaoIzioRest.Models.DadosTransacaoOnline.cod_usuario">
             <summary>
             Codigo do usuario (enviar 1)
