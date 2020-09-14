@@ -210,7 +210,7 @@ namespace TransacaoIzioRest.DAO
                     sqlServer.Command.Parameters.AddWithValue("@cod_arquivo", 0);
 
                 sqlServer.Command.Parameters.AddWithValue("@cod_loja", objTransacao.cod_loja);
-                sqlServer.Command.Parameters.AddWithValue("@cod_pdv", objTransacao.cod_pdv);
+                //sqlServer.Command.Parameters.AddWithValue("@cod_pdv", objTransacao.cod_pdv);
                 sqlServer.Command.Parameters.AddWithValue("@cod_usuario", objTransacao.cod_usuario);
                 sqlServer.Command.Parameters.AddWithValue("@qtd_itens_compra", objTransacao.qtd_itens_compra);
 
@@ -224,6 +224,17 @@ namespace TransacaoIzioRest.DAO
                 {
                     sqlServer.Command.Parameters.AddWithValue("@vlr_total_desconto", DBNull.Value);
                 }
+
+
+                if (objTransacao.cod_pdv != null)
+                {
+                    sqlServer.Command.Parameters.AddWithValue("@cod_pdv", objTransacao.cod_pdv);
+                }
+                else
+                {
+                    sqlServer.Command.Parameters.AddWithValue("@cod_pdv", DBNull.Value);
+                }
+
 
 
                 if (objTransacao.vlr_troco != null)
@@ -355,6 +366,7 @@ namespace TransacaoIzioRest.DAO
                                                            @nom_tipo_pagamento,
                                                            @cod_nsu_cartao,
                                                            @dat_nsu_cartao,
+                                                           @des_bin_cartao,
                                                            @vlr_meiopagto)";
                     }
 
