@@ -39,6 +39,11 @@
             Meios de pagamentos utilizados na compra (quando tiver mais de 1, separar eles por ";". Ex: Cartão Visa; Cartão Master; Dinheiro)
             </summary>
         </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoOnline.vlr_meiopagto">
+            <summary>
+            Valor pago em cada meio de pagamento (quando tiver mais de 1, separar eles por ";". Ex: 11.00; 19.00; 20.00)
+            </summary>
+        </member>
         <member name="P:TransacaoIzioRest.Models.DadosTransacaoOnline.cod_loja">
             <summary>
             Codigo da loja que foi realizado a compra
@@ -79,9 +84,14 @@
             BIN do cartão utilizado no pagamento da venda. Caso a compra seja paga em mais de um cartão, os BINs precisam vir separados por ";"
             </summary>
         </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoOnline.vlr_troco">
+            <summary>
+            Valor para campanha do tipo do troco
+            </summary>
+        </member>
         <member name="P:TransacaoIzioRest.Models.DadosTransacaoOnline.ListaItens">
             <summary>
-            Lista com os itens da compra
+            Valor para campanha do tipo do troco
             </summary>
         </member>
         <member name="T:TransacaoIzioRest.Models.DadosItensTransacao">
@@ -169,6 +179,11 @@
             Meios de pagamanto da compra. Quando tiver mais de 1 separar com ";". Ex: Cartão Visa; Cartão Master; Dinheiro
             </summary>
         </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoLote.vlr_meiopagto">
+            <summary>
+            Valor pago em cada meio de pagamento (quando tiver mais de 1, separar eles por ";". Ex: 11.00; 19.00; 20.00)
+            </summary>
+        </member>
         <member name="P:TransacaoIzioRest.Models.DadosTransacaoLote.qtd_itens_compra">
             <summary>
             Quantidade de itens da compra
@@ -222,6 +237,11 @@
         <member name="P:TransacaoIzioRest.Models.DadosTransacaoLote.des_bin_cartao">
             <summary>
             BIN do cartão utilizado no pagamento da venda. Caso a compra seja paga em mais de um cartão, os BINs precisam vir separados por ";"
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoLote.vlr_troco">
+            <summary>
+            Valor para campanha do tipo do troco
             </summary>
         </member>
         <member name="T:TransacaoIzioRest.Models.DadosLoteViewizio_3">
