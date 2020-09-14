@@ -57,6 +57,10 @@ namespace TransacaoIzioRest.Models
         public long cod_loja { get; set; }
 
         /// <summary>
+        /// Numero do PDV da realização da compraS
+        /// </summary>
+        public string cod_pdv { get; set; }
+        /// <summary>
         /// Codigo do usuario (enviar 1)
         /// </summary>
         public long cod_usuario { get; set; }

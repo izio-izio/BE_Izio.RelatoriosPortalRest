@@ -143,6 +143,7 @@ namespace TransacaoIzioRest.DAO
                                                       dat_compra,
                                                       vlr_compra,
                                                       cod_loja,
+                                                      cod_pdv,
                                                       cod_usuario,
                                                       dat_importacao,
                                                       cod_arquivo,
@@ -155,6 +156,7 @@ namespace TransacaoIzioRest.DAO
                                                       @dat_compra,
                                                       @vlr_compra,
                                                       @cod_loja,
+                                                      @cod_pdv,
                                                       @cod_usuario,
                                                       (CONVERT(datetimeoffset, getdate()) AT TIME ZONE 'E. South America Standard Time'),
                                                       @cod_arquivo,
@@ -208,6 +210,7 @@ namespace TransacaoIzioRest.DAO
                     sqlServer.Command.Parameters.AddWithValue("@cod_arquivo", 0);
 
                 sqlServer.Command.Parameters.AddWithValue("@cod_loja", objTransacao.cod_loja);
+                sqlServer.Command.Parameters.AddWithValue("@cod_pdv", objTransacao.cod_pdv);
                 sqlServer.Command.Parameters.AddWithValue("@cod_usuario", objTransacao.cod_usuario);
                 sqlServer.Command.Parameters.AddWithValue("@qtd_itens_compra", objTransacao.qtd_itens_compra);
 
