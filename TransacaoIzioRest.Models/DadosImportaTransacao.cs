@@ -20,6 +20,7 @@ namespace TransacaoIzioRest.Models
         /// <summary>
         /// Codigo da equipe (enviar 100)
         /// </summary>
+        [JsonIgnore]
         public long? cod_equipe { get; set; }
 
         /// <summary>
