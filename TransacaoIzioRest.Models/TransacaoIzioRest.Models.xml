@@ -56,7 +56,7 @@
         </member>
         <member name="P:TransacaoIzioRest.Models.DadosTransacaoOnline.cod_usuario">
             <summary>
-            Codigo do usuario (enviar 1)
+            Codigo do operador do pdv
             </summary>
         </member>
         <member name="P:TransacaoIzioRest.Models.DadosTransacaoOnline.qtd_itens_compra">
@@ -257,6 +257,11 @@
         <member name="P:TransacaoIzioRest.Models.DadosLoteViewizio_3.vlr_total_desconto">
             <summary>
             Valor total de desconto aplicado nos itens vendidos
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosLoteViewizio_3.cod_usuario">
+            <summary>
+            Codigo do operador do pdv
             </summary>
         </member>
         <member name="P:TransacaoIzioRest.Models.DadosLoteViewizio_3.item">

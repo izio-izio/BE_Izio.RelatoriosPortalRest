@@ -61,7 +61,7 @@ namespace TransacaoIzioRest.Models
         /// </summary>
         public string cod_pdv { get; set; }
         /// <summary>
-        /// Codigo do usuario (enviar 1)
+        /// Codigo do operador do pdv
         /// </summary>
         public long? cod_usuario { get; set; } = 1;
 
@@ -312,7 +312,9 @@ namespace TransacaoIzioRest.Models
         public decimal ValorItem { get; set; }
         public decimal? vlr_desconto_item { get; set; }
         public decimal Quantidade { get; set; }
-
+        /// <summary>
+        /// Codigo do operador do pdv
+        /// </summary>
         public long cod_usuario { get; set; }
         public long cod_pessoa { get; set; }
 
