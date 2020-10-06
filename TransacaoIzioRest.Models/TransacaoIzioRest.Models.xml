@@ -39,14 +39,24 @@
             Meios de pagamentos utilizados na compra (quando tiver mais de 1, separar eles por ";". Ex: Cartão Visa; Cartão Master; Dinheiro)
             </summary>
         </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoOnline.vlr_meiopagto">
+            <summary>
+            Valor pago em cada meio de pagamento (quando tiver mais de 1, separar eles por ";". Ex: 11.00; 19.00; 20.00)
+            </summary>
+        </member>
         <member name="P:TransacaoIzioRest.Models.DadosTransacaoOnline.cod_loja">
             <summary>
             Codigo da loja que foi realizado a compra
             </summary>
         </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoOnline.cod_pdv">
+            <summary>
+            Numero do PDV da realização da compraS
+            </summary>
+        </member>
         <member name="P:TransacaoIzioRest.Models.DadosTransacaoOnline.cod_usuario">
             <summary>
-            Codigo do usuario (enviar 1)
+            Codigo do operador do pdv
             </summary>
         </member>
         <member name="P:TransacaoIzioRest.Models.DadosTransacaoOnline.qtd_itens_compra">
@@ -79,9 +89,14 @@
             BIN do cartão utilizado no pagamento da venda. Caso a compra seja paga em mais de um cartão, os BINs precisam vir separados por ";"
             </summary>
         </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoOnline.vlr_troco">
+            <summary>
+            Valor para campanha do tipo do troco
+            </summary>
+        </member>
         <member name="P:TransacaoIzioRest.Models.DadosTransacaoOnline.ListaItens">
             <summary>
-            Lista com os itens da compra
+            Valor para campanha do tipo do troco
             </summary>
         </member>
         <member name="T:TransacaoIzioRest.Models.DadosItensTransacao">
@@ -169,6 +184,11 @@
             Meios de pagamanto da compra. Quando tiver mais de 1 separar com ";". Ex: Cartão Visa; Cartão Master; Dinheiro
             </summary>
         </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoLote.vlr_meiopagto">
+            <summary>
+            Valor pago em cada meio de pagamento (quando tiver mais de 1, separar eles por ";". Ex: 11.00; 19.00; 20.00)
+            </summary>
+        </member>
         <member name="P:TransacaoIzioRest.Models.DadosTransacaoLote.qtd_itens_compra">
             <summary>
             Quantidade de itens da compra
@@ -224,6 +244,11 @@
             BIN do cartão utilizado no pagamento da venda. Caso a compra seja paga em mais de um cartão, os BINs precisam vir separados por ";"
             </summary>
         </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoLote.vlr_troco">
+            <summary>
+            Valor para campanha do tipo do troco
+            </summary>
+        </member>
         <member name="T:TransacaoIzioRest.Models.DadosLoteViewizio_3">
             <summary>
             Classe padrão com os campos viewizio_3
@@ -232,6 +257,11 @@
         <member name="P:TransacaoIzioRest.Models.DadosLoteViewizio_3.vlr_total_desconto">
             <summary>
             Valor total de desconto aplicado nos itens vendidos
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosLoteViewizio_3.cod_usuario">
+            <summary>
+            Codigo do operador do pdv
             </summary>
         </member>
         <member name="P:TransacaoIzioRest.Models.DadosLoteViewizio_3.item">

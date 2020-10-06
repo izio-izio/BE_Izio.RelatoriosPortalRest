@@ -20,12 +20,13 @@ namespace TransacaoIzioRest.Models
         /// <summary>
         /// Codigo da equipe (enviar 100)
         /// </summary>
+        [JsonIgnore]
         public long cod_equipe { get; set; }
 
         /// <summary>
         /// Codigo da pessoa,se não tiver enviar 0
         /// </summary>
-        public long cod_pessoa { get; set; }
+        public long? cod_pessoa { get; set; } = 0;
 
         /// <summary>
         /// Data e hora da realização da compra
@@ -46,13 +47,22 @@ namespace TransacaoIzioRest.Models
         public string nom_tipo_pagamento { get; set; }
 
         /// <summary>
+        /// Valor pago em cada meio de pagamento (quando tiver mais de 1, separar eles por ";". Ex: 11.00; 19.00; 20.00)
+        /// </summary>
+        public string vlr_meiopagto { get; set; }
+
+        /// <summary>
         /// Codigo da loja que foi realizado a compra
         /// </summary>
         [JsonRequired]
         public long cod_loja { get; set; }
 
         /// <summary>
-        /// Codigo do usuario (enviar 1)
+        /// Numero do PDV da realização da compraS
+        /// </summary>
+        public string cod_pdv { get; set; }
+        /// <summary>
+        /// Codigo do operador do pdv
         /// </summary>
         public long cod_usuario { get; set; }
 
@@ -89,7 +99,12 @@ namespace TransacaoIzioRest.Models
         public string des_bin_cartao { get; set; }
 
         /// <summary>
-        /// Lista com os itens da compra
+        /// Valor para campanha do tipo do troco
+        /// </summary>
+        public decimal? vlr_troco { get; set; }
+
+        /// <summary>
+        /// Valor para campanha do tipo do troco
         /// </summary>
         [JsonRequired]
         public List<DadosItensTransacao> ListaItens { get; set; }
@@ -193,6 +208,11 @@ namespace TransacaoIzioRest.Models
         public string des_tipo_pagamento { get; set; }
 
         /// <summary>
+        /// Valor pago em cada meio de pagamento (quando tiver mais de 1, separar eles por ";". Ex: 11.00; 19.00; 20.00)
+        /// </summary>
+        public string vlr_meiopagto { get; set; }
+
+        /// <summary>
         /// Quantidade de itens da compra
         /// </summary>
         [JsonRequired]
@@ -255,6 +275,11 @@ namespace TransacaoIzioRest.Models
         /// </summary>
         public string des_bin_cartao { get; set; }
 
+        /// <summary>
+        /// Valor para campanha do tipo do troco
+        /// </summary>
+        public decimal? vlr_troco { get; set; }
+
     }
 
     /// <summary>
@@ -271,6 +296,8 @@ namespace TransacaoIzioRest.Models
 
         public string Pdv { get; set; }
         public Int32 CodPagto { get; set; }
+
+        public string vlr_meiopagto { get; set; }
         public string MeioPagto { get; set; }
 
         public Int32 QtdeItens { get; set; }
@@ -278,7 +305,7 @@ namespace TransacaoIzioRest.Models
         /// Valor total de desconto aplicado nos itens vendidos
         /// </summary>
         public decimal? vlr_total_desconto { get; set; }
-
+        public decimal? vlr_troco { get; set; }
         public string CodEAN { get; set; }
         public long CodProduto { get; set; }
         public string DesProduto { get; set; }
@@ -286,7 +313,9 @@ namespace TransacaoIzioRest.Models
         public decimal ValorItem { get; set; }
         public decimal? vlr_desconto_item { get; set; }
         public decimal Quantidade { get; set; }
-
+        /// <summary>
+        /// Codigo do operador do pdv
+        /// </summary>
         public long cod_usuario { get; set; }
         public long cod_pessoa { get; set; }
 

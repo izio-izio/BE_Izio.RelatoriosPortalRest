@@ -4,7 +4,7 @@
         <name>Izio.Biblioteca</name>
     </assembly>
     <members>
-        <member name="M:Izio.Biblioteca.AzureBlob.UploadFileBase64(System.Object,System.String)">
+        <member name="M:Izio.Biblioteca.AzureBlob.UploadFileBase64(System.Object,System.String,System.Boolean)">
             <summary>
             Upload de arquivo em base 64 para o Azure Blob
             </summary>
@@ -20,7 +20,7 @@
             <param name="token"></param>
             <returns></returns>
         </member>
-        <member name="M:Izio.Biblioteca.AzureBlob.uploadFileAzure(System.Object,System.Object)">
+        <member name="M:Izio.Biblioteca.AzureBlob.uploadFileAzure(System.Object,System.Object,System.Boolean)">
             <summary>
             Realiza o upload do arquivo no Azure Blob Service
             </summary>
@@ -69,6 +69,12 @@
             <summary>
             Mensagem
             </summary>
+        </member>
+        <member name="M:Izio.Biblioteca.DAO.ParametroDAO.ListarParametros(System.String)">
+            <summary>
+            Metodo responsavel por buscar parametros na base do cliente no modelo de chave-valor (parametros separados por virgula sem espaço)
+            </summary>
+            <param name="chaves">string de chaves, podendo ser multivalorado separado por virgula sem espaço</param>
         </member>
         <member name="T:Izio.Biblioteca.Dominio.OperadorLogico">
             <summary>
@@ -120,7 +126,7 @@
             propriedade opcional para limitar o numero de execuções simultaneas (valor padrão 10)
             </summary>
         </member>
-        <member name="M:Izio.Biblioteca.ExportacaoArquivo.ExportarArquivo``1(System.String,System.Collections.Generic.IEnumerable{``0},System.String,System.String,Izio.Biblioteca.TipoArquivoExportacao,System.Boolean,System.Collections.Generic.Dictionary{System.String,System.String})">
+        <member name="M:Izio.Biblioteca.ExportacaoArquivo.ExportarArquivo``1(System.String,System.Collections.Generic.IEnumerable{``0},System.String,System.String,Izio.Biblioteca.TipoArquivoExportacao,System.Boolean,System.Collections.Generic.Dictionary{System.String,System.String},System.Int32,System.String,System.Boolean)">
             <summary>
             Metodo responsavel por gerar arquivo no formato csv e encaminhar por email
             </summary>
@@ -134,6 +140,8 @@
             <param name="nomeArquivo">Propriedade opcional para informar o nome do arquivo</param>
             <param name="tipoExportacao">Enumerador de Tipo de Arquivo de Exportação</param>
             <param name="retornaUrlArquivo">Caso o valor seja true retornará apenas a URL do arquivo CSV e nao enviará o email.</param>
+            <param name="cod_usuario">Código do usuário que solicitou a exportação.</param>
+            <param name="password">Senha para proteger o arquivo excel.</param>
         </member>
         <member name="T:Izio.Biblioteca.Model.ApiErrors">
             <summary>
@@ -188,6 +196,21 @@
         <member name="P:Izio.Biblioteca.Model.DadosLog.cod_menu">
             <summary>
             Campo deprecado - informar 0
+            </summary>
+        </member>
+        <member name="T:Izio.Biblioteca.Model.DadosParametro">
+            <summary>
+            Dados do parametro
+            </summary>
+        </member>
+        <member name="P:Izio.Biblioteca.Model.DadosParametro.des_chave">
+            <summary>
+            Código único
+            </summary>
+        </member>
+        <member name="P:Izio.Biblioteca.Model.DadosParametro.des_valor">
+            <summary>
+            valor
             </summary>
         </member>
         <member name="T:Izio.Biblioteca.ModuloClasse.AtributoPropriedade">

@@ -143,23 +143,27 @@ namespace TransacaoIzioRest.DAO
                                                       dat_compra,
                                                       vlr_compra,
                                                       cod_loja,
+                                                      cod_pdv,
                                                       cod_usuario,
                                                       dat_importacao,
                                                       cod_arquivo,
                                                       qtd_itens_compra,
                                                       cupom,
-                                                      vlr_total_desconto) output INSERTED.cod_transacao 
+                                                      vlr_total_desconto,
+                                                      vlr_troco) output INSERTED.cod_transacao 
                                                    values (
                                                       @cod_pessoa,
                                                       @dat_compra,
                                                       @vlr_compra,
                                                       @cod_loja,
+                                                      @cod_pdv,
                                                       @cod_usuario,
                                                       (CONVERT(datetimeoffset, getdate()) AT TIME ZONE 'E. South America Standard Time'),
                                                       @cod_arquivo,
                                                       @qtd_itens_compra,
                                                       @cupom,
-                                                      @vlr_total_desconto) ";
+                                                      @vlr_total_desconto,
+                                                      @vlr_troco) ";
                 }
                 else
                 {
@@ -173,7 +177,8 @@ namespace TransacaoIzioRest.DAO
                                                       dat_importacao,
                                                       qtd_itens_compra,
                                                       cupom,
-                                                      vlr_total_desconto) output INSERTED.cod_tab_transacao_cpf
+                                                      vlr_total_desconto,
+                                                      vlr_troco) output INSERTED.cod_tab_transacao_cpf
                                                    values (
                                                       @num_cpf,
                                                       @dat_compra,
@@ -183,7 +188,8 @@ namespace TransacaoIzioRest.DAO
                                                       (CONVERT(datetimeoffset, getdate()) AT TIME ZONE 'E. South America Standard Time'),
                                                       @qtd_itens_compra,
                                                       @cupom,
-                                                      @vlr_total_desconto) ";
+                                                      @vlr_total_desconto,
+                                                      @vlr_troco) ";
 
                 }
 
@@ -204,6 +210,7 @@ namespace TransacaoIzioRest.DAO
                     sqlServer.Command.Parameters.AddWithValue("@cod_arquivo", 0);
 
                 sqlServer.Command.Parameters.AddWithValue("@cod_loja", objTransacao.cod_loja);
+                //sqlServer.Command.Parameters.AddWithValue("@cod_pdv", objTransacao.cod_pdv);
                 sqlServer.Command.Parameters.AddWithValue("@cod_usuario", objTransacao.cod_usuario);
                 sqlServer.Command.Parameters.AddWithValue("@qtd_itens_compra", objTransacao.qtd_itens_compra);
 
@@ -216,6 +223,27 @@ namespace TransacaoIzioRest.DAO
                 else
                 {
                     sqlServer.Command.Parameters.AddWithValue("@vlr_total_desconto", DBNull.Value);
+                }
+
+
+                if (objTransacao.cod_pdv != null)
+                {
+                    sqlServer.Command.Parameters.AddWithValue("@cod_pdv", objTransacao.cod_pdv);
+                }
+                else
+                {
+                    sqlServer.Command.Parameters.AddWithValue("@cod_pdv", DBNull.Value);
+                }
+
+
+
+                if (objTransacao.vlr_troco != null)
+                {
+                    sqlServer.Command.Parameters.AddWithValue("@vlr_troco", objTransacao.vlr_troco);
+                }
+                else
+                {
+                    sqlServer.Command.Parameters.AddWithValue("@vlr_troco", DBNull.Value);
                 }
 
                 #endregion
@@ -314,13 +342,15 @@ namespace TransacaoIzioRest.DAO
                                                            nom_tipo_pagamento,
                                                            cod_nsu_cartao,
                                                            dat_nsu_cartao,
-                                                           des_bin_cartao) 
+                                                           des_bin_cartao,
+                                                           vlr_meiopagto) 
                                                         values (
                                                            @cod_transacao,
                                                            @nom_tipo_pagamento,
                                                            @cod_nsu_cartao,
                                                            @dat_nsu_cartao,
-                                                           @des_bin_cartao) ";
+                                                           @des_bin_cartao,
+                                                           @vlr_meiopagto) ";
                     }
                     else
                     {
@@ -329,13 +359,15 @@ namespace TransacaoIzioRest.DAO
                                                            nom_tipo_pagamento,
                                                            cod_nsu_cartao,
                                                            dat_nsu_cartao,
-                                                           des_bin_cartao) 
+                                                           des_bin_cartao,
+                                                           vlr_meiopagto) 
                                                         values (
                                                            @cod_transacao,
                                                            @nom_tipo_pagamento,
                                                            @cod_nsu_cartao,
                                                            @dat_nsu_cartao,
-                                                           @des_bin_cartao) ";
+                                                           @des_bin_cartao,
+                                                           @vlr_meiopagto)";
                     }
 
 
@@ -345,15 +377,25 @@ namespace TransacaoIzioRest.DAO
 
                     ListaMeioPagto = objTransacao.nom_tipo_pagamento.Split(';').ToList();
 
+
                     Int32 posSplitNSU = 0;
 
                     //Array com os NSUs da compra paga com cartão, cria array para 10 pagamentos em cartão
                     string[] arrayCodNSU = new string[10];
-//                    Boolean bArrayPreechido = false;
+                    string[] arrayVlrMeioPagto = new string[10];
+                    //                    Boolean bArrayPreechido = false;
 
                     if (!string.IsNullOrEmpty(objTransacao.nsu_transacao))
                     {
                         arrayCodNSU = objTransacao.nsu_transacao.Split(';');
+                        //bArrayPreechido = true;
+                    }
+
+                    if (!string.IsNullOrEmpty(objTransacao.vlr_meiopagto))
+                    {
+                        objTransacao.vlr_meiopagto = objTransacao.vlr_meiopagto.Replace(":", ";").Replace(",", ".").Trim();
+
+                        arrayVlrMeioPagto = objTransacao.vlr_meiopagto.Split(';');
                         //bArrayPreechido = true;
                     }
 
@@ -375,6 +417,16 @@ namespace TransacaoIzioRest.DAO
                         {
                             nomePagamennto = "Não Informado";
                         }
+
+                        if (arrayVlrMeioPagto.ElementAtOrDefault(posSplitNSU) != null)
+                        {
+                            sqlServer.Command.Parameters.AddWithValue("@vlr_meiopagto", arrayVlrMeioPagto[posSplitNSU]);
+                        }
+                        else
+                        {
+                            sqlServer.Command.Parameters.AddWithValue("@vlr_meiopagto", "0");
+                        }
+
 
                         if (arrayCodNSU.ElementAtOrDefault(posSplitNSU) != null)
                         {
@@ -522,7 +574,10 @@ namespace TransacaoIzioRest.DAO
                         nsu_transacao = dadosTrans.nsu_transacao,
                         dat_geracao_nsu = dadosTrans.dat_geracao_nsu,
                         vlr_total_desconto = dadosTrans.vlr_total_desconto,
-                        des_bin_cartao = dadosTrans.des_bin_cartao
+                        des_bin_cartao = dadosTrans.des_bin_cartao,
+                        vlr_meiopagto = dadosTrans.vlr_meiopagto,
+                        vlr_troco = dadosTrans.vlr_troco
+                       
                     });
                 }
 
@@ -563,7 +618,9 @@ namespace TransacaoIzioRest.DAO
                     "nsu_transacao",
                     "dat_geracao_nsu",
                     "vlr_total_desconto",
-                    "des_bin_cartao"))
+                    "des_bin_cartao",
+                    "vlr_meiopagto",
+                    "vlr_troco"))
                 {
                     bcp.BulkCopyTimeout = ConfigurationManager.AppSettings["TimeoutExecucao"] != null ? Convert.ToInt32(ConfigurationManager.AppSettings["TimeoutExecucao"]) : 600;
                     bcp.DestinationTableName = "viewizio_3";
