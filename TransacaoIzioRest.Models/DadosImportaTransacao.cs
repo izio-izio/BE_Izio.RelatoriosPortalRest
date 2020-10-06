@@ -21,7 +21,7 @@ namespace TransacaoIzioRest.Models
         /// Codigo da equipe (enviar 100)
         /// </summary>
         [JsonIgnore]
-        public long cod_equipe { get; set; }
+        public long? cod_equipe { get; set; }
 
         /// <summary>
         /// Codigo da pessoa,se não tiver enviar 0
@@ -64,7 +64,7 @@ namespace TransacaoIzioRest.Models
         /// <summary>
         /// Codigo do operador do pdv
         /// </summary>
-        public long cod_usuario { get; set; }
+        public long? cod_usuario { get; set; } = 1;
 
         /// <summary>
         /// Quantidade de itens da compra

@@ -48,7 +48,7 @@ namespace TransacaoIzioRest.DAO
         /// <param name="cod_loja"></param>
         /// <returns></returns>
         #region Verifica se o cod. Pessoa informado, possui cadastro no Izio
-        public Boolean VerificaCodPessoaExiste(long cod_pessoa,string cupom, DateTime dat_compra, long cod_loja)
+        public Boolean VerificaCodPessoaExiste(long? cod_pessoa,string cupom, DateTime dat_compra, long? cod_loja)
         {
             int iCount = 0;
 

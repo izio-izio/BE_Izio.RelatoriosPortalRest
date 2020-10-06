@@ -160,4 +160,58 @@ namespace TransacaoIzioRest.Models
 
     #endregion
 
+    #region Total Desconto Por Pessoa
+
+    /// <summary>
+    /// Objeto de retorno para quando a execução ocorrer com sucesso
+    /// </summary>
+    public class RetornoDadosTotalDesconto
+    {
+        public List<DadosConsultaTotalDesconto> payload { get; set; }
+    }
+
+
+    /// <summary>
+    /// Objeto de Retorno para utilização interna, para o processamento na DAO
+    /// </summary>
+    public class DadosConsultaDesconto
+    {
+        public List<DadosConsultaTotalDesconto> payload { get; set; }
+    }
+
+    /// <summary>
+    /// Objeto padrão de retorno da API Rest
+    /// </summary>
+    public class PayloadTotalDesconto
+    {
+        public List<DadosConsultaTotalDesconto> listaTotalDesconto { get; set; }
+    }
+
+    /// <summary>
+    /// Dados com os itens da transacao
+    /// </summary>
+    public class DadosConsultaTotalDesconto
+    {
+
+
+        /// <summary>
+        /// Codigo da pessoa 
+        /// </summary>
+        public long cod_pessoa { get; set; }
+
+        /// <summary>
+        /// Codigo da Transação - Chave para os itens da compra
+        /// </summary>
+        public Int64 qtd_transacao { get; set; }
+
+        /// <summary>
+        /// Código interno do produto
+        /// </summary>
+        public decimal vlr_total_desconto { get; set; }
+
+        
+    }
+
+    #endregion
+
 }
