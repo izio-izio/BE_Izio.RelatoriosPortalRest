@@ -228,7 +228,7 @@ namespace TransacaoIzioRest.Controllers
                     {
                         listaErros.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ObjetoItensTransacaoVazio });
                     }
-                    else if (objTransacao.cod_pessoa > 0 && !impTransacao.VerificaCodPessoaExiste(objTransacao.cod_pessoa, objTransacao.cupom, objTransacao.dat_compra, objTransacao.cod_loja))
+                    else if (objTransacao.cod_pessoa > 0 && !impTransacao.VerificaCodPessoaExiste(objTransacao.cod_pessoa.Value, objTransacao.cupom, objTransacao.dat_compra, objTransacao.cod_loja))
                     {
                         listaErros.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = NaoExisteCodPessoa });
                     }
