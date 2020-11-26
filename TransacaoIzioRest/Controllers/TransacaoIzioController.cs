@@ -261,7 +261,7 @@ namespace TransacaoIzioRest.Controllers
             }
             catch (System.Exception ex)
             {
-
+                
                 if (listaErros.errors == null)
                 {
                     listaErros.errors = new List<Erros>();
@@ -332,6 +332,8 @@ namespace TransacaoIzioRest.Controllers
                 {
                     listaErros.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ObjetoItensTransacaoVazio });
                 }
+                else if(objTransacao.Where(x => x == null).Any())
+                    listaErros.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ObjetoItensTransacaoVazio });
 
                 //Se a lista estiver preenchida, é por que foi encontrado erros na validação
                 if (listaErros.errors.Count > 0)

@@ -13,6 +13,8 @@ using Newtonsoft.Json;
 using System.Data;
 using Izio.Biblioteca.Model;
 using System.Text.RegularExpressions;
+using Izio.Biblioteca.DAO;
+using Azure.Storage.Queues;
 
 namespace TransacaoIzioRest.DAO
 {
@@ -479,12 +481,8 @@ namespace TransacaoIzioRest.DAO
                     DadosLog dadosLog = new DadosLog();
                     dadosLog.des_erro_tecnico = "Cupom: [" + objTransacao.cupom + "] " + ex.Message;
 
-                    Log.InserirLogIzio(NomeClienteWs, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
-
-                    var jsonTransacao = JsonConvert.SerializeObject(objTransacao);
-                    dadosLog.des_erro_tecnico = "Json: " + jsonTransacao.ToString();
-
-                    Log.InserirLogIzio(NomeClienteWs, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
+                    InserirFila(NomeClienteWs, $"venda-log-{NomeClienteWs}", objTransacao);
+                    
 
                     listaErros.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ErroVendaDuplicada + dadosLog.des_erro_tecnico });
                 }
@@ -872,5 +870,36 @@ namespace TransacaoIzioRest.DAO
 
         }
         #endregion
+
+        public static void InserirFila(string sNomeCliente, string des_nome_fila, dynamic objeto)
+        {
+
+            ParametroDAO param = new ParametroDAO(sNomeCliente);
+
+            Dictionary<string, string> listParam = new Dictionary<string, string>();
+            listParam = param.ListarParametros("queue_azure");
+            string connectionString = listParam["queue_azure"];
+
+            // Instantiate a QueueClient which will be used to create and manipulate the queue
+            QueueClient queueClient = new QueueClient(connectionString, $"{des_nome_fila}");
+
+            // Create the queue
+            queueClient.CreateIfNotExists();
+
+            if (queueClient.Exists())
+            {
+                try
+                {
+                    queueClient.SendMessage(JsonConvert.SerializeObject(objeto), null, TimeSpan.FromDays(3));
+                }catch(Exception ex)
+                {
+                    var x = 0;
+                }
+                // Send a message to the queue
+                
+            }
+
+        }
+
     }
 }
