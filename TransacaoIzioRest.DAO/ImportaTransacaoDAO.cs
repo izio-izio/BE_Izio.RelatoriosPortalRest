@@ -881,7 +881,7 @@ namespace TransacaoIzioRest.DAO
             string connectionString = listParam["queue_azure"];
 
             // Instantiate a QueueClient which will be used to create and manipulate the queue
-            QueueClient queueClient = new QueueClient(connectionString, $"{des_nome_fila}");
+            QueueClient queueClient = new QueueClient(connectionString, $"{des_nome_fila.ToLower()}");
 
             // Create the queue
             queueClient.CreateIfNotExists();
@@ -890,12 +890,10 @@ namespace TransacaoIzioRest.DAO
             {
                 try
                 {
-                    queueClient.SendMessage(JsonConvert.SerializeObject(objeto), null, TimeSpan.FromDays(3));
-                }catch(Exception ex)
-                {
-                    var x = 0;
-                }
-                // Send a message to the queue
+                    byte[] textoAsBytes = Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(objeto));
+                    string resultado = System.Convert.ToBase64String(textoAsBytes);
+                    queueClient.SendMessage(resultado, null, TimeSpan.FromDays(3));
+                }catch(Exception ex){}
                 
             }
 
