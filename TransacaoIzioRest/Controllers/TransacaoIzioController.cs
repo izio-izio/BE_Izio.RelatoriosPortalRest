@@ -438,7 +438,7 @@ namespace TransacaoIzioRest.Controllers
 
                 //Cria objeto para processamento das transacoes
                 TransacaoCanceladaDAO excluiTransacao = new TransacaoCanceladaDAO(sNomeCliente,tokenAutenticacao);
-                listaErros = excluiTransacao.ExcluirRegistrosCompraCancelada(objTransacao, HttpContext.Current.Request.ServerVariables["REMOTE_ADDR"]);
+                var retorno = excluiTransacao.ExcluirRegistrosCompraCancelada(objTransacao, HttpContext.Current.Request.ServerVariables["REMOTE_ADDR"], listaErros);
 
                 if (listaErros.errors != null && listaErros.errors.Count > 0)
                 {
@@ -448,7 +448,7 @@ namespace TransacaoIzioRest.Controllers
                 {
                     retornoSucesso.payload = new Sucesso();
                     retornoSucesso.payload.code = Convert.ToInt32(HttpStatusCode.OK).ToString();
-                    retornoSucesso.payload.message = SucessoExclusao;
+                    retornoSucesso.payload.message = SucessoExclusao+ retorno;
 
                     return Request.CreateResponse(HttpStatusCode.OK, retornoSucesso);
                 }
