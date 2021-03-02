@@ -29,7 +29,7 @@ namespace TransacaoIzioRest.DAO
         SqlServer sqlServer;
         string NomeClienteWs;
         string tokenAutenticacao;
-        public TransacaoCanceladaDAO(string sNomeCliente,string _tokenAutenticacao)
+        public TransacaoCanceladaDAO(string sNomeCliente, string _tokenAutenticacao)
         {
             sqlServer = new SqlServer(sNomeCliente);
             NomeClienteWs = sNomeCliente;
@@ -46,13 +46,13 @@ namespace TransacaoIzioRest.DAO
         /// <param name="IpOrigem"></param>
         /// <returns></returns>
         #region Apaga os registros da venda cancelada na base do Izio
-        public ApiErrors ExcluirRegistrosCompraCancelada(DadosTransacaoCancelada objTransacao, string IpOrigem)
+        public string ExcluirRegistrosCompraCancelada(DadosTransacaoCancelada objTransacao, string IpOrigem, ApiErrors retorno)
         {
             //Total de registros deletados
             Int32 totalRegistrosExcluidos = 0;
 
-            ApiErrors retorno = new ApiErrors();
-
+            var mensagemRetorno = "";
+            
             try
             {
                 // Abre a conexao com o banco de dados
@@ -134,8 +134,7 @@ namespace TransacaoIzioRest.DAO
                         // caso a compra tenha gerado cashback, os créditos devem ser removidos da processadora
                         #region Consulta os creditos gerados para o cliente, caso a compra tenha gerado cashback;
 
-                        ExcluiCreditoMarketPay(sqlServer);
-
+                        
                         #endregion
 
 
@@ -179,6 +178,14 @@ namespace TransacaoIzioRest.DAO
                         //executa o delete e retorna o total de linhas afetatas
                         totalRegistrosExcluidos += sqlServer.Command.ExecuteNonQuery();
                     }
+
+                    if(totalRegistrosExcluidos > 0)
+                    {
+                        if (!ExcluiCreditoCashback(sqlServer))
+                        {
+                            mensagemRetorno = " Não foi possível remover crétidos concedidos";
+                        }
+                    }
                 }
 
                 #endregion
@@ -211,7 +218,7 @@ namespace TransacaoIzioRest.DAO
                 sqlServer.CloseConnection();
             }
 
-            return retorno;
+            return mensagemRetorno;
 
         }
         #endregion
@@ -289,100 +296,69 @@ namespace TransacaoIzioRest.DAO
 
 
         /// <summary>
-        /// Exclui o credito gerado na market pay, por que a compra foi cancelada
+        /// Exclui o credito gerado caso nao tenha sido integrado  (retona 
         /// </summary>
         /// <param name="sqlServer"></param>
         #region Exclui o credito gerado na market pay, por que a compra foi cancelada
 
 
-        private void ExcluiCreditoMarketPay(SqlServer sqlServer)
+        private bool ExcluiCreditoCashback(SqlServer sqlServer)
         {
             try
             {
-                if (NomeClienteWs.ToLower().Contains("cattan"))
-                {
-                    sqlServer.Command.CommandText = @"select dat_cadastro,des_nsu_origem, cod_cnpj_estabelecimento, id_cartao, vlr_credito,cod_lancamento_credito_campanha
+                var lancamentoIntegrado = false;
+                sqlServer.Command.CommandText = @"select dat_cadastro,des_nsu_origem, cod_cnpj_estabelecimento, id_cartao, vlr_credito,cod_lancamento_credito_campanha,cod_lancamento_credito_etapa
                                                           from 
                                                              tab_lancamento_credito_campanha with(nolock)
                                                           where
                                                              dat_compra = CAST(@datacompra AS DATETIME2(0)) and
-                                                             vlr_compra = @valorcompra and
-                                                             cupom = @cupom ";
+                                                              vlr_compra = @valorcompra and
+                                                             cupom = @cupom and cod_lancamento_credito_etapa > 1";
 
-                    sqlServer.Reader = sqlServer.Command.ExecuteReader();
+                sqlServer.Reader = sqlServer.Command.ExecuteReader();
 
-                    if (sqlServer.Reader.HasRows && sqlServer.Reader.Read())
-                    {
-                        DadosCancelamentoMarketPAy dadosMktPay = new DadosCancelamentoMarketPAy();
-
-                        dadosMktPay.dataHoraTransacao = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.000Z");
-                        dadosMktPay.nsuOrigem = sqlServer.Reader.GetInt64(5).ToString();
-                        dadosMktPay.cnpjEstabelecimento = sqlServer.Reader.GetString(2);
-                        dadosMktPay.idCartao = sqlServer.Reader.GetInt32(3);
-                        dadosMktPay.tipoTransacao = 10; //Somente para cashout - cashback gerado pelo Izio
-                        dadosMktPay.valor = sqlServer.Reader.GetDecimal(4);
-
-                        dadosMktPay.dadosTransacaoOriginal = new Dadostransacaooriginal();
-                        dadosMktPay.dadosTransacaoOriginal.dataHoraTransacao = sqlServer.Reader.GetDateTime(0).Date.ToLocalTime().ToString("yyyy-MM-ddT00:00:00.000Z");
-                        dadosMktPay.dadosTransacaoOriginal.nsuTransacaoOriginal = sqlServer.Reader.GetString(1).ToString();
-                        dadosMktPay.dadosTransacaoOriginal.tipoTransacaoOriginal = 4; //CashIn realizado pelo Izio
-
-                        long cod_lancamento_credito_campanha = sqlServer.Reader.GetInt64(5);
-
-                        sqlServer.Reader.Close();
-
-                        string tokenConvenio = "";
-                        string urlMarketPay = "";
-
-                        dynamic objConfigCliente = Utilidades.ConsultarConfiguracoesCliente(NomeClienteWs);
-
-                        if (objConfigCliente.payload != null && objConfigCliente.payload.dadosAcesso != null && objConfigCliente.payload.dadosConfiguracaoProcessadora != null)
-                        {
-                            tokenConvenio = objConfigCliente.payload.dadosConfiguracaoProcessadora.dadosProcessadora.des_token_convenio;
-                            urlMarketPay = objConfigCliente.payload.dadosConfiguracaoProcessadora.dadosProcessadora.des_url_api;
-                        }
-
-                        List<Izio.Biblioteca.Header> lstHeader = new List<Izio.Biblioteca.Header>();
-                        System.Net.ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
-                        lstHeader.Add(new Izio.Biblioteca.Header { name = "access_token", value = tokenConvenio });
-
-                        string responseString = Utilidades.ChamadaApiExterna(
-                                        tipoRequisicao: "POST",
-                                        metodo: "api/transacao/cancelar/",
-                                        body: dadosMktPay,
-                                        url: urlMarketPay,
-                                        Headers: lstHeader);
-
-                        if (!string.IsNullOrEmpty(responseString) && !responseString.Contains("TRANSACAO OK"))
-                        {
-                            DadosLog dadosLog = new DadosLog();
-                            dadosLog.des_erro_tecnico = "Erro no cancelamento:" + responseString;
-
-                            //Pegar a mensagem padrão retornada da api, caso não tenha mensagem de negocio para devolver na API
-                            Log.InserirLogIzio(NomeClienteWs, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
-                            lstHeader.Clear();
-                            lstHeader.Add(new Izio.Biblioteca.Header { name = "tokenAutenticacao", value = tokenAutenticacao });
-
-                            responseString = Utilidades.ChamadaApiExterna(tipoRequisicao: "POST",
-                                                                                           metodo: "EmailRest/api/Email/EnvioEmailTemplate/",
-                                                                                           body: new EmailTemplateEnvio
-                                                                                           {
-                                                                                               des_email = "monitoramento@izio.com.br",
-                                                                                               des_complemneto = "[Erro Processadora e no Izio] - Erro ao cancelar lançamento na marketpay: " + cod_lancamento_credito_campanha,
-                                                                                               cod_tipo_email_template = (int)TipoTemplate.TEMPLATE_CONTEUDO_GENERICO,
-                                                                                               des_titulo_email = "Erro ao cancelar cashback na MarketPay"
-                                                                                           },
-                                                                                           Headers: lstHeader
-                                                                                           );
-                        }
-                        else
-                        {
-                            sqlServer.Command.Parameters.AddWithValue("@cod_lancamento_credito_campanha", cod_lancamento_credito_campanha);
-                            sqlServer.Command.CommandText = "delete from tab_lancamento_credito_campanha where cod_lancamento_credito_campanha = @cod_lancamento_credito_campanha";
-                            sqlServer.Command.ExecuteNonQuery();
-                        }
-                    }
+                if (sqlServer.Reader.HasRows && sqlServer.Reader.Read())
+                {
+                    lancamentoIntegrado = true;
                 }
+                sqlServer.Reader.Close();
+                sqlServer.Command.CommandText = @"SELECT * INTO #tmp FROM dbo.tab_lancamento_credito_campanha where where dat_compra = CAST(@datacompra AS DATETIME2(0)) and
+                                                              vlr_compra = @valorcompra and
+                                                             cupom = @cupom and cod_lancamento_credito_etapa = 1
+
+INSERT INTO dbo.tab_lancamento_credito_campanha_exclusao
+(
+    cod_lancamento_credito_campanha,
+    cod_gestao_campanha,
+    dat_cadastro,
+    vlr_credito,
+    dat_validade,
+    cod_cpf,
+    cupom,
+    cod_transacao,
+    dat_compra,
+    vlr_compra
+)
+SELECT cod_lancamento_credito_campanha,
+       cod_gestao_campanha,
+       (CONVERT(DATETIMEOFFSET, GETDATE()) AT TIME ZONE 'E. South America Standard Time'),
+       vlr_credito,
+       dat_validade,
+       cod_cpf,
+       cupom,
+       cod_transacao,
+       dat_compra,
+       vlr_compra
+FROM #tmp WITH (NOLOCK)
+
+DELETE FROM dbo.tab_lancamento_credito_campanha
+WHERE cod_lancamento_credito_campanha IN (
+                                             SELECT cod_lancamento_credito_campanha FROM #tmp WITH (NOLOCK)
+                                         )";
+                sqlServer.Command.ExecuteNonQuery();
+
+                return !lancamentoIntegrado;
+
             }
             catch (Exception ex)
             {
@@ -391,6 +367,7 @@ namespace TransacaoIzioRest.DAO
 
                 //Pegar a mensagem padrão retornada da api, caso não tenha mensagem de negocio para devolver na API
                 Log.InserirLogIzio(NomeClienteWs, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
+                throw ex;
             }
             finally
             {
@@ -401,7 +378,6 @@ namespace TransacaoIzioRest.DAO
                 }
 
             }
-
         }
 
 
