@@ -644,6 +644,11 @@
             Valor do desconto aplicado no item
             </summary>
         </member>
+        <member name="P:TransacaoIzioRest.Models.DadosConsultaItensTransacao.vlr_credito">
+            <summary>
+            Valor do cashback do item
+            </summary>
+        </member>
         <member name="T:TransacaoIzioRest.Models.RetornoDadosTotalDesconto">
             <summary>
             Objeto de retorno para quando a execução ocorrer com sucesso
