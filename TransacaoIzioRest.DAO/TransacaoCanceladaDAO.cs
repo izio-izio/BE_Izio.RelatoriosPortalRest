@@ -52,14 +52,23 @@ namespace TransacaoIzioRest.DAO
             Int32 totalRegistrosExcluidos = 0;
 
             var mensagemRetorno = "";
-            
+
+            var sqlIzpay = new SqlServer(NomeClienteWs == "lab" ? "izpaylab" : "izpay");
+
             try
             {
+
+                sqlIzpay.StartConnection();
+                sqlIzpay.BeginTransaction();
+
+
                 // Abre a conexao com o banco de dados
                 sqlServer.StartConnection();
 
                 //Inicia o controle de transacao
                 sqlServer.BeginTransaction();
+
+
 
                 #region Executa a execução dos registros da venda cancelada
 
@@ -73,16 +82,20 @@ namespace TransacaoIzioRest.DAO
                 pdat_compra.ParameterName = "@datacompra";
                 pdat_compra.Value = objTransacao.dat_compra;
                 sqlServer.Command.Parameters.Add(pdat_compra);
+                sqlIzpay.Command.Parameters.AddWithValue("@datacompra", objTransacao.dat_compra);
 
                 IDbDataParameter pvalorcompra = sqlServer.Command.CreateParameter();
                 pvalorcompra.ParameterName = "@valorcompra";
                 pvalorcompra.Value = objTransacao.vlr_compra;
                 sqlServer.Command.Parameters.Add(pvalorcompra);
 
+                sqlIzpay.Command.Parameters.AddWithValue("@valorcompra", objTransacao.vlr_compra);
+
                 IDbDataParameter pcupom = sqlServer.Command.CreateParameter();
                 pcupom.ParameterName = "@cupom";
                 pcupom.Value = objTransacao.cupom;
                 sqlServer.Command.Parameters.Add(pcupom);
+                sqlIzpay.Command.Parameters.AddWithValue("@cupom", objTransacao.cupom);
 
                 IDbDataParameter pcod_loja = sqlServer.Command.CreateParameter();
                 pcod_loja.ParameterName = "@cod_loja";
@@ -181,6 +194,22 @@ namespace TransacaoIzioRest.DAO
 
                     if(totalRegistrosExcluidos > 0)
                     {
+                        dynamic objCliente = Izio.Biblioteca.Utilidades.ConsultarConfiguracoesCliente(NomeClienteWs);
+
+                        if (objCliente != null && objCliente.payload != null && objCliente.payload.dadosAcesso != null && objCliente.payload.dadosEstilo != null)
+                        {
+                            if(objCliente.payload.dadosEstilo.cod_empresa_izpay > 0)
+                            {
+                                
+                                if (!ExcluiCreditoCashback(sqlIzpay,false, ((long) objCliente.payload.dadosEstilo.cod_empresa_izpay)))
+                                {
+                                    mensagemRetorno = " Não foi possível remover crétidos concedidos. ";
+                                }
+                            }
+                            
+
+                        }
+
                         if (!ExcluiCreditoCashback(sqlServer))
                         {
                             mensagemRetorno = " Não foi possível remover crétidos concedidos";
@@ -191,6 +220,7 @@ namespace TransacaoIzioRest.DAO
                 #endregion
 
                 sqlServer.Commit();
+                sqlIzpay.Commit();
 
                 retorno.errors = new List<Erros>();
 
@@ -204,7 +234,7 @@ namespace TransacaoIzioRest.DAO
             catch (System.Exception ex)
             {
                 sqlServer.Rollback();
-
+                sqlIzpay.Rollback();
                 DadosLog dadosLog = new DadosLog();
                 dadosLog.des_erro_tecnico = ex.ToString();
 
@@ -302,18 +332,21 @@ namespace TransacaoIzioRest.DAO
         #region Exclui o credito gerado na market pay, por que a compra foi cancelada
 
 
-        private bool ExcluiCreditoCashback(SqlServer sqlServer)
+        private bool ExcluiCreditoCashback(SqlServer sqlServer, bool fl_loyalty = true, long cod_empresa = 0)
         {
             try
             {
+                var sCodEmpresa = fl_loyalty ? "" : ", cod_empresa";
+                var sWhere = fl_loyalty ? "" : " AND cod_empresa = @cod_empresa_izpay ";
                 var lancamentoIntegrado = false;
-                sqlServer.Command.CommandText = @"select dat_cadastro,des_nsu_origem, cod_cnpj_estabelecimento, id_cartao, vlr_credito,cod_lancamento_credito_campanha,cod_lancamento_credito_etapa
+                sqlServer.Command.Parameters.AddWithValue("@cod_empresa_izpay", cod_empresa);
+                sqlServer.Command.CommandText = $@"select dat_cadastro,des_nsu_origem, cod_cnpj_estabelecimento, id_cartao, vlr_credito,cod_lancamento_credito_campanha,cod_lancamento_credito_etapa
                                                           from 
                                                              tab_lancamento_credito_campanha with(nolock)
                                                           where
                                                              dat_compra = CAST(@datacompra AS DATETIME2(0)) and
                                                               vlr_compra = @valorcompra and
-                                                             cupom = @cupom and cod_lancamento_credito_etapa > 1";
+                                                             cupom = @cupom and cod_lancamento_credito_etapa > 1 {sWhere}";
 
                 sqlServer.Reader = sqlServer.Command.ExecuteReader();
 
@@ -322,9 +355,9 @@ namespace TransacaoIzioRest.DAO
                     lancamentoIntegrado = true;
                 }
                 sqlServer.Reader.Close();
-                sqlServer.Command.CommandText = @"SELECT * INTO #tmp FROM dbo.tab_lancamento_credito_campanha where where dat_compra = CAST(@datacompra AS DATETIME2(0)) and
+                sqlServer.Command.CommandText = $@"SELECT * INTO #tmp FROM dbo.tab_lancamento_credito_campanha where dat_compra = CAST(@datacompra AS DATETIME2(0)) and
                                                               vlr_compra = @valorcompra and
-                                                             cupom = @cupom and cod_lancamento_credito_etapa = 1
+                                                             cupom = @cupom and cod_lancamento_credito_etapa = 1 {sWhere}
 
 INSERT INTO dbo.tab_lancamento_credito_campanha_exclusao
 (
@@ -337,7 +370,7 @@ INSERT INTO dbo.tab_lancamento_credito_campanha_exclusao
     cupom,
     cod_transacao,
     dat_compra,
-    vlr_compra
+    vlr_compra{sCodEmpresa}
 )
 SELECT cod_lancamento_credito_campanha,
        cod_gestao_campanha,
@@ -348,7 +381,7 @@ SELECT cod_lancamento_credito_campanha,
        cupom,
        cod_transacao,
        dat_compra,
-       vlr_compra
+       vlr_compra{sCodEmpresa}
 FROM #tmp WITH (NOLOCK)
 
 DELETE FROM dbo.tab_lancamento_credito_campanha
