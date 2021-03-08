@@ -140,13 +140,23 @@ namespace TransacaoIzioRest.DAO
                                                      tri.des_produto des_produto,
                                                      round(tri.vlr_item_compra-(isnull(tri.vlr_desconto_item,0)),2) vlr_item_compra,
                                                      tri.qtd_item_compra qtd_item_compra,
-                                                     tri.vlr_desconto_item
+                                                     tri.vlr_desconto_item,
+                                                     sum(isnull(tlcce.vlr_credito, 0)) as vlr_credito
                                                   into 
                                                      #tmp_transacao
                                                   from 
                                                      tab_transacao_itens tri with(nolock)
+                                                     left join tab_lancamento_credito_campanha_ean tlcce with(nolock) on (tri.cod_NSU = tlcce.cod_ean_produto and tri.cod_tab_transacao_itens = tlcce.cod_tab_transacao_itens)
                                                   where 
                                                      tri.cod_transacao =  @cod_transacao
+                                                  group by tri.cod_transacao,
+                                                           tri.cod_produto,
+                                                           tri.cod_nsu,
+                                                           tri.des_produto,
+                                                           tri.vlr_item_compra,
+                                                           tri.qtd_item_compra,
+                                                           tri.vlr_desconto_item
+
                                                   
                                                   select
                                                      tmp.cod_transacao,
@@ -156,7 +166,8 @@ namespace TransacaoIzioRest.DAO
                                                      tmp.vlr_item_compra,
                                                      qtd_item_compra, 
                                                      null img_produto,
-                                                     vlr_desconto_item
+                                                     vlr_desconto_item,
+                                                     vlr_credito
                                                   from
                                                      #tmp_transacao tmp
                                                   order by 4
@@ -174,14 +185,23 @@ namespace TransacaoIzioRest.DAO
                                                      tri.des_produto des_produto,
                                                      round((tri.vlr_item_compra * tri.qtd_item_compra-(isnull(tri.vlr_desconto_item,0))),2) vlr_item_compra,
                                                      tri.qtd_item_compra qtd_item_compra,
-                                                     tri.vlr_desconto_item
+                                                     tri.vlr_desconto_item,
+                                                     sum(isnull(tlcce.vlr_credito, 0)) as vlr_credito
                                                   into 
                                                      #tmp_transacao
                                                   from 
                                                      tab_transacao_itens tri with(nolock)
+                                                     left join tab_lancamento_credito_campanha_ean tlcce with(nolock) on (tri.cod_NSU = tlcce.cod_ean_produto and tri.cod_tab_transacao_itens = tlcce.cod_tab_transacao_itens)
                                                   where 
                                                      tri.cod_transacao =  @cod_transacao
-                                                  
+                                                  group by tri.cod_transacao,
+                                                           tri.cod_produto,
+                                                           tri.cod_nsu,
+                                                           tri.des_produto,
+                                                           tri.vlr_item_compra,
+                                                           tri.qtd_item_compra,
+                                                           tri.vlr_desconto_item
+                                                   
                                                   select
                                                      tmp.cod_transacao,
                                                      case when ltrim(rtrim(coalesce(tmp.cod_plu,tmp.cod_ean))) <> '' then ltrim(rtrim(coalesce(tmp.cod_plu,tmp.cod_ean))) else tmp.cod_ean end cod_plu,
@@ -190,7 +210,8 @@ namespace TransacaoIzioRest.DAO
                                                      tmp.vlr_item_compra,
                                                      qtd_item_compra, 
                                                      null img_produto,
-                                                     vlr_desconto_item
+                                                     vlr_desconto_item,
+                                                     vlr_credito
                                                   from
                                                      #tmp_transacao tmp
                                                   order by 4
@@ -210,6 +231,7 @@ namespace TransacaoIzioRest.DAO
                 // **********************************************************************************
 
                 //Executa a consulta
+                sqlServer.Command.CommandTimeout = 120;
                 sqlServer.Reader = sqlServer.Command.ExecuteReader();
 
                 if (sqlServer.Reader.HasRows)

@@ -156,6 +156,11 @@ namespace TransacaoIzioRest.Models
         /// Valor do desconto aplicado no item
         /// </summary>
         public decimal? vlr_desconto_item { get; set; }
+
+        /// <summary>
+        /// Valor do cashback do item
+        /// </summary>
+        public decimal? vlr_credito { get; set; }
     }
 
     #endregion
