@@ -249,6 +249,11 @@
             Valor para campanha do tipo do troco
             </summary>
         </member>
+        <member name="P:TransacaoIzioRest.Models.DadosTransacaoLote.cod_usuario">
+            <summary>
+            Código do operador do PDV
+            </summary>
+        </member>
         <member name="T:TransacaoIzioRest.Models.DadosLoteViewizio_3">
             <summary>
             Classe padrão com os campos viewizio_3

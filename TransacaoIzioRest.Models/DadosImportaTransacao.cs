@@ -280,6 +280,11 @@ namespace TransacaoIzioRest.Models
         /// </summary>
         public decimal? vlr_troco { get; set; }
 
+        /// <summary>
+        /// Código do operador do PDV
+        /// </summary>
+        public long? cod_usuario { get; set; }
+
     }
 
     /// <summary>

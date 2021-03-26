@@ -71,8 +71,8 @@
     <Reference Include="DocumentFormat.OpenXml, Version=2.7.2.0, Culture=neutral, PublicKeyToken=8fb06cb64d019a17, processorArchitecture=MSIL">
       <HintPath>..\packages\DocumentFormat.OpenXml.2.7.2\lib\net46\DocumentFormat.OpenXml.dll</HintPath>
     </Reference>
-    <Reference Include="EmailRest.Models, Version=1.0.7032.18035, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\EmailRest.Models.20190416.45.0\lib\netstandard2.0\EmailRest.Models.dll</HintPath>
+    <Reference Include="EmailRest.Models, Version=1.0.7641.18131, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\EmailRest.Models.20210308.19.0\lib\netstandard2.0\EmailRest.Models.dll</HintPath>
     </Reference>
     <Reference Include="ExcelNumberFormat, Version=1.0.10.0, Culture=neutral, PublicKeyToken=23c6f5d73be07eca, processorArchitecture=MSIL">
       <HintPath>..\packages\ExcelNumberFormat.1.0.10\lib\net20\ExcelNumberFormat.dll</HintPath>
@@ -83,8 +83,8 @@
     <Reference Include="ICSharpCode.SharpZipLib, Version=1.2.0.246, Culture=neutral, PublicKeyToken=1b03e6acf1164f73, processorArchitecture=MSIL">
       <HintPath>..\packages\SharpZipLib.1.2.0\lib\net45\ICSharpCode.SharpZipLib.dll</HintPath>
     </Reference>
-    <Reference Include="Izio.Biblioteca, Version=1.1.7557.26653, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Izio.Biblioteca.20200909.46.0\lib\net461\Izio.Biblioteca.dll</HintPath>
+    <Reference Include="Izio.Biblioteca, Version=1.1.7661.26225, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Izio.Biblioteca.20201222.49.0\lib\net461\Izio.Biblioteca.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Azure.KeyVault.Core, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Azure.KeyVault.Core.3.0.1\lib\net452\Microsoft.Azure.KeyVault.Core.dll</HintPath>
@@ -135,8 +135,8 @@
     <Reference Include="NJsonSchema, Version=9.11.0.0, Culture=neutral, PublicKeyToken=c2f9c3bdfae56102, processorArchitecture=MSIL">
       <HintPath>..\packages\NJsonSchema.9.11.0\lib\net45\NJsonSchema.dll</HintPath>
     </Reference>
-    <Reference Include="NSwag.Annotations, Version=11.17.21.0, Culture=neutral, PublicKeyToken=c2d88086e098d109, processorArchitecture=MSIL">
-      <HintPath>..\packages\NSwag.Annotations.11.17.21\lib\net45\NSwag.Annotations.dll</HintPath>
+    <Reference Include="NSwag.Annotations, Version=13.9.4.0, Culture=neutral, PublicKeyToken=c2d88086e098d109, processorArchitecture=MSIL">
+      <HintPath>..\packages\NSwag.Annotations.13.9.4\lib\net45\NSwag.Annotations.dll</HintPath>
     </Reference>
     <Reference Include="NSwag.AspNet.Owin, Version=11.20.1.0, Culture=neutral, PublicKeyToken=c2d88086e098d109, processorArchitecture=MSIL">
       <HintPath>..\packages\NSwag.AspNet.Owin.11.20.1\lib\net45\NSwag.AspNet.Owin.dll</HintPath>

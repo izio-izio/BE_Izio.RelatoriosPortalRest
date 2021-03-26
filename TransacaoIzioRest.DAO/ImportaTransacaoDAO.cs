@@ -565,7 +565,7 @@ namespace TransacaoIzioRest.DAO
                         ValorItem = dadosTrans.vlr_item_compra,
                         vlr_desconto_item = dadosTrans.vlr_desconto_item,
                         Quantidade = dadosTrans.qtd_item_compra,
-                        cod_usuario = 1,
+                        cod_usuario = dadosTrans.cod_usuario == null ? 0 : dadosTrans.cod_usuario,
                         cod_pessoa = 0,
                         item = dadosTrans.nro_item_compra,
                         cod_loja = dadosTrans.cod_loja,

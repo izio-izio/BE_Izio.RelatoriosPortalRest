@@ -256,6 +256,19 @@
             <param name="metodoBase">Metodo que gerou o erro</param>
             <returns>Mensagem com o erro de negocio para ser apresentado nas APIs e Portais Izio</returns>
         </member>
+        <member name="M:Izio.Biblioteca.Log.InserirLogIzio(System.String,Izio.Biblioteca.Model.DadosLog,System.Reflection.MethodBase,System.Boolean)">
+            <summary>
+            Método para gravação do log.
+            Método possui uma flag para separação de log de erro de negócio. Log de negócios serão persistidos na sis_log_negocio.
+            O log que não for marcado como erro de negócio continua sendo inserido na sis_log.
+            Após a gravação do log, será retornado mensagem do erro para ser utilizada no retorno das APIs e nos Portais Izio.
+            </summary>
+            <param name="sNomeCliente">Nome do cliente que será inserido o log</param>
+            <param name="dadosLog">Objeto com os dados do log</param>
+            <param name="metodoBase">Metodo que gerou o erro</param>
+            <param name="isErroNegocio">Flag que difencia log de negócio</param>
+            <returns>Mensagem com o erro de negocio para ser apresentado nas APIs e Portais Izio</returns>
+        </member>
         <member name="M:Izio.Biblioteca.Log.gerarLogViaArquivo(System.String,System.String)">
             <summary>
             Gerar o log em arquivo de texto, em caso de erro na gravação do log no banco de dados
@@ -337,7 +350,7 @@
             Objeto com tipo de retorno de configuração do cliente
             </summary>
         </member>
-        <member name="M:Izio.Biblioteca.Utilidades.ConverterDataSetParaCsv(System.Data.DataSet,System.String,System.String)">
+        <member name="M:Izio.Biblioteca.Utilidades.ConverterDataSetParaCsv(System.Data.DataSet,System.String,System.String,System.String,System.Int32)">
             <summary>
             Gera um arquivo com os dados presentes no dataset
             Se já existir um arquivo com o mesmo nome, será sobrescrito
@@ -345,6 +358,8 @@
             <param name="dtSet"></param>
             <param name="caminhoGeracaoArquivo"></param>
             <param name="nomeArquivo"></param>
+            <param name="delimitadorcoluna"></param>
+            <param name="indexTable"></param>
         </member>
         <member name="M:Izio.Biblioteca.Utilidades.ConverteObjectListParaHtmlTable(System.Object)">
             <summary>
@@ -359,6 +374,11 @@
             <remarks>Calcula o tamanho do grupo de controle para uma determinada população</remarks>
             <param name="qtdClientes">População para calculo do grupo de controle</param>
             <returns>Tamanho do grupo de controle (tamanho da população de grupo de controle)</returns>
+        </member>
+        <member name="T:BE_Izio.Biblioteca.Controllers.UsuarioLogado">
+            <summary>
+            Dados da transacao
+            </summary>
         </member>
     </members>
 </doc>
