@@ -37,7 +37,7 @@ namespace TransacaoIzioRest.DAO
                 sqlServer.StartConnection();
 
                 //Verifica se o usuario e a senha informado esta correto
-                sqlServer.Command.CommandText = @"select distinct
+                sqlServer.Command.CommandText = $@"select distinct
                                                      trs.cod_transacao,
                                                      trs.cod_pessoa,
                                                      trs.dat_compra,
@@ -47,8 +47,8 @@ namespace TransacaoIzioRest.DAO
                                                      trs.qtd_itens_compra,
                                                      trs.cupom ,
                                                      trs.vlr_total_desconto,
-                                                     tlc.vlr_credito as vlr_credito_cashback,
-                                                     tlc.dat_validade as dat_validade_cashback
+                                                     sum(coalesce(tlc.vlr_credito,0)) as vlr_credito_cashback,
+                                                     max(tlc.dat_validade) as dat_validade_cashback
                                                   from 
                                                      tab_transacao trs with(nolock) 
                                                   left join
@@ -56,16 +56,23 @@ namespace TransacaoIzioRest.DAO
                                                   left join
                                                      tab_lancamento_credito_campanha tlc with(nolock) on tlc.cod_transacao = trs.cod_transacao
                                                   where 
-                                                      trs.dat_compra between '" + anoMes+"01 00:00:01' and '" +anoMes + DateTime.DaysInMonth(Convert.ToInt32(anoMes.Substring(0,4)), Convert.ToInt32(anoMes.Substring(4, 2))).ToString() + " 23:59:59' and " +
-                                                  "   trs.cod_pessoa = @cod_pessoa order by trs.dat_compra desc";
+                                                      trs.dat_compra between '{anoMes}01 00:00:01' and '{anoMes}{DateTime.DaysInMonth(Convert.ToInt32(anoMes.Substring(0,4)), Convert.ToInt32(anoMes.Substring(4, 2))).ToString()} 23:59:59' and 
+                                                      trs.cod_pessoa = @cod_pessoa 
+                                                   group by trs.cod_transacao,
+                                                      trs.cod_pessoa,
+                                                      trs.dat_compra,
+                                                      trs.vlr_compra,
+                                                      trs.cod_loja, 
+                                                      tlj.razao_social , 
+                                                      trs.qtd_itens_compra,
+                                                      trs.cupom ,
+                                                      trs.vlr_total_desconto
+                                                   order by trs.dat_compra desc";
 
                 // **********************************************************************************
                 //Monta os parametros
                 //Codigo da Pessoa
-                IDbDataParameter pcod_cpf = sqlServer.Command.CreateParameter();
-                pcod_cpf.ParameterName = "@cod_pessoa";
-                pcod_cpf.Value = cod_pessoa;
-                sqlServer.Command.Parameters.Add(pcod_cpf);
+                sqlServer.Command.Parameters.AddWithValue("@cod_pessoa",cod_pessoa);
 
                 // **********************************************************************************
                 // **********************************************************************************
