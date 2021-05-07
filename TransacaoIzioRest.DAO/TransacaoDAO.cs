@@ -148,21 +148,22 @@ namespace TransacaoIzioRest.DAO
                                                      round(tri.vlr_item_compra-(isnull(tri.vlr_desconto_item,0)),2) vlr_item_compra,
                                                      tri.qtd_item_compra qtd_item_compra,
                                                      tri.vlr_desconto_item,
-                                                     sum(isnull(tlcce.vlr_credito, 0)) as vlr_credito
+                                                     /*sum(isnull(tlcce.vlr_credito, 0)) as vlr_credito*/
+                                                     isnull(tlcce.vlr_credito, 0) as vlr_credito
                                                   into 
                                                      #tmp_transacao
                                                   from 
                                                      tab_transacao_itens tri with(nolock)
                                                      left join tab_lancamento_credito_campanha_ean tlcce with(nolock) on (tri.cod_NSU = tlcce.cod_ean_produto and tri.cod_tab_transacao_itens = tlcce.cod_tab_transacao_itens)
                                                   where 
-                                                     tri.cod_transacao =  @cod_transacao
+                                                     tri.cod_transacao =  @cod_transacao /*
                                                   group by tri.cod_transacao,
                                                            tri.cod_produto,
                                                            tri.cod_nsu,
                                                            tri.des_produto,
                                                            tri.vlr_item_compra,
                                                            tri.qtd_item_compra,
-                                                           tri.vlr_desconto_item
+                                                           tri.vlr_desconto_item */
 
                                                   
                                                   select
@@ -193,21 +194,22 @@ namespace TransacaoIzioRest.DAO
                                                      round((tri.vlr_item_compra * tri.qtd_item_compra-(isnull(tri.vlr_desconto_item,0))),2) vlr_item_compra,
                                                      tri.qtd_item_compra qtd_item_compra,
                                                      tri.vlr_desconto_item,
-                                                     sum(isnull(tlcce.vlr_credito, 0)) as vlr_credito
+                                                     /*sum(isnull(tlcce.vlr_credito, 0)) as vlr_credito*/
+                                                     isnull(tlcce.vlr_credito, 0) as vlr_credito
                                                   into 
                                                      #tmp_transacao
                                                   from 
                                                      tab_transacao_itens tri with(nolock)
                                                      left join tab_lancamento_credito_campanha_ean tlcce with(nolock) on (tri.cod_NSU = tlcce.cod_ean_produto and tri.cod_tab_transacao_itens = tlcce.cod_tab_transacao_itens)
                                                   where 
-                                                     tri.cod_transacao =  @cod_transacao
+                                                     tri.cod_transacao =  @cod_transacao /*
                                                   group by tri.cod_transacao,
                                                            tri.cod_produto,
                                                            tri.cod_nsu,
                                                            tri.des_produto,
                                                            tri.vlr_item_compra,
                                                            tri.qtd_item_compra,
-                                                           tri.vlr_desconto_item
+                                                           tri.vlr_desconto_item */
                                                    
                                                   select
                                                      tmp.cod_transacao,
