@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+//using System.Linq;
+//using System.Web;
 
 /// <summary>
 /// Classe utilizada para quando as vendas são enviadas em lote
