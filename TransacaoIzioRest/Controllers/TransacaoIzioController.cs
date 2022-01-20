@@ -218,7 +218,7 @@ namespace TransacaoIzioRest.Controllers
                 }
                 else
                 {
-                    objTransacao.cod_cpf = Regex.Replace(objTransacao.cod_cpf, "[^0-9,]", ""); 
+                    objTransacao.cod_cpf = String.IsNullOrEmpty(objTransacao.cod_cpf) ? "" :  Regex.Replace(objTransacao.cod_cpf, "[^0-9,]", ""); 
 
                     if (objTransacao.ListaItens == null)
                     {
