@@ -15,6 +15,8 @@ using Izio.Biblioteca.Model;
 using System.Text.RegularExpressions;
 using Izio.Biblioteca.DAO;
 using Azure.Storage.Queues;
+using TransacaoIzioRest.DAO.ServiceBus;
+using EmailRest.Models;
 
 namespace TransacaoIzioRest.DAO
 {
@@ -35,10 +37,12 @@ namespace TransacaoIzioRest.DAO
 
         SqlServer sqlServer;
         string NomeClienteWs;
-        public ImportaTransacaoDAO(string sNomeCliente)
+        string tokenAutenticacao;
+        public ImportaTransacaoDAO(string sNomeCliente,string token = "")
         {
             sqlServer = new SqlServer(sNomeCliente);
             NomeClienteWs = sNomeCliente;
+            tokenAutenticacao = token;
         }
 
         /// <summary>
@@ -538,6 +542,13 @@ namespace TransacaoIzioRest.DAO
 
             try
             {
+                //Insere o request na fila - Service Bus
+                #region Insere o request na fila - Service Bus
+
+                EnviarMensagemFila.InserirLoteFila(NomeClienteWs,tokenAutenticacao, objTransacao, IpOrigem);
+
+                #endregion
+
                 // Abre a conexao com o banco de dados
                 sqlServer.StartConnection();
 
@@ -641,6 +652,10 @@ namespace TransacaoIzioRest.DAO
 
                 //Seta a lista de erros com o erro
                 listaErros.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ErroBancoDeDadosLoteTransacao + ", favor contactar o administrador" });
+
+                //Envia email para o monitoramento caso de erro ao inserir na fila
+                enviarEmail(ex.ToString(), "Erro enviar lote de compra para  fila (ServiceBus)");
+
             }
             finally
             {
@@ -650,6 +665,7 @@ namespace TransacaoIzioRest.DAO
             return listaErros;
 
         }
+
         #endregion
 
         /// <summary>
@@ -899,5 +915,42 @@ namespace TransacaoIzioRest.DAO
 
         }
 
+        private void enviarEmail(string desTexto, string desTitulo)
+        {
+            List<Header> lstHeader = new List<Header>();
+            lstHeader.Add(new Header
+            {
+                name = "tokenAutenticacao",
+                value = tokenAutenticacao
+            });
+
+            var acesso = Utilidades.ConsultarConfiguracoesCliente(NomeClienteWs);
+
+
+            int i = 0;
+
+            EmailTemplateEnvio email = new EmailTemplateEnvio
+            {
+                des_email = "monitoramento@izio.com.br",
+                des_cod_campanha = 0,
+                cod_tipo_email_template = (int)TipoTemplate.TEMPLATE_CONTEUDO_GENERICO,
+                des_complemneto = desTexto,
+                des_titulo_email = desTitulo
+
+            };
+
+            var result = Utilidades.ChamadaApiExternaStatusCode(
+                                             tipoRequisicao: "POST",
+                                             metodo: "EmailRest/api/Email/EnvioEmailTemplate/",
+                                             body: JsonConvert.SerializeObject(email),
+                                             url: "https://api.izio.com.br/",
+                                             Headers: lstHeader);
+
+            if (result != null)
+            {
+                result = result;
+            }
+
+        }
     }
 }

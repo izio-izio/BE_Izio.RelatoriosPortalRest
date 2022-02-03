@@ -343,18 +343,10 @@ namespace TransacaoIzioRest.Controllers
 
                 #endregion
 
-                //Cria objeto para processamento das transacoes
-                DAO.ImportaTransacaoDAO impTransacao = new DAO.ImportaTransacaoDAO(sNomeCliente);
-
-                if (sNomeCliente.ToUpper() == "CONDOR")
-                {
-                    listaErros = impTransacao.ImportaLoteTransacaoSemTransacao(objTransacao, HttpContext.Current.Request.ServerVariables["REMOTE_ADDR"]);
-                }
-                else
-                {
-                    listaErros = impTransacao.ImportaLoteTransacao(objTransacao, HttpContext.Current.Request.ServerVariables["REMOTE_ADDR"]);
-                }
-
+                //Insere o lote com as compras na viewizio_3
+                DAO.ImportaTransacaoDAO impTransacao = new DAO.ImportaTransacaoDAO(sNomeCliente,tokenAutenticacao);
+                listaErros = impTransacao.ImportaLoteTransacao(objTransacao, HttpContext.Current.Request.ServerVariables["REMOTE_ADDR"]);
+         
                 if (listaErros.errors != null && listaErros.errors.Count > 0)
                 {
                     return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
