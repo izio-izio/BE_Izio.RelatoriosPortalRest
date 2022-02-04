@@ -646,16 +646,13 @@ namespace TransacaoIzioRest.DAO
 
                 DadosLog dadosLog = new DadosLog();
                 dadosLog.des_erro_tecnico = ex.ToString();
-
-                //Pegar a mensagem padrão retornada da api, caso não tenha mensagem de negocio para devolver na API
                 Log.InserirLogIzio(NomeClienteWs, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
 
                 //Seta a lista de erros com o erro
                 listaErros.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ErroBancoDeDadosLoteTransacao + ", favor contactar o administrador" });
 
                 //Envia email para o monitoramento caso de erro ao inserir na fila
-                enviarEmail(ex.ToString(), "Erro enviar lote de compra para  fila (ServiceBus)");
-
+                enviarEmail($"Verificar o request na sis_log </br></br>{ex.ToString()}", $"{NomeClienteWs} - Erro enviar lote de compra para fila (ServiceBus)");
             }
             finally
             {

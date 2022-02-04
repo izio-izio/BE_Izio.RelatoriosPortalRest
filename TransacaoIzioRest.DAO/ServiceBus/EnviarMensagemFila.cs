@@ -13,9 +13,9 @@ namespace TransacaoIzioRest.DAO.ServiceBus
 {
     public static class EnviarMensagemFila
     {
-        public static void InserirLoteFila(string NomeClienteWs, string tokenAutenticacao, List<DadosTransacaoLote> objTransacao, string ipOrigem)
+        public static void InserirLoteFila(string NomeClienteWs, string tokenAutenticacao, List<DadosTransacaoLote> listaCompras, string ipOrigem)
         {
-            
+            List<DadosTransacaoLote> listaFila = new List<DadosTransacaoLote>();
             try
             {
                 //Monta configuração para serialização dos dados do objeto na fila - ServiceBus
@@ -28,28 +28,40 @@ namespace TransacaoIzioRest.DAO.ServiceBus
                 //Cria a fila (caso não existah) e o objeto para enviar o lote de compra(s) para a fila
                 var queueClient = MessageBusService.InitializeMessageBusService(tokenAutenticacao, NomeClienteWs, $"transacao-{NomeClienteWs.ToLower()}").Result;
 
-                //Lista padrão para envio da mensagem (lote de compra(s)) para a fila
-                List<Message> listMessage = new List<Message>();
-
-                //Monta mensagem - Serializa o lote de compr(a)s com aplicando as configurações de serialização para o serviceBus
-                messageBody = JsonConvert.SerializeObject(objTransacao, settings);
-
-                //Insere a mensagem em bytes na lista para a fila serviceBus
-                listMessage.Add(new Message(Encoding.UTF8.GetBytes(messageBody)));
-
                 //Define timeout de 30 segundos de upload da mensagem na fila
                 queueClient.OperationTimeout = TimeSpan.FromSeconds(30);
 
-                //Insere a mensagem na fila serviceBus - Lista de compra(s)
-                queueClient.SendAsync(listMessage).GetAwaiter().GetResult();
+                //Lista padrão para envio da mensagem (lote de compra(s)) para a fila
+                List<Message> listMessage = new List<Message>();
 
+                while (listaCompras.Count() > 0)
+                {
+                    //Se o lote de compras tiver mais de 200 regitros, ele é dividido e inserido na fila por lote
+                    listaFila = listaCompras.Take(200).ToList();
+
+                    //Monta mensagem - Serializa o lote de compr(a)s com aplicando as configurações de serialização para o serviceBus
+                    messageBody = JsonConvert.SerializeObject(listaFila, settings);
+
+                    //Insere a mensagem em bytes na lista para a fila serviceBus
+                    listMessage.Add(new Message(Encoding.UTF8.GetBytes(messageBody)));
+
+                    //Insere a mensagem na fila serviceBus - Lista de compra(s)
+                    queueClient.SendAsync(listMessage).GetAwaiter().GetResult();
+
+                    //Remove da fila de processamento, os registros inseridos na fila
+                    if (listaFila.Count > listaCompras.Count) listaCompras.RemoveRange(0, listaFila.Count);
+                    else listaCompras.RemoveRange(0, listaFila.Count);
+
+                    //Limpa a fila de mensagens
+                    listMessage.Clear();
+                }
                 //await queueClient.CloseAsync();
                 //Fecha a conexão com a fila
                 queueClient.CloseAsync();
             }
             catch (Exception ex)
             {
-                Log.InserirLogIzio(NomeClienteWs, new DadosLog { des_erro_tecnico = "TransacaoIzioRest - Erro ao enviar mensagem a fila: " + ex.Message }, System.Reflection.MethodBase.GetCurrentMethod());
+                Log.InserirLogIzio(NomeClienteWs, new DadosLog { des_erro_tecnico = "TransacaoIzioRest - Erro ao enviar mensagem para fila: " + ex.Message }, System.Reflection.MethodBase.GetCurrentMethod());
                 throw;
             }
 

@@ -24,6 +24,7 @@ namespace TransacaoIzioRest.DAO.ServiceBus
                     LockDuration = TimeSpan.FromMinutes(5),
                     MaxSizeInMB = 5 * 1024,
                     EnableBatchedOperations = true
+                    
                 }).ConfigureAwait(false);
             }
 
