@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
 using System.Web.Http.Description;
@@ -740,5 +741,71 @@ namespace TransacaoIzioRest.Controllers
                 return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
             }
         }
+
+        /// <summary>
+        /// Realiza a exclusão dos registros intermediários para reprocessamento.
+        /// </summary>
+        /// <param name="tokenAutenticacao">Token de autorizacao para utilizacao da api</param>
+        /// <param name="dataProcessamento">Data (yyyy-MM-dd) para exclusão processamento (deixar em branco para deletar tudo)</param>
+        /// <returns></returns>
+        [HttpPost, Utilidades.ValidaTokenAutenticacao]
+        [Route("api/TransacaoIzio/ConsumirFilaComprasEmLote")]
+        //[ApiExplorerSettings(IgnoreApi = true)]
+        [SwaggerResponse("200", typeof(ApiSuccess))]
+        [SwaggerResponse("401", typeof(ApiErrors))]
+        [SwaggerResponse("500", typeof(ApiErrors))]
+        public HttpResponseMessage ConsumirFilaComprasEmLote()
+        {
+            //Nome do cliente que esta executando a API, gerado após validação do Token
+            string sNomeCliente = "";
+            string tokenAutenticacao = "";
+
+            //Objeto de retorno contendo os erros da execução da API
+            ApiErrors listaErros = new ApiErrors();
+            listaErros.errors = new List<Erros>();
+
+            try
+            {
+                //Valida Token no Izio
+                #region Valida Token no Izio
+                sNomeCliente = Request.Headers.GetValues("sNomeCliente").First();
+                tokenAutenticacao = Request.Headers.GetValues("tokenAutenticacao").First();
+                #endregion
+
+                //Cria objeto para processamento das transacoes
+                //ImportaTransacaoDAO dao = new ImportaTransacaoDAO(sNomeCliente, tokenAutenticacao);
+                Task<int> total = Task.FromResult(0);
+                total = DAO.ServiceBus.ConsumirMensagemFila.ConsumirFilaNotasSefazAsync(sNomeCliente, tokenAutenticacao, 0);
+
+                ApiSuccess success = new ApiSuccess();
+
+                success.payload = new Sucesso();
+                success.payload.code = "200";
+                success.payload.message = $"Dados processados [{total.Id}] da fila com Sucesso.";
+                return Request.CreateResponse(HttpStatusCode.OK, success);
+
+            }
+            catch (System.Exception ex)
+            {
+
+                if (listaErros.errors == null)
+                {
+                    listaErros.errors = new List<Erros>();
+                }
+                //Seta o Objeto com o Erro ocorrido
+                listaErros.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = "Erro interno a exclusão das vendas em lote, favor contactar o administrador." });
+
+                DadosLog dadosLog = new DadosLog();
+                dadosLog.des_erro_tecnico = ex.ToString();
+
+                //Pegar a mensagem padrão retornada da api, caso não tenha mensagem de negocio para devolver na API
+                Log.InserirLogIzio(sNomeCliente, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
+
+                //trocar o status code
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
+
+            }
+        }
+
     }
 }

@@ -78,6 +78,14 @@
             <param name="codigoPessoa">Codigo da pessoa para a consulta das compras</param>
             <param name="qtdMes"> consulta das compras neste periodo</param>
         </member>
+        <member name="M:TransacaoIzioRest.Controllers.TransacaoIzioRestController.ConsumirFilaComprasEmLote">
+            <summary>
+            Realiza a exclusão dos registros intermediários para reprocessamento.
+            </summary>
+            <param name="tokenAutenticacao">Token de autorizacao para utilizacao da api</param>
+            <param name="dataProcessamento">Data (yyyy-MM-dd) para exclusão processamento (deixar em branco para deletar tudo)</param>
+            <returns></returns>
+        </member>
         <member name="T:TransacaoRest.Controllers.TransacaoCabecalhoController">
             <summary>
             Api das transações cabeçalhos

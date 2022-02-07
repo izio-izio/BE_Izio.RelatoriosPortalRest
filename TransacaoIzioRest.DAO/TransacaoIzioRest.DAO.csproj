@@ -234,6 +234,7 @@
     <Compile Include="ImportaTransacaoDAO.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ServiceBus\ConnectionStringServiceBus.cs" />
+    <Compile Include="ServiceBus\ConsumirMensagemFila.cs" />
     <Compile Include="ServiceBus\EnviarMensagemFila.cs" />
     <Compile Include="ServiceBus\MessageBusService.cs" />
     <Compile Include="ServiceBus\SubstituteNullWithEmptyStringContractResolver.cs" />

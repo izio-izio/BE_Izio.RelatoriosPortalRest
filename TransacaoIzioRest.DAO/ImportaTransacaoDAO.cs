@@ -663,6 +663,128 @@ namespace TransacaoIzioRest.DAO
 
         }
 
+
+        internal ApiErrors ImportaLoteTransacaoFila(List<DadosTransacaoLote> objTransacao)
+        {
+            ApiErrors listaErros = new ApiErrors();
+            listaErros.errors = new List<Erros>();
+
+            //Lista padrão para bulkt Insert na viewizio_3
+            List<DadosLoteViewizio_3> listaViewizio_3 = new List<DadosLoteViewizio_3>();
+
+            try
+            {
+                // Abre a conexao com o banco de dados
+                sqlServer.StartConnection();
+
+                //Popula lista padrão para o bulkInsert na viewizio_3
+                #region Monta lista padrão para o bulkInsert na viewizio_3
+                foreach (DadosTransacaoLote dadosTrans in objTransacao.ToList())
+                {
+                    listaViewizio_3.Add(new DadosLoteViewizio_3
+                    {
+                        CpfCliente = Convert.ToInt64(string.IsNullOrEmpty(dadosTrans.cod_cpf) == false ? dadosTrans.cod_cpf : "0"),
+                        CpfCliente_2 = Convert.ToInt64(string.IsNullOrEmpty(dadosTrans.cod_cpf) == false ? dadosTrans.cod_cpf : "0"),
+                        DataCompra = dadosTrans.dat_compra,
+                        ValorCompra = dadosTrans.vlr_compra,
+                        cupom = dadosTrans.cupom,
+                        Pdv = dadosTrans.Pdv,
+                        CodPagto = 0,
+                        MeioPagto = dadosTrans.des_tipo_pagamento,
+                        QtdeItens = dadosTrans.qtd_itens_compra,
+                        CodEAN = dadosTrans.cod_ean,
+                        CodProduto = Convert.ToInt64(dadosTrans.cod_produto),
+                        DesProduto = dadosTrans.des_produto,
+                        ValorItem = dadosTrans.vlr_item_compra,
+                        vlr_desconto_item = dadosTrans.vlr_desconto_item,
+                        Quantidade = dadosTrans.qtd_item_compra,
+                        cod_usuario = dadosTrans.cod_usuario == null ? 0 : dadosTrans.cod_usuario.Value,
+                        cod_pessoa = 0,
+                        item = dadosTrans.nro_item_compra,
+                        cod_loja = dadosTrans.cod_loja,
+                        nsu_transacao = dadosTrans.nsu_transacao,
+                        dat_geracao_nsu = dadosTrans.dat_geracao_nsu,
+                        vlr_total_desconto = dadosTrans.vlr_total_desconto,
+                        des_bin_cartao = dadosTrans.des_bin_cartao,
+                        vlr_meiopagto = dadosTrans.vlr_meiopagto,
+                        vlr_troco = dadosTrans.vlr_troco
+
+                    });
+                }
+
+                #endregion
+
+                //Trocar a execução por bulkInsert da lista
+                #region Bulk Insert da lista
+
+                using (var bcp = new SqlBulkCopy
+                            (
+                            //Para utilizar o controle de transacao
+                            sqlServer.Command.Connection,
+                            SqlBulkCopyOptions.TableLock |
+                            SqlBulkCopyOptions.FireTriggers |
+                            SqlBulkCopyOptions.UseInternalTransaction,
+                            null
+                            ))
+                using (
+                    var reader = ObjectReader.Create(listaViewizio_3,
+                    "CpfCliente",
+                    "CpfCliente_2",
+                    "DataCompra",
+                    "ValorCompra",
+                    "cupom",
+                    "Pdv",
+                    "CodPagto",
+                    "MeioPagto",
+                    "QtdeItens",
+                    "CodEAN",
+                    "CodProduto",
+                    "DesProduto",
+                    "ValorItem",
+                    "vlr_desconto_item",
+                    "Quantidade",
+                    "cod_usuario",
+                    "cod_pessoa",
+                    "item",
+                    "cod_loja",
+                    "nsu_transacao",
+                    "dat_geracao_nsu",
+                    "vlr_total_desconto",
+                    "des_bin_cartao",
+                    "vlr_meiopagto",
+                    "vlr_troco"))
+                {
+                    bcp.BulkCopyTimeout = ConfigurationManager.AppSettings["TimeoutExecucao"] != null ? Convert.ToInt32(ConfigurationManager.AppSettings["TimeoutExecucao"]) : 600;
+                    bcp.DestinationTableName = "viewizio_3";
+                    bcp.WriteToServer(reader);
+                }
+
+                #endregion
+
+                //sqlServer.Commit();
+            }
+            catch (System.Exception ex)
+            {
+                //sqlServer.Rollback();
+
+                DadosLog dadosLog = new DadosLog();
+                dadosLog.des_erro_tecnico = ex.ToString();
+                Log.InserirLogIzio(NomeClienteWs, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
+
+                //Seta a lista de erros com o erro
+                listaErros.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ErroBancoDeDadosLoteTransacao + ", favor contactar o administrador" });
+
+                //Envia email para o monitoramento caso de erro ao inserir na fila
+                enviarEmail($"Verificar o request na sis_log </br></br>{ex.ToString()}", $"{NomeClienteWs} - Erro enviar lote de compra para fila (ServiceBus)");
+            }
+            finally
+            {
+                sqlServer.CloseConnection();
+            }
+
+            return listaErros;
+
+        }
         #endregion
 
         /// <summary>
