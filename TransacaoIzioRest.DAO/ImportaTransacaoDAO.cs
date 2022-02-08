@@ -544,9 +544,13 @@ namespace TransacaoIzioRest.DAO
             {
                 //Insere o request na fila - Service Bus
                 #region Insere o request na fila - Service Bus
-
-                EnviarMensagemFila.InserirLoteFila(NomeClienteWs,tokenAutenticacao, objTransacao, IpOrigem);
-
+                if (NomeClienteWs.ToLower() == "campelo" || NomeClienteWs.ToLower() == "lab")
+                {
+                    if (!EnviarMensagemFila.InserirLoteFila(NomeClienteWs, tokenAutenticacao, objTransacao, IpOrigem))
+                    {
+                        enviarEmail("Erro no processamento do lote: </br> </br> " + JsonConvert.SerializeObject(objTransacao), $"{NomeClienteWs} - Erro ao inserir na fila");
+                    }
+                }
                 #endregion
 
                 // Abre a conexao com o banco de dados
@@ -1036,40 +1040,54 @@ namespace TransacaoIzioRest.DAO
 
         private void enviarEmail(string desTexto, string desTitulo)
         {
-            List<Header> lstHeader = new List<Header>();
-            lstHeader.Add(new Header
+            try
             {
-                name = "tokenAutenticacao",
-                value = tokenAutenticacao
-            });
-
-            var acesso = Utilidades.ConsultarConfiguracoesCliente(NomeClienteWs);
 
 
-            int i = 0;
+                List<Header> lstHeader = new List<Header>();
+                lstHeader.Add(new Header
+                {
+                    name = "tokenAutenticacao",
+                    value = tokenAutenticacao
+                });
 
-            EmailTemplateEnvio email = new EmailTemplateEnvio
-            {
-                des_email = "monitoramento@izio.com.br",
-                des_cod_campanha = 0,
-                cod_tipo_email_template = (int)TipoTemplate.TEMPLATE_CONTEUDO_GENERICO,
-                des_complemneto = desTexto,
-                des_titulo_email = desTitulo
+                var acesso = Utilidades.ConsultarConfiguracoesCliente(NomeClienteWs);
 
-            };
 
-            var result = Utilidades.ChamadaApiExternaStatusCode(
-                                             tipoRequisicao: "POST",
-                                             metodo: "EmailRest/api/Email/EnvioEmailTemplate/",
-                                             body: JsonConvert.SerializeObject(email),
-                                             url: "https://api.izio.com.br/",
-                                             Headers: lstHeader);
+                int i = 0;
 
-            if (result != null)
-            {
-                result = result;
+                EmailTemplateEnvio email = new EmailTemplateEnvio
+                {
+                    des_email = "monitoramento@izio.com.br",
+                    des_cod_campanha = 0,
+                    cod_tipo_email_template = (int)TipoTemplate.TEMPLATE_CONTEUDO_GENERICO,
+                    des_complemneto = desTexto,
+                    des_titulo_email = desTitulo
+
+                };
+
+                var result = Utilidades.ChamadaApiExternaStatusCode(
+                                                 tipoRequisicao: "POST",
+                                                 metodo: "EmailRest/api/Email/EnvioEmailTemplate/",
+                                                 body: JsonConvert.SerializeObject(email),
+                                                 url: "https://api.izio.com.br/",
+                                                 Headers: lstHeader);
+
+                if (result != null)
+                {
+                    result = result;
+                }
             }
+            catch (Exception ex)
+            {
+                DadosLog dadosLog = new DadosLog();
+                dadosLog.des_erro_tecnico = "Erro ao enviar email da fila: " +  ex.Message;
 
+                //Pegar a mensagem padrão retornada da api, caso não tenha mensagem de negocio para devolver na API
+                Log.InserirLogIzio(NomeClienteWs, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
+
+                throw;
+            }
         }
     }
 }

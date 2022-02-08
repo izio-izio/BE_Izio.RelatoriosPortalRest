@@ -13,7 +13,7 @@ namespace TransacaoIzioRest.DAO.ServiceBus
 {
     public static class EnviarMensagemFila
     {
-        public static void InserirLoteFila(string NomeClienteWs, string tokenAutenticacao, List<DadosTransacaoLote> listaCompras, string ipOrigem)
+        public static Boolean InserirLoteFila(string NomeClienteWs, string tokenAutenticacao, List<DadosTransacaoLote> listaCompras, string ipOrigem)
         {
             List<DadosTransacaoLote> listaFila = new List<DadosTransacaoLote>();
             try
@@ -55,14 +55,21 @@ namespace TransacaoIzioRest.DAO.ServiceBus
                     //Limpa a fila de mensagens
                     listMessage.Clear();
                 }
+
                 //await queueClient.CloseAsync();
                 //Fecha a conexão com a fila
                 queueClient.CloseAsync();
+
+                return true;
             }
             catch (Exception ex)
             {
-                Log.InserirLogIzio(NomeClienteWs, new DadosLog { des_erro_tecnico = "TransacaoIzioRest - Erro ao enviar mensagem para fila: " + ex.Message }, System.Reflection.MethodBase.GetCurrentMethod());
-                throw;
+                //Log.InserirLogIzio(NomeClienteWs, new DadosLog { des_erro_tecnico = "TransacaoIzioRest - Erro ao enviar mensagem para fila: " + ex.Message }, System.Reflection.MethodBase.GetCurrentMethod());
+                DadosLog dadosLog = new DadosLog();
+                dadosLog.des_erro_tecnico = $" Erro ao inserir mensagem na fila: {ex.Message}";
+                Log.InserirLogIzio(NomeClienteWs, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
+
+                return false;
             }
 
         }
