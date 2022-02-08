@@ -1,5 +1,6 @@
 ﻿using Izio.Biblioteca;
 using Izio.Biblioteca.Model;
+using Newtonsoft.Json;
 using NSwag.Annotations;
 using System;
 using System.Collections.Generic;
@@ -743,18 +744,31 @@ namespace TransacaoIzioRest.Controllers
         }
 
         /// <summary>
-        /// Realiza a exclusão dos registros intermediários para reprocessamento.
+        /// Método para consumir a fila de compras enviadas em lote.
         /// </summary>
-        /// <param name="tokenAutenticacao">Token de autorizacao para utilizacao da api</param>
-        /// <param name="dataProcessamento">Data (yyyy-MM-dd) para exclusão processamento (deixar em branco para deletar tudo)</param>
+        /// <remarks>
+        /// Método para consumir a fila (serviceBus) de compras enviadas em lote. As compras são inseridas na fila em lote de 200 registros no máximo.
+        /// 
+        /// ### Processamento ###
+        /// - Somente é permitido a execução com o token do Izio.
+        /// - Lista de clientes enviada com valor 0, indica que todos os clientes serão processados.
+        /// - Lista de clientes, quando tiver mais de um cliente, separar por virgula (Ex: 15,7,20).
+        /// - O processamento será feito em paralelo entre os clientes, caso número de threads seja maior que 1.
+        /// - As mensagens são lidas da fila, quando o lote lido inteirar 1000 registros é persistido na base o lote de compra.
+        /// - As mensagens são apagadas da fila, somente se tiver ocorrido com sucesso a persistência no banco de dados.
+        /// - As mensagens ficam na fila por 7 dias e depois são excluídas automaticamente.
+        /// 
+        /// </remarks>
+        /// <param name="listaClientes">Lista de clientes para o processamento</param>
+        /// <param name="numThreads">Numero de threads para o processamento</param>
         /// <returns></returns>
         [HttpPost, Utilidades.ValidaTokenAutenticacao]
         [Route("api/TransacaoIzio/ConsumirFilaComprasEmLote")]
         //[ApiExplorerSettings(IgnoreApi = true)]
-        [SwaggerResponse("200", typeof(ApiSuccess))]
+        [SwaggerResponse("200", typeof(RetornoTransacao<DadosConsumirFila>))]
         [SwaggerResponse("401", typeof(ApiErrors))]
         [SwaggerResponse("500", typeof(ApiErrors))]
-        public HttpResponseMessage ConsumirFilaComprasEmLote()
+        public HttpResponseMessage ConsumirFilaComprasEmLote(string listaClientes, int numThreads = 1)
         {
             //Nome do cliente que esta executando a API, gerado após validação do Token
             string sNomeCliente = "";
@@ -764,25 +778,79 @@ namespace TransacaoIzioRest.Controllers
             ApiErrors listaErros = new ApiErrors();
             listaErros.errors = new List<Erros>();
 
+            RetornoTransacao<DadosConsumirFila> retorno = new RetornoTransacao<DadosConsumirFila>();
+            retorno.payload = new List<DadosConsumirFila>();
+
             try
             {
                 //Valida Token no Izio
                 #region Valida Token no Izio
                 sNomeCliente = Request.Headers.GetValues("sNomeCliente").First();
                 tokenAutenticacao = Request.Headers.GetValues("tokenAutenticacao").First();
+
+                if (sNomeCliente.ToLower() != "izio")
+                {
+                    listaErros.errors.Add(new Erros() {code= Convert.ToInt32(HttpStatusCode.PreconditionFailed).ToString(), message="Execução permitida apenas com o token do Izio." });
+                }
+                else
+                {
+                    if (string.IsNullOrEmpty(listaClientes))
+                    {
+                        listaErros.errors.Add(new Erros() { code = Convert.ToInt32(HttpStatusCode.PreconditionFailed).ToString(), message = "É necessário informar a lista de clientes ou enviar 0 para processar todos os clientes." });
+                    }
+
+                    if (numThreads < 1 || numThreads > 3)
+                    {
+                        listaErros.errors.Add(new Erros() { code = Convert.ToInt32(HttpStatusCode.PreconditionFailed).ToString(), message = "Numero de threads tem que ser maior que 0 ou menor ou igual a 3." });
+                    }
+                }
+
+                if(listaErros.errors.Count() > 0)
+                {
+                    return Request.CreateResponse(HttpStatusCode.PreconditionFailed, listaErros);
+                }
                 #endregion
 
-                //Cria objeto para processamento das transacoes
-                //ImportaTransacaoDAO dao = new ImportaTransacaoDAO(sNomeCliente, tokenAutenticacao);
-                Task<int> total = Task.FromResult(0);
-                total = DAO.ServiceBus.ConsumirMensagemFila.ConsumirFilaNotasSefazAsync(sNomeCliente, tokenAutenticacao, 0);
+                //Consulta base do Izio os dados do cliente para processamento
+                #region Consulta base do Izio os dados do cliente para processamento
+                ImportaTransacaoDAO dao = new ImportaTransacaoDAO(sNomeCliente, tokenAutenticacao);
+                var clientes = dao.ListarClientes(listaClientes);
 
-                ApiSuccess success = new ApiSuccess();
+                if (!clientes.Any())
+                {
+                    listaErros.errors.Add(new Erros() { code = Convert.ToInt32(HttpStatusCode.PreconditionFailed).ToString(), message = "Nenhum cliente foi encontrado para o processamento." });
+                    return Request.CreateResponse(HttpStatusCode.PreconditionFailed, listaErros);
+                }
+                #endregion
 
-                success.payload = new Sucesso();
-                success.payload.code = "200";
-                success.payload.message = $"Dados processados [{total.Id}] da fila com Sucesso.";
-                return Request.CreateResponse(HttpStatusCode.OK, success);
+
+                //Monta parallel foreach do processamento
+                Parallel.ForEach(clientes, new ParallelOptions { MaxDegreeOfParallelism = numThreads }, (cliente) =>
+                {
+                    try
+                    {
+                        DAO.ServiceBus.ConsumirMensagemFila daoFila = new DAO.ServiceBus.ConsumirMensagemFila(cliente.des_chave_ws, cliente.des_token_rest);
+                        
+                        Task<int> total = Task.FromResult(0);
+                        total = daoFila.ConsumirFilaNotasSefazAsync(cliente.des_chave_ws, cliente.des_token_rest, 0);
+                        retorno.payload.Add(new DadosConsumirFila() { des_nome_cliente = cliente.des_chave_ws, qtd_mensagens_fila = total.Id });
+                    }
+                    catch (Exception ex)
+                    {
+                        DadosLog dadosLog = new DadosLog();
+                        dadosLog.des_erro_tecnico = $@"Erro ao consumir a fila, ex: [{JsonConvert.SerializeObject(ex)}]";
+                        Log.InserirLogIzio(cliente.des_chave_ws, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
+
+                        retorno.payload.Add(new DadosConsumirFila() { des_nome_cliente = cliente.des_chave_ws, qtd_mensagens_fila = 0, des_observacao = $"Cliente [{cliente.id} - {cliente.des_chave_ws}] ocorreu erro consumir a fila, ex: {JsonConvert.SerializeObject(ex)}." });
+                    }
+                });
+
+                if(retorno.payload.Count () > 0  && retorno.payload.Where(x=> !string.IsNullOrEmpty(x.des_observacao)).Count() > 0)
+                {
+                    return Request.CreateResponse(HttpStatusCode.BadRequest, retorno);
+                }
+
+                return Request.CreateResponse(HttpStatusCode.OK, retorno);
 
             }
             catch (System.Exception ex)

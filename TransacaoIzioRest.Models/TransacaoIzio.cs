@@ -219,4 +219,33 @@ namespace TransacaoIzioRest.Models
 
     #endregion
 
+    public class DadosClienteIzio
+    {
+        public int id { get; set; }
+        public string des_chave_ws { get; set; }
+        public string des_token_rest { get; set; }
+        public string des_nome_cliente { get; set; }
+        public string des_string_conexao { get; set; }
+    }
+
+    public class DadosConsumirFila
+    {
+        /// <summary>
+        /// Nome do cliente
+        /// </summary>
+        public string des_nome_cliente { get; set; }
+        /// <summary>
+        /// Quantidade de mensagens lidas da fila
+        /// </summary>
+        public int qtd_mensagens_fila { get; set; }
+        /// <summary>
+        /// Observação sobre o consumo da fila, usado para quando dá erro no processamento
+        /// </summary>
+        public string des_observacao { get; set; }
+    }
+
+    public class RetornoTransacao<T>
+    {
+        public List<T> payload { get; set; }
+    }
 }

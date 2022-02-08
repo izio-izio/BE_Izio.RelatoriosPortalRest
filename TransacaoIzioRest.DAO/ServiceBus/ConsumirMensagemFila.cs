@@ -225,7 +225,7 @@ namespace TransacaoIzioRest.DAO.ServiceBus
             return Task.CompletedTask;
         }
 
-        public static async Task<int> ConsumirFilaNotasSefazAsync(string nomeCliente, string tokenAutenticacao, int totalNotas)
+        public async Task<int> ConsumirFilaNotasSefazAsync(string nomeCliente, string tokenAutenticacao, int totalNotas)
         {
             int i = 0;
             try

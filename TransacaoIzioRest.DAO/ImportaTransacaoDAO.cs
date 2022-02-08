@@ -675,6 +675,7 @@ namespace TransacaoIzioRest.DAO
 
             //Lista padrão para bulkt Insert na viewizio_3
             List<DadosLoteViewizio_3> listaViewizio_3 = new List<DadosLoteViewizio_3>();
+            List<DadosLoteViewizio_3> listaViewizio_data = new List<DadosLoteViewizio_3>();
 
             try
             {
@@ -685,35 +686,70 @@ namespace TransacaoIzioRest.DAO
                 #region Monta lista padrão para o bulkInsert na viewizio_3
                 foreach (DadosTransacaoLote dadosTrans in objTransacao.ToList())
                 {
-                    listaViewizio_3.Add(new DadosLoteViewizio_3
+                    if (dadosTrans.dat_compra > new DateTime(1900,01,01))
                     {
-                        CpfCliente = Convert.ToInt64(string.IsNullOrEmpty(dadosTrans.cod_cpf) == false ? dadosTrans.cod_cpf : "0"),
-                        CpfCliente_2 = Convert.ToInt64(string.IsNullOrEmpty(dadosTrans.cod_cpf) == false ? dadosTrans.cod_cpf : "0"),
-                        DataCompra = dadosTrans.dat_compra,
-                        ValorCompra = dadosTrans.vlr_compra,
-                        cupom = dadosTrans.cupom,
-                        Pdv = dadosTrans.Pdv,
-                        CodPagto = 0,
-                        MeioPagto = dadosTrans.des_tipo_pagamento,
-                        QtdeItens = dadosTrans.qtd_itens_compra,
-                        CodEAN = dadosTrans.cod_ean,
-                        CodProduto = Convert.ToInt64(dadosTrans.cod_produto),
-                        DesProduto = dadosTrans.des_produto,
-                        ValorItem = dadosTrans.vlr_item_compra,
-                        vlr_desconto_item = dadosTrans.vlr_desconto_item,
-                        Quantidade = dadosTrans.qtd_item_compra,
-                        cod_usuario = dadosTrans.cod_usuario == null ? 0 : dadosTrans.cod_usuario.Value,
-                        cod_pessoa = 0,
-                        item = dadosTrans.nro_item_compra,
-                        cod_loja = dadosTrans.cod_loja,
-                        nsu_transacao = dadosTrans.nsu_transacao,
-                        dat_geracao_nsu = dadosTrans.dat_geracao_nsu,
-                        vlr_total_desconto = dadosTrans.vlr_total_desconto,
-                        des_bin_cartao = dadosTrans.des_bin_cartao,
-                        vlr_meiopagto = dadosTrans.vlr_meiopagto,
-                        vlr_troco = dadosTrans.vlr_troco
+                        listaViewizio_3.Add(new DadosLoteViewizio_3
+                        {
+                            CpfCliente = Convert.ToInt64(string.IsNullOrEmpty(dadosTrans.cod_cpf) == false ? dadosTrans.cod_cpf : "0"),
+                            CpfCliente_2 = Convert.ToInt64(string.IsNullOrEmpty(dadosTrans.cod_cpf) == false ? dadosTrans.cod_cpf : "0"),
+                            DataCompra = dadosTrans.dat_compra,
+                            ValorCompra = dadosTrans.vlr_compra,
+                            cupom = dadosTrans.cupom,
+                            Pdv = dadosTrans.Pdv,
+                            CodPagto = 0,
+                            MeioPagto = dadosTrans.des_tipo_pagamento,
+                            QtdeItens = dadosTrans.qtd_itens_compra,
+                            CodEAN = dadosTrans.cod_ean,
+                            CodProduto = Convert.ToInt64(dadosTrans.cod_produto),
+                            DesProduto = dadosTrans.des_produto,
+                            ValorItem = dadosTrans.vlr_item_compra,
+                            vlr_desconto_item = dadosTrans.vlr_desconto_item,
+                            Quantidade = dadosTrans.qtd_item_compra,
+                            cod_usuario = dadosTrans.cod_usuario == null ? 0 : dadosTrans.cod_usuario.Value,
+                            cod_pessoa = 0,
+                            item = dadosTrans.nro_item_compra,
+                            cod_loja = dadosTrans.cod_loja,
+                            nsu_transacao = dadosTrans.nsu_transacao,
+                            dat_geracao_nsu = dadosTrans.dat_geracao_nsu,
+                            vlr_total_desconto = dadosTrans.vlr_total_desconto,
+                            des_bin_cartao = dadosTrans.des_bin_cartao,
+                            vlr_meiopagto = dadosTrans.vlr_meiopagto,
+                            vlr_troco = dadosTrans.vlr_troco
 
-                    });
+                        });
+                    }
+                    else
+                    {
+                        listaViewizio_data.Add(new DadosLoteViewizio_3
+                        {
+                            CpfCliente = Convert.ToInt64(string.IsNullOrEmpty(dadosTrans.cod_cpf) == false ? dadosTrans.cod_cpf : "0"),
+                            CpfCliente_2 = Convert.ToInt64(string.IsNullOrEmpty(dadosTrans.cod_cpf) == false ? dadosTrans.cod_cpf : "0"),
+                            DataCompra = dadosTrans.dat_compra,
+                            ValorCompra = dadosTrans.vlr_compra,
+                            cupom = dadosTrans.cupom,
+                            Pdv = dadosTrans.Pdv,
+                            CodPagto = 0,
+                            MeioPagto = dadosTrans.des_tipo_pagamento,
+                            QtdeItens = dadosTrans.qtd_itens_compra,
+                            CodEAN = dadosTrans.cod_ean,
+                            CodProduto = Convert.ToInt64(dadosTrans.cod_produto),
+                            DesProduto = dadosTrans.des_produto,
+                            ValorItem = dadosTrans.vlr_item_compra,
+                            vlr_desconto_item = dadosTrans.vlr_desconto_item,
+                            Quantidade = dadosTrans.qtd_item_compra,
+                            cod_usuario = dadosTrans.cod_usuario == null ? 0 : dadosTrans.cod_usuario.Value,
+                            cod_pessoa = 0,
+                            item = dadosTrans.nro_item_compra,
+                            cod_loja = dadosTrans.cod_loja,
+                            nsu_transacao = dadosTrans.nsu_transacao,
+                            dat_geracao_nsu = dadosTrans.dat_geracao_nsu,
+                            vlr_total_desconto = dadosTrans.vlr_total_desconto,
+                            des_bin_cartao = dadosTrans.des_bin_cartao,
+                            vlr_meiopagto = dadosTrans.vlr_meiopagto,
+                            vlr_troco = dadosTrans.vlr_troco
+
+                        });
+                    }
                 }
 
                 #endregion
@@ -759,7 +795,7 @@ namespace TransacaoIzioRest.DAO
                     "vlr_troco"))
                 {
                     bcp.BulkCopyTimeout = ConfigurationManager.AppSettings["TimeoutExecucao"] != null ? Convert.ToInt32(ConfigurationManager.AppSettings["TimeoutExecucao"]) : 600;
-                    bcp.DestinationTableName = "viewizio_3";
+                    bcp.DestinationTableName = "viewizio_3_2";
                     bcp.WriteToServer(reader);
                 }
 
@@ -1087,6 +1123,57 @@ namespace TransacaoIzioRest.DAO
                 Log.InserirLogIzio(NomeClienteWs, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
 
                 throw;
+            }
+        }
+
+        public List<DadosClienteIzio> ListarClientes(string ids)
+        {
+            try
+            {
+                if (ids == "0")
+                {
+                    ids = "";
+                }
+                else
+                {
+                    ids = $" AND sis.id IN({ids}) ";
+                }
+
+                var query = $@"SELECT sis.id,
+                            sis.des_chave_ws,
+                            sis.des_token_rest,
+                            mctp.num_dia_processamento,
+                            sis.des_string_conexao
+                            FROM sis_clientes sis WITH (NOLOCK)
+                            INNER JOIN dbo.mon_cliente_transacao_parametrizacao mctp WITH (NOLOCK)
+                            ON mctp.id = sis.id {ids} order by 2 ";
+
+                sqlServer.StartConnection();
+                sqlServer.Command.CommandText = query;
+                sqlServer.Reader = sqlServer.Command.ExecuteReader();
+
+                var lista = new ModuloClasse().PreencheClassePorDataReader<DadosClienteIzio>(sqlServer.Reader);
+
+                sqlServer.CloseConnection();
+                return lista;
+            }
+            catch (Exception ex)
+            {
+                Log.inserirLogException(NomeClienteWs, ex, 0);
+                throw ex;
+            }
+            finally
+            {
+                if (sqlServer != null)
+                {
+                    if (sqlServer.Reader != null)
+                    {
+                        sqlServer.Reader.Close();
+                        sqlServer.Reader.Dispose();
+                    }
+
+                    sqlServer.CloseConnection();
+                }
             }
         }
     }

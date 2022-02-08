@@ -13,9 +13,13 @@ namespace TransacaoIzioRest.DAO.ServiceBus
 {
     public static class EnviarMensagemFila
     {
-        public static Boolean InserirLoteFila(string NomeClienteWs, string tokenAutenticacao, List<DadosTransacaoLote> listaCompras, string ipOrigem)
+        public static Boolean InserirLoteFila(string NomeClienteWs, string tokenAutenticacao, List<DadosTransacaoLote> listaComprasApi, string ipOrigem)
         {
             List<DadosTransacaoLote> listaFila = new List<DadosTransacaoLote>();
+
+            //A seta a lista que será inserida na fila
+            List<DadosTransacaoLote> listaCompras = new List<DadosTransacaoLote>();
+            listaCompras.AddRange(listaComprasApi);
             try
             {
                 //Monta configuração para serialização dos dados do objeto na fila - ServiceBus

@@ -689,5 +689,20 @@
             Código interno do produto
             </summary>
         </member>
+        <member name="P:TransacaoIzioRest.Models.DadosConsumirFila.des_nome_cliente">
+            <summary>
+            Nome do cliente
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosConsumirFila.qtd_mensagens_fila">
+            <summary>
+            Quantidade de mensagens lidas da fila
+            </summary>
+        </member>
+        <member name="P:TransacaoIzioRest.Models.DadosConsumirFila.des_observacao">
+            <summary>
+            Observação sobre o consumo da fila, usado para quando dá erro no processamento
+            </summary>
+        </member>
     </members>
 </doc>
