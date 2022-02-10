@@ -795,7 +795,7 @@ namespace TransacaoIzioRest.DAO
                     "vlr_troco"))
                 {
                     bcp.BulkCopyTimeout = ConfigurationManager.AppSettings["TimeoutExecucao"] != null ? Convert.ToInt32(ConfigurationManager.AppSettings["TimeoutExecucao"]) : 600;
-                    bcp.DestinationTableName = "viewizio_3_2";
+                    bcp.DestinationTableName = "viewizio_3";
                     bcp.WriteToServer(reader);
                 }
 
