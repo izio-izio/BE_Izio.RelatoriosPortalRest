@@ -62,16 +62,16 @@ namespace TransacaoIzioRest.DAO.ServiceBus
                         }
                         catch (Exception ex)
                         {
+                            iContTimeout++;
+
                             if (iContTimeout < 3 && ex.Message.Contains("allocated time"))
                             {
-                                iContTimeout++;
-
                                 //Dorme 1 segundo para a proxima tentativa por causa de timeout na Azure
                                 System.Threading.Thread.Sleep(1000);
                             }
                             else
                             {
-                                if (iContTimeout >= 3) throw new Exception($"Erro no processamento da fila. {iContTimeout} tentativas de reenvio. Erro: {ex.Message}" );
+                                if (iContTimeout >= 3) throw new Exception($"Erro timeout processamento da fila. {iContTimeout} tentativas de reenvio. Erro: {ex.Message}" );
                             }
                         }
                     }
