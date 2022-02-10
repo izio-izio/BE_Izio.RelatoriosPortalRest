@@ -49,9 +49,32 @@ namespace TransacaoIzioRest.DAO.ServiceBus
                     //Insere a mensagem em bytes na lista para a fila serviceBus
                     listMessage.Add(new Message(Encoding.UTF8.GetBytes(messageBody)));
 
-                    //Insere a mensagem na fila serviceBus - Lista de compra(s)
-                    queueClient.SendAsync(listMessage).GetAwaiter().GetResult();
+                    //Contador caso o Azure apresente lentidão para realizar o processamento da fila
+                    int iContTimeout = 0;
 
+                    while (iContTimeout < 3)
+                    {
+                        try
+                        {
+                            //Insere a mensagem na fila serviceBus - Lista de compra(s)
+                            queueClient.SendAsync(listMessage).GetAwaiter().GetResult();
+                            iContTimeout = 4;
+                        }
+                        catch (Exception ex)
+                        {
+                            if (iContTimeout < 3 && ex.Message.Contains("allocated time"))
+                            {
+                                iContTimeout++;
+
+                                //Dorme 1 segundo para a proxima tentativa por causa de timeout na Azure
+                                System.Threading.Thread.Sleep(1000);
+                            }
+                            else
+                            {
+                                if (iContTimeout >= 3) throw new Exception($"Erro no processamento da fila. {iContTimeout} tentativas de reenvio. Erro: {ex.Message}" );
+                            }
+                        }
+                    }
                     //Remove da fila de processamento, os registros inseridos na fila
                     if (listaFila.Count > listaCompras.Count) listaCompras.RemoveRange(0, listaFila.Count);
                     else listaCompras.RemoveRange(0, listaFila.Count);
