@@ -33,8 +33,8 @@ namespace TransacaoIzioRest.DAO.ServiceBus
                 var queueClient = MessageBusService.InitializeMessageBusService(tokenAutenticacao, NomeClienteWs, $"transacao-{NomeClienteWs.ToLower()}").Result;
 
                 //Define timeout de 30 segundos de upload da mensagem na fila
-                queueClient.OperationTimeout = TimeSpan.FromSeconds(30);
-
+                queueClient.OperationTimeout = TimeSpan.FromSeconds(10);
+                
                 //Lista padrão para envio da mensagem (lote de compra(s)) para a fila
                 List<Message> listMessage = new List<Message>();
 

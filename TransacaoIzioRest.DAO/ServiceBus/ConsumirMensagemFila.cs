@@ -102,7 +102,7 @@ namespace TransacaoIzioRest.DAO.ServiceBus
                             if (temMsg)
                                 temMsg = TimeZoneInfo.ConvertTime(message.SystemProperties.EnqueuedTimeUtc, TimeZoneInfo.FindSystemTimeZoneById("E. South America Standard Time")) < datInicio ? true : false;
 
-                            if (DateTime.Now > datInicio.AddMinutes(15))
+                            if (DateTime.Now > datInicio.AddMinutes(5))
                                 temMsg = false;
                         }
                     }
