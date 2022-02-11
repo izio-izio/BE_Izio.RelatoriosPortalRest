@@ -15,7 +15,6 @@ using Izio.Biblioteca.Model;
 using System.Text.RegularExpressions;
 using Izio.Biblioteca.DAO;
 using Azure.Storage.Queues;
-using TransacaoIzioRest.DAO.ServiceBus;
 using EmailRest.Models;
 
 namespace TransacaoIzioRest.DAO
@@ -485,7 +484,7 @@ namespace TransacaoIzioRest.DAO
                     DadosLog dadosLog = new DadosLog();
                     dadosLog.des_erro_tecnico = "Cupom: [" + objTransacao.cupom + "] " + ex.Message;
 
-                    InserirFila(NomeClienteWs, $"venda-log-{NomeClienteWs}", objTransacao);
+                    //InserirFila(NomeClienteWs, $"venda-log-{NomeClienteWs}", objTransacao);
                     
 
                     listaErros.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ErroVendaDuplicada + dadosLog.des_erro_tecnico });
@@ -546,10 +545,10 @@ namespace TransacaoIzioRest.DAO
                 #region Insere o request na fila - Service Bus
                 if (NomeClienteWs.ToLower() == "campelo" || NomeClienteWs.ToLower() == "lab")
                 {
-                    if (!EnviarMensagemFila.InserirLoteFila(NomeClienteWs, tokenAutenticacao, objTransacao, IpOrigem))
-                    {
-                        enviarEmail("Erro no processamento do lote: </br> </br> " + JsonConvert.SerializeObject(objTransacao), $"{NomeClienteWs} - Erro ao inserir na fila");
-                    }
+                    //if (!EnviarMensagemFila.InserirLoteFila(NomeClienteWs, tokenAutenticacao, objTransacao, IpOrigem))
+                    //{
+                    //    enviarEmail("Erro no processamento do lote: </br> </br> " + JsonConvert.SerializeObject(objTransacao), $"{NomeClienteWs} - Erro ao inserir na fila");
+                    //}
                 }
                 #endregion
 
@@ -1045,34 +1044,6 @@ namespace TransacaoIzioRest.DAO
 
         }
         #endregion
-
-        public static void InserirFila(string sNomeCliente, string des_nome_fila, dynamic objeto)
-        {
-
-            ParametroDAO param = new ParametroDAO(sNomeCliente);
-
-            Dictionary<string, string> listParam = new Dictionary<string, string>();
-            listParam = param.ListarParametros("queue_azure");
-            string connectionString = listParam["queue_azure"];
-
-            // Instantiate a QueueClient which will be used to create and manipulate the queue
-            QueueClient queueClient = new QueueClient(connectionString, $"{des_nome_fila.ToLower()}");
-
-            // Create the queue
-            queueClient.CreateIfNotExists();
-
-            if (queueClient.Exists())
-            {
-                try
-                {
-                    byte[] textoAsBytes = Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(objeto));
-                    string resultado = System.Convert.ToBase64String(textoAsBytes);
-                    queueClient.SendMessage(resultado, null, TimeSpan.FromDays(3));
-                }catch(Exception ex){}
-                
-            }
-
-        }
 
         private void enviarEmail(string desTexto, string desTitulo)
         {

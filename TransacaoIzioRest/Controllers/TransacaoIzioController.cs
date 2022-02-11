@@ -829,11 +829,11 @@ namespace TransacaoIzioRest.Controllers
                 {
                     try
                     {
-                        DAO.ServiceBus.ConsumirMensagemFila daoFila = new DAO.ServiceBus.ConsumirMensagemFila(cliente.des_chave_ws, cliente.des_token_rest);
+                        //DAO.ServiceBus.ConsumirMensagemFila daoFila = new DAO.ServiceBus.ConsumirMensagemFila(cliente.des_chave_ws, cliente.des_token_rest);
                         
-                        Task<int> total = Task.FromResult(0);
-                        total = daoFila.ConsumirFilaNotasSefazAsync(cliente.des_chave_ws, cliente.des_token_rest, 0);
-                        retorno.payload.Add(new DadosConsumirFila() { des_nome_cliente = cliente.des_chave_ws, qtd_mensagens_fila = total.Id });
+                        //Task<int> total = Task.FromResult(0);
+                        //total = daoFila.ConsumirFilaNotasSefazAsync(cliente.des_chave_ws, cliente.des_token_rest, 0);
+                        //retorno.payload.Add(new DadosConsumirFila() { des_nome_cliente = cliente.des_chave_ws, qtd_mensagens_fila = total.Id });
                     }
                     catch (Exception ex)
                     {
