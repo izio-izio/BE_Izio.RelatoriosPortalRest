@@ -14,8 +14,10 @@ using System.Data;
 using Izio.Biblioteca.Model;
 using System.Text.RegularExpressions;
 using Izio.Biblioteca.DAO;
-using Azure.Storage.Queues;
 using EmailRest.Models;
+using Azure.Messaging.ServiceBus;
+using Azure.Messaging.ServiceBus.Administration;
+using System.Runtime.Caching;
 
 namespace TransacaoIzioRest.DAO
 {
@@ -530,27 +532,21 @@ namespace TransacaoIzioRest.DAO
         /// <param name="IpOrigem"></param>
         /// <returns></returns>
         #region Importa as vendas para tabela intermediaria viewizio_3, para ser processado em um segundo momento, pela API REST - RUNDECK
-        public ApiErrors ImportaLoteTransacao(List<DadosTransacaoLote> objTransacao,
-                                                              string IpOrigem)
+        public ApiErrors ImportaLoteTransacao(List<DadosTransacaoLote> objTransacao,string IpOrigem)
         {
             ApiErrors listaErros = new ApiErrors();
             listaErros.errors = new List<Erros>();
 
             //Lista padrão para bulkt Insert na viewizio_3
             List<DadosLoteViewizio_3> listaViewizio_3 = new List<DadosLoteViewizio_3>();
-
+     
             try
             {
-                //Insere o request na fila - Service Bus
-                #region Insere o request na fila - Service Bus
-                if (NomeClienteWs.ToLower() == "campelo" || NomeClienteWs.ToLower() == "lab")
+                //Insere o request na fila - Azure.Messaging.ServiceBus - Service Bus
+                if (!InserirLoteTransacaoFila(objTransacao))
                 {
-                    //if (!EnviarMensagemFila.InserirLoteFila(NomeClienteWs, tokenAutenticacao, objTransacao, IpOrigem))
-                    //{
-                    //    enviarEmail("Erro no processamento do lote: </br> </br> " + JsonConvert.SerializeObject(objTransacao), $"{NomeClienteWs} - Erro ao inserir na fila");
-                    //}
+                    enviarEmail("Erro no processamento do lote: </br> </br> " + JsonConvert.SerializeObject(objTransacao), $"{NomeClienteWs} - Erro ao inserir na fila");
                 }
-                #endregion
 
                 // Abre a conexao com o banco de dados
                 sqlServer.StartConnection();
@@ -589,7 +585,7 @@ namespace TransacaoIzioRest.DAO
                         des_bin_cartao = dadosTrans.des_bin_cartao,
                         vlr_meiopagto = dadosTrans.vlr_meiopagto,
                         vlr_troco = dadosTrans.vlr_troco
-                       
+
                     });
                 }
 
@@ -666,8 +662,191 @@ namespace TransacaoIzioRest.DAO
 
         }
 
+        private void testemetodo(List<DadosTransacaoLote> listaFilaaaa)
+        {
+            
 
-        internal ApiErrors ImportaLoteTransacaoFila(List<DadosTransacaoLote> objTransacao)
+            string sEtapa = "";
+            try
+            {
+                if (NomeClienteWs.ToLower() == "campelo" || NomeClienteWs.ToLower() == "lab")
+                {
+                    System.Net.ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls12;
+
+                    //Coloca em cache os dados de utilizacao da fila
+                    //sEtapa = "Coloca em cache os dados de utilizacao da fila";
+                    //Dictionary<string, string> listParam = new Dictionary<string, string>();
+                    //listParam = GetFromCache<Dictionary<string, string>>($"{NomeClienteWs}_servicebus_parmetroDAO", 1, () =>
+                    //{
+                    //    ParametroDAO parametrosDAO = new ParametroDAO(NomeClienteWs, tokenAutenticacao);
+                    //    return parametrosDAO.ListarParametros("queue_azure,logarRequest,AzureBusConStr");
+                    //});
+                    //string connectionString = listParam.ContainsKey("AzureBusConStr") ? listParam["AzureBusConStr"] : "Endpoint=sb://izioservicebus.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=Dpnh2JPn9tgXGqRK9afC99bQI5qEDQfS3u55sU6F/oM=";
+
+
+                    ////Cria componente de verificação se a fila já está criada
+                    //sEtapa = "Cria componente de verificação se a fila já está criada";
+                    //ServiceBusAdministrationClient queue = new ServiceBusAdministrationClient(connectionString);
+                    //var existQueue = queue.QueueExistsAsync($"transacao-{NomeClienteWs.ToLower()}").GetAwaiter().GetResult();
+
+                    ////Se a fila não existir
+                    //sEtapa = "Se a fila não existir";
+                    //if (!existQueue)
+                    //{
+                    //    //Cria a nova fila
+                    //    sEtapa = "Cria a nova fila";
+                    //    var options = new CreateQueueOptions($"transacao-{NomeClienteWs.ToLower()}");
+                    //    options.MaxDeliveryCount = int.MaxValue;
+                    //    options.LockDuration = TimeSpan.FromMinutes(5);
+                    //    options.MaxSizeInMegabytes = 5 * 1024;
+                    //    options.EnableBatchedOperations = true;
+                    //    queue.CreateQueueAsync(options).GetAwaiter().GetResult();
+                    //}
+
+                    string connectionString = "";
+                    //Inicia o componente para conexao com a fila
+                    sEtapa = "Inicia o componente para conexao com a fila";
+                    ServiceBusClient _client = new ServiceBusClient(connectionString);
+
+                    //Cria o componente para envio da mensagem para fila
+                    sEtapa = "Cria o componente para envio da mensagem para fila";
+                    ServiceBusSender _clientSender = _client.CreateSender($"oferta-consinco-{NomeClienteWs.ToLower()}");
+
+                    List<DadosTransacaoLote> listaCompras = new List<DadosTransacaoLote>();
+                    List<DadosTransacaoLote> listaFila = new List<DadosTransacaoLote>();
+
+                    ////A seta a lista que será inserida na fila
+                    //listaCompras.AddRange(listaFilaaaa);
+
+                    //while (listaCompras.Count() > 0)
+                    //{
+                    //    //Se o lote de compras tiver mais de 200 regitros, ele é dividido e inserido na fila por lote
+                    //    listaFila = listaCompras.Take(200).ToList();
+
+                    //    //Converte em json o objeto postado na api
+                    //    sEtapa = "Converte em json o objeto postado na api";
+                    //    string resultado = JsonConvert.SerializeObject(listaFila, Formatting.None);
+
+                    //    //Cria uma nova mensagem deixanto json em bytes
+                    //    sEtapa = "Cria uma nova mensagem deixanto json em bytes";
+                    //    ServiceBusMessage message = new ServiceBusMessage(Encoding.UTF8.GetBytes(resultado));
+
+                    //    //Envia a mensagem para a fila
+                    //    sEtapa = "Envia a mensagem para a fila";
+                    //    _clientSender.SendMessageAsync(message).GetAwaiter().GetResult();
+
+                    //    //Remove da fila de processamento, os registros inseridos na fila
+                    //    if (listaFila.Count > listaCompras.Count) listaCompras.RemoveRange(0, listaFila.Count);
+                    //    else listaCompras.RemoveRange(0, listaFila.Count);
+                    //}
+
+                    ////Fecha os componentes de conexão com a fila
+                    //_clientSender.CloseAsync();
+                    //_client.DisposeAsync();
+                }
+
+                //return true;
+            }
+            catch (Exception ex)
+            {
+                DadosLog dadosLog = new DadosLog { des_erro_tecnico = $"{sEtapa} - Erro ao enviar mensagem para fila. {ex.Message.ToString()}" };
+                Log.InserirLogIzio(NomeClienteWs, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
+
+                //return false;
+            }
+        }
+
+        private Boolean InserirLoteTransacaoFila(List<DadosTransacaoLote> objTransacao)
+        {
+            string sEtapa = "";
+            try
+            {
+                if (NomeClienteWs.ToLower() == "campelo" || NomeClienteWs.ToLower() == "lab")
+                {
+                    System.Net.ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls12;
+
+                    //Coloca em cache os dados de utilizacao da fila
+                    sEtapa = "Coloca em cache os dados de utilizacao da fila";
+                    Dictionary<string, string> listParam = new Dictionary<string, string>();
+                    listParam = GetFromCache<Dictionary<string, string>>($"{NomeClienteWs}_servicebus_parmetroDAO", 1, () =>
+                    {
+                        ParametroDAO parametrosDAO = new ParametroDAO(NomeClienteWs, tokenAutenticacao);
+                        return parametrosDAO.ListarParametros("queue_azure,logarRequest,AzureBusConStr");
+                    });
+                    string connectionString = listParam.ContainsKey("AzureBusConStr") ? listParam["AzureBusConStr"] : "Endpoint=sb://izioservicebus.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=Dpnh2JPn9tgXGqRK9afC99bQI5qEDQfS3u55sU6F/oM=";
+
+                    //Cria componente de verificação se a fila já está criada
+                    sEtapa = "Cria componente de verificação se a fila já está criada";
+                    ServiceBusAdministrationClient queue = new ServiceBusAdministrationClient(connectionString);
+                    var existQueue = queue.QueueExistsAsync($"transacao-{NomeClienteWs.ToLower()}").GetAwaiter().GetResult();
+
+                    //Se a fila não existir
+                    sEtapa = "Se a fila não existir";
+                    if (!existQueue)
+                    {
+                        //Cria a nova fila
+                        sEtapa = "Cria a nova fila";
+                        var options = new CreateQueueOptions($"transacao-{NomeClienteWs.ToLower()}");
+                        options.MaxDeliveryCount = int.MaxValue;
+                        options.LockDuration = TimeSpan.FromMinutes(5);
+                        options.MaxSizeInMegabytes = 5 * 1024;
+                        options.EnableBatchedOperations = true;
+                        queue.CreateQueueAsync(options).GetAwaiter().GetResult();
+                    }
+
+                    //Inicia o componente para conexao com a fila
+                    sEtapa = "Inicia o componente para conexao com a fila";
+                    ServiceBusClient _client = new ServiceBusClient(connectionString);
+
+                    //Cria o componente para envio da mensagem para fila
+                    sEtapa = "Cria o componente para envio da mensagem para fila";
+                    ServiceBusSender _clientSender = _client.CreateSender($"oferta-consinco-{NomeClienteWs.ToLower()}");
+
+                    List<DadosTransacaoLote> listaCompras = new List<DadosTransacaoLote>();
+                    List<DadosTransacaoLote> listaFila = new List<DadosTransacaoLote>();
+
+                    //A seta a lista que será inserida na fila
+                    listaCompras.AddRange(objTransacao);
+
+                    while (listaCompras.Count() > 0)
+                    {
+                        //Se o lote de compras tiver mais de 200 regitros, ele é dividido e inserido na fila por lote
+                        listaFila = listaCompras.Take(200).ToList();
+
+                        //Converte em json o objeto postado na api
+                        sEtapa = "Converte em json o objeto postado na api";
+                        string resultado = JsonConvert.SerializeObject(listaFila, Formatting.None);
+
+                        //Cria uma nova mensagem deixanto json em bytes
+                        sEtapa = "Cria uma nova mensagem deixanto json em bytes";
+                        ServiceBusMessage message = new ServiceBusMessage(Encoding.UTF8.GetBytes(resultado));
+
+                        //Envia a mensagem para a fila
+                        sEtapa = "Envia a mensagem para a fila";
+                        _clientSender.SendMessageAsync(message).GetAwaiter().GetResult();
+
+                        //Remove da fila de processamento, os registros inseridos na fila
+                        if (listaFila.Count > listaCompras.Count) listaCompras.RemoveRange(0, listaFila.Count);
+                        else listaCompras.RemoveRange(0, listaFila.Count);
+                    }
+
+                    //Fecha os componentes de conexão com a fila
+                    _clientSender.CloseAsync();
+                    _client.DisposeAsync();
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                DadosLog dadosLog = new DadosLog { des_erro_tecnico = $"{sEtapa} - Erro ao enviar mensagem para fila. {ex.Message.ToString()}" };
+                Log.InserirLogIzio(NomeClienteWs, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
+
+                return false;
+            }
+        }
+
+        public ApiErrors ImportaLoteTransacaoFila()
         {
             ApiErrors listaErros = new ApiErrors();
             listaErros.errors = new List<Erros>();
@@ -675,146 +854,223 @@ namespace TransacaoIzioRest.DAO
             //Lista padrão para bulkt Insert na viewizio_3
             List<DadosLoteViewizio_3> listaViewizio_3 = new List<DadosLoteViewizio_3>();
             List<DadosLoteViewizio_3> listaViewizio_data = new List<DadosLoteViewizio_3>();
-
+            string sEtapa = "";
+            int totalLoteFila = 0;
             try
             {
-                // Abre a conexao com o banco de dados
-                sqlServer.StartConnection();
-
-                //Popula lista padrão para o bulkInsert na viewizio_3
-                #region Monta lista padrão para o bulkInsert na viewizio_3
-                foreach (DadosTransacaoLote dadosTrans in objTransacao.ToList())
+                //Coloca em cache os dados para conexão com a fila
+                Dictionary<string, string> listParam = new Dictionary<string, string>();
+                listParam = GetFromCache<Dictionary<string, string>>($"{NomeClienteWs}_servicebus_parmetroDAO", 1, () =>
                 {
-                    if (dadosTrans.dat_compra > new DateTime(1900,01,01))
-                    {
-                        listaViewizio_3.Add(new DadosLoteViewizio_3
-                        {
-                            CpfCliente = Convert.ToInt64(string.IsNullOrEmpty(dadosTrans.cod_cpf) == false ? dadosTrans.cod_cpf : "0"),
-                            CpfCliente_2 = Convert.ToInt64(string.IsNullOrEmpty(dadosTrans.cod_cpf) == false ? dadosTrans.cod_cpf : "0"),
-                            DataCompra = dadosTrans.dat_compra,
-                            ValorCompra = dadosTrans.vlr_compra,
-                            cupom = dadosTrans.cupom,
-                            Pdv = dadosTrans.Pdv,
-                            CodPagto = 0,
-                            MeioPagto = dadosTrans.des_tipo_pagamento,
-                            QtdeItens = dadosTrans.qtd_itens_compra,
-                            CodEAN = dadosTrans.cod_ean,
-                            CodProduto = Convert.ToInt64(dadosTrans.cod_produto),
-                            DesProduto = dadosTrans.des_produto,
-                            ValorItem = dadosTrans.vlr_item_compra,
-                            vlr_desconto_item = dadosTrans.vlr_desconto_item,
-                            Quantidade = dadosTrans.qtd_item_compra,
-                            cod_usuario = dadosTrans.cod_usuario == null ? 0 : dadosTrans.cod_usuario.Value,
-                            cod_pessoa = 0,
-                            item = dadosTrans.nro_item_compra,
-                            cod_loja = dadosTrans.cod_loja,
-                            nsu_transacao = dadosTrans.nsu_transacao,
-                            dat_geracao_nsu = dadosTrans.dat_geracao_nsu,
-                            vlr_total_desconto = dadosTrans.vlr_total_desconto,
-                            des_bin_cartao = dadosTrans.des_bin_cartao,
-                            vlr_meiopagto = dadosTrans.vlr_meiopagto,
-                            vlr_troco = dadosTrans.vlr_troco
+                    ParametroDAO parametrosDAO = new ParametroDAO(NomeClienteWs, tokenAutenticacao);
+                    return parametrosDAO.ListarParametros("queue_azure,logarRequest,AzureBusConStr");
+                });
+                string connectionString = listParam.ContainsKey("AzureBusConStr") ? listParam["AzureBusConStr"] : "Endpoint=sb://izioservicebus.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=Dpnh2JPn9tgXGqRK9afC99bQI5qEDQfS3u55sU6F/oM=";
 
-                        });
-                    }
-                    else
-                    {
-                        listaViewizio_data.Add(new DadosLoteViewizio_3
-                        {
-                            CpfCliente = Convert.ToInt64(string.IsNullOrEmpty(dadosTrans.cod_cpf) == false ? dadosTrans.cod_cpf : "0"),
-                            CpfCliente_2 = Convert.ToInt64(string.IsNullOrEmpty(dadosTrans.cod_cpf) == false ? dadosTrans.cod_cpf : "0"),
-                            DataCompra = dadosTrans.dat_compra,
-                            ValorCompra = dadosTrans.vlr_compra,
-                            cupom = dadosTrans.cupom,
-                            Pdv = dadosTrans.Pdv,
-                            CodPagto = 0,
-                            MeioPagto = dadosTrans.des_tipo_pagamento,
-                            QtdeItens = dadosTrans.qtd_itens_compra,
-                            CodEAN = dadosTrans.cod_ean,
-                            CodProduto = Convert.ToInt64(dadosTrans.cod_produto),
-                            DesProduto = dadosTrans.des_produto,
-                            ValorItem = dadosTrans.vlr_item_compra,
-                            vlr_desconto_item = dadosTrans.vlr_desconto_item,
-                            Quantidade = dadosTrans.qtd_item_compra,
-                            cod_usuario = dadosTrans.cod_usuario == null ? 0 : dadosTrans.cod_usuario.Value,
-                            cod_pessoa = 0,
-                            item = dadosTrans.nro_item_compra,
-                            cod_loja = dadosTrans.cod_loja,
-                            nsu_transacao = dadosTrans.nsu_transacao,
-                            dat_geracao_nsu = dadosTrans.dat_geracao_nsu,
-                            vlr_total_desconto = dadosTrans.vlr_total_desconto,
-                            des_bin_cartao = dadosTrans.des_bin_cartao,
-                            vlr_meiopagto = dadosTrans.vlr_meiopagto,
-                            vlr_troco = dadosTrans.vlr_troco
+                //Cria componente de verificação se a fila já está criada
+                sEtapa = "Cria componente de verificação se a fila já está criada";
+                ServiceBusAdministrationClient queue = new ServiceBusAdministrationClient(connectionString);
+                var existQueue = queue.QueueExistsAsync($"transacao-{NomeClienteWs.ToLower()}").GetAwaiter().GetResult();
 
-                        });
-                    }
-                }
-
-                #endregion
-
-                //Trocar a execução por bulkInsert da lista
-                #region Bulk Insert da lista
-
-                using (var bcp = new SqlBulkCopy
-                            (
-                            //Para utilizar o controle de transacao
-                            sqlServer.Command.Connection,
-                            SqlBulkCopyOptions.TableLock |
-                            SqlBulkCopyOptions.FireTriggers |
-                            SqlBulkCopyOptions.UseInternalTransaction,
-                            null
-                            ))
-                using (
-                    var reader = ObjectReader.Create(listaViewizio_3,
-                    "CpfCliente",
-                    "CpfCliente_2",
-                    "DataCompra",
-                    "ValorCompra",
-                    "cupom",
-                    "Pdv",
-                    "CodPagto",
-                    "MeioPagto",
-                    "QtdeItens",
-                    "CodEAN",
-                    "CodProduto",
-                    "DesProduto",
-                    "ValorItem",
-                    "vlr_desconto_item",
-                    "Quantidade",
-                    "cod_usuario",
-                    "cod_pessoa",
-                    "item",
-                    "cod_loja",
-                    "nsu_transacao",
-                    "dat_geracao_nsu",
-                    "vlr_total_desconto",
-                    "des_bin_cartao",
-                    "vlr_meiopagto",
-                    "vlr_troco"))
+                //Se a fila existir, consome as mensagens
+                sEtapa = "Se a fila não existir";
+                if (existQueue)
                 {
-                    bcp.BulkCopyTimeout = ConfigurationManager.AppSettings["TimeoutExecucao"] != null ? Convert.ToInt32(ConfigurationManager.AppSettings["TimeoutExecucao"]) : 600;
-                    bcp.DestinationTableName = "viewizio_3";
-                    bcp.WriteToServer(reader);
+                    //Variaveis do processamento
+                    var listaLocal = new List<DadosTransacaoLote>();
+                    List<ServiceBusReceivedMessage> listaExcluirFila = new List<ServiceBusReceivedMessage>();
+                    Boolean temMsg = true;
+                    DateTime datInicio = DateTime.Now;
+
+                    //Inicia o componente para conexao com a fila
+                    sEtapa = "Inicia o componente para conexao com a fila";
+                    ServiceBusClient _client = new ServiceBusClient(connectionString);
+
+                    // create a receiver that we can use to receive the message
+                    ServiceBusReceiver receiver = _client.CreateReceiver($"transacao-{NomeClienteWs.ToLower()}");
+
+                    // Abre a conexao com o banco de dados
+                    sqlServer.StartConnection();
+                    sqlServer.BeginTransaction();
+
+                    //Enquanto existir mensagem na fila fica no processamento
+                    while (temMsg)
+                    {
+                        // the received message is a different type as it contains some service set properties
+                        var messages = receiver.ReceiveMessagesAsync(10).GetAwaiter().GetResult();
+
+                        if (messages != null && messages.Count() > 0)
+                        {
+                            foreach (ServiceBusReceivedMessage message in messages)
+                            {
+                                //Converte a mensagem de Byte para texto (volta o json)
+                                string item = Encoding.UTF8.GetString(message.Body.ToArray());
+
+                                List<DadosTransacaoLote> lote = new List<DadosTransacaoLote>();
+                                lote = JsonConvert.DeserializeObject<List<DadosTransacaoLote>>(item);
+                                listaLocal.AddRange(lote);
+                                listaExcluirFila.Add(message);
+
+                                //Verifica se a data e hora da mensagem é menor que a data do inicio do processamento.
+                                //O processamento só ocorre para mensagens recebidas antes da data e hora do inicio do processamento
+                                if (temMsg)
+                                    temMsg = TimeZoneInfo.ConvertTime(message.EnqueuedTime, TimeZoneInfo.FindSystemTimeZoneById("E. South America Standard Time")) < datInicio ? true : false;
+
+                                if (DateTime.Now > datInicio.AddMinutes(5))
+                                    temMsg = false;
+                            }
+
+                            //Verifica se não existe mais mensagem na fila e a lista local está preenchida
+                            //ou
+                            //Verifica se a lista local tem 100 registros
+                            //Sendo afirmativo um dos dois casos, persiste no banco de dados os callbacks de retorno do sefaz
+                            //e
+                            //apaga da fila as notas persistidas
+                            if ((!temMsg && listaLocal.Count() > 0) || listaLocal.Count() >= 1000)
+                            {
+                                //Popula lista padrão para o bulkInsert na viewizio_3
+                                #region Monta lista padrão para o bulkInsert na viewizio_3
+                                foreach (DadosTransacaoLote dadosTrans in listaLocal.ToList())
+                                {
+                                    if (dadosTrans.dat_compra > new DateTime(1900, 01, 01))
+                                    {
+                                        listaViewizio_3.Add(new DadosLoteViewizio_3
+                                        {
+                                            CpfCliente = Convert.ToInt64(string.IsNullOrEmpty(dadosTrans.cod_cpf) == false ? dadosTrans.cod_cpf : "0"),
+                                            CpfCliente_2 = Convert.ToInt64(string.IsNullOrEmpty(dadosTrans.cod_cpf) == false ? dadosTrans.cod_cpf : "0"),
+                                            DataCompra = dadosTrans.dat_compra,
+                                            ValorCompra = dadosTrans.vlr_compra,
+                                            cupom = dadosTrans.cupom,
+                                            Pdv = dadosTrans.Pdv,
+                                            CodPagto = 0,
+                                            MeioPagto = dadosTrans.des_tipo_pagamento,
+                                            QtdeItens = dadosTrans.qtd_itens_compra,
+                                            CodEAN = dadosTrans.cod_ean,
+                                            CodProduto = Convert.ToInt64(dadosTrans.cod_produto),
+                                            DesProduto = dadosTrans.des_produto,
+                                            ValorItem = dadosTrans.vlr_item_compra,
+                                            vlr_desconto_item = dadosTrans.vlr_desconto_item,
+                                            Quantidade = dadosTrans.qtd_item_compra,
+                                            cod_usuario = dadosTrans.cod_usuario == null ? 0 : dadosTrans.cod_usuario.Value,
+                                            cod_pessoa = 0,
+                                            item = dadosTrans.nro_item_compra,
+                                            cod_loja = dadosTrans.cod_loja,
+                                            nsu_transacao = dadosTrans.nsu_transacao,
+                                            dat_geracao_nsu = dadosTrans.dat_geracao_nsu,
+                                            vlr_total_desconto = dadosTrans.vlr_total_desconto,
+                                            des_bin_cartao = dadosTrans.des_bin_cartao,
+                                            vlr_meiopagto = dadosTrans.vlr_meiopagto,
+                                            vlr_troco = dadosTrans.vlr_troco
+
+                                        });
+                                    }
+                                    else
+                                    {
+                                        listaViewizio_data.Add(new DadosLoteViewizio_3
+                                        {
+                                            CpfCliente = Convert.ToInt64(string.IsNullOrEmpty(dadosTrans.cod_cpf) == false ? dadosTrans.cod_cpf : "0"),
+                                            CpfCliente_2 = Convert.ToInt64(string.IsNullOrEmpty(dadosTrans.cod_cpf) == false ? dadosTrans.cod_cpf : "0"),
+                                            DataCompra = dadosTrans.dat_compra,
+                                            ValorCompra = dadosTrans.vlr_compra,
+                                            cupom = dadosTrans.cupom,
+                                            Pdv = dadosTrans.Pdv,
+                                            CodPagto = 0,
+                                            MeioPagto = dadosTrans.des_tipo_pagamento,
+                                            QtdeItens = dadosTrans.qtd_itens_compra,
+                                            CodEAN = dadosTrans.cod_ean,
+                                            CodProduto = Convert.ToInt64(dadosTrans.cod_produto),
+                                            DesProduto = dadosTrans.des_produto,
+                                            ValorItem = dadosTrans.vlr_item_compra,
+                                            vlr_desconto_item = dadosTrans.vlr_desconto_item,
+                                            Quantidade = dadosTrans.qtd_item_compra,
+                                            cod_usuario = dadosTrans.cod_usuario == null ? 0 : dadosTrans.cod_usuario.Value,
+                                            cod_pessoa = 0,
+                                            item = dadosTrans.nro_item_compra,
+                                            cod_loja = dadosTrans.cod_loja,
+                                            nsu_transacao = dadosTrans.nsu_transacao,
+                                            dat_geracao_nsu = dadosTrans.dat_geracao_nsu,
+                                            vlr_total_desconto = dadosTrans.vlr_total_desconto,
+                                            des_bin_cartao = dadosTrans.des_bin_cartao,
+                                            vlr_meiopagto = dadosTrans.vlr_meiopagto,
+                                            vlr_troco = dadosTrans.vlr_troco
+
+                                        });
+                                    }
+                                }
+
+                                #endregion
+
+                                totalLoteFila += listaViewizio_3.Count();
+
+                                //Trocar a execução por bulkInsert da lista
+                                #region Bulk Insert da lista
+
+                                using (var bcp = new SqlBulkCopy
+                                            (
+                                            //Para utilizar o controle de transacao
+                                            sqlServer.Command.Connection,
+                                            SqlBulkCopyOptions.TableLock |
+                                            SqlBulkCopyOptions.FireTriggers |
+                                            SqlBulkCopyOptions.UseInternalTransaction,
+                                            null
+                                            ))
+                                using (
+                                    var reader = ObjectReader.Create(listaViewizio_3,
+                                    "CpfCliente",
+                                    "CpfCliente_2",
+                                    "DataCompra",
+                                    "ValorCompra",
+                                    "cupom",
+                                    "Pdv",
+                                    "CodPagto",
+                                    "MeioPagto",
+                                    "QtdeItens",
+                                    "CodEAN",
+                                    "CodProduto",
+                                    "DesProduto",
+                                    "ValorItem",
+                                    "vlr_desconto_item",
+                                    "Quantidade",
+                                    "cod_usuario",
+                                    "cod_pessoa",
+                                    "item",
+                                    "cod_loja",
+                                    "nsu_transacao",
+                                    "dat_geracao_nsu",
+                                    "vlr_total_desconto",
+                                    "des_bin_cartao",
+                                    "vlr_meiopagto",
+                                    "vlr_troco"))
+                                {
+                                    bcp.BulkCopyTimeout = ConfigurationManager.AppSettings["TimeoutExecucao"] != null ? Convert.ToInt32(ConfigurationManager.AppSettings["TimeoutExecucao"]) : 600;
+                                    bcp.DestinationTableName = "viewizio_3";
+                                    bcp.WriteToServer(reader);
+                                }
+
+                                #endregion
+                            }
+                        }
+                    }
+
+                    sqlServer.Commit();
+
+                    //Adiciona na lista de retorna a quantidade de lote processados
+                    listaErros.errors.Add(new Erros() { code = "200", message = totalLoteFila.ToString() });
                 }
-
-                #endregion
-
-                //sqlServer.Commit();
             }
             catch (System.Exception ex)
             {
-                //sqlServer.Rollback();
+                sqlServer.Rollback();
 
                 DadosLog dadosLog = new DadosLog();
                 dadosLog.des_erro_tecnico = ex.ToString();
                 Log.InserirLogIzio(NomeClienteWs, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
 
                 //Seta a lista de erros com o erro
-                listaErros.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = ErroBancoDeDadosLoteTransacao + ", favor contactar o administrador" });
+                listaErros.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.BadRequest).ToString(), message = ex.ToString() });
 
                 //Envia email para o monitoramento caso de erro ao inserir na fila
-                enviarEmail($"Verificar o request na sis_log </br></br>{ex.ToString()}", $"{NomeClienteWs} - Erro enviar lote de compra para fila (ServiceBus)");
+                enviarEmail($"{sEtapa} - Verificar o request na sis_log </br></br>{ex.ToString()}", $"{NomeClienteWs} - Erro consumir lote de compra da fila (ServiceBus)");
             }
             finally
             {
@@ -1146,6 +1402,17 @@ namespace TransacaoIzioRest.DAO
                     sqlServer.CloseConnection();
                 }
             }
+        }
+
+        public static TEntity GetFromCache<TEntity>(string key, int numHorasCache, Func<TEntity> valueFactory) where TEntity : class
+        {
+            ObjectCache cache = MemoryCache.Default;
+            // the lazy class provides lazy initializtion which will eavaluate the valueFactory expression only if the item does not exist in cache
+            var newValue = new Lazy<TEntity>(valueFactory);
+            CacheItemPolicy policy = new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.Now.AddHours(numHorasCache) };
+            //The line below returns existing item or adds the new value if it doesn't exist
+            var value = cache.AddOrGetExisting(key, newValue, policy) as Lazy<TEntity>;
+            return (value ?? newValue).Value; // Lazy<T> handles the locking itself
         }
     }
 }
