@@ -800,7 +800,7 @@ namespace TransacaoIzioRest.DAO
 
                     //Cria o componente para envio da mensagem para fila
                     sEtapa = "Cria o componente para envio da mensagem para fila";
-                    ServiceBusSender _clientSender = _client.CreateSender($"oferta-consinco-{NomeClienteWs.ToLower()}");
+                    ServiceBusSender _clientSender = _client.CreateSender($"transacao-{NomeClienteWs.ToLower()}");
 
                     List<DadosTransacaoLote> listaCompras = new List<DadosTransacaoLote>();
                     List<DadosTransacaoLote> listaFila = new List<DadosTransacaoLote>();
