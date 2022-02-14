@@ -671,7 +671,7 @@ namespace TransacaoIzioRest.DAO
 
             try
             {
-                if (NomeClienteWs.ToLower() == "campelo" || NomeClienteWs.ToLower() == "lab")
+                if (NomeClienteWs.ToLower() == "campelo" || NomeClienteWs.ToLower() == "costazul" || NomeClienteWs.ToLower() == "lab")
                 {
                     //Seta o protocolo de ssl de envio da mensagem para a fila
                     ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
