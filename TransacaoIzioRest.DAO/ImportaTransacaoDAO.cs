@@ -18,6 +18,7 @@ using EmailRest.Models;
 using Azure.Messaging.ServiceBus;
 using Azure.Messaging.ServiceBus.Administration;
 using System.Runtime.Caching;
+using System.Threading.Tasks;
 
 namespace TransacaoIzioRest.DAO
 {
@@ -662,108 +663,21 @@ namespace TransacaoIzioRest.DAO
 
         }
 
-        private void testemetodo(List<DadosTransacaoLote> listaFilaaaa)
-        {
-            
-
-            string sEtapa = "";
-            try
-            {
-                if (NomeClienteWs.ToLower() == "campelo" || NomeClienteWs.ToLower() == "lab")
-                {
-                    System.Net.ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls12;
-
-                    //Coloca em cache os dados de utilizacao da fila
-                    //sEtapa = "Coloca em cache os dados de utilizacao da fila";
-                    //Dictionary<string, string> listParam = new Dictionary<string, string>();
-                    //listParam = GetFromCache<Dictionary<string, string>>($"{NomeClienteWs}_servicebus_parmetroDAO", 1, () =>
-                    //{
-                    //    ParametroDAO parametrosDAO = new ParametroDAO(NomeClienteWs, tokenAutenticacao);
-                    //    return parametrosDAO.ListarParametros("queue_azure,logarRequest,AzureBusConStr");
-                    //});
-                    //string connectionString = listParam.ContainsKey("AzureBusConStr") ? listParam["AzureBusConStr"] : "Endpoint=sb://izioservicebus.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=Dpnh2JPn9tgXGqRK9afC99bQI5qEDQfS3u55sU6F/oM=";
-
-
-                    ////Cria componente de verificação se a fila já está criada
-                    //sEtapa = "Cria componente de verificação se a fila já está criada";
-                    //ServiceBusAdministrationClient queue = new ServiceBusAdministrationClient(connectionString);
-                    //var existQueue = queue.QueueExistsAsync($"transacao-{NomeClienteWs.ToLower()}").GetAwaiter().GetResult();
-
-                    ////Se a fila não existir
-                    //sEtapa = "Se a fila não existir";
-                    //if (!existQueue)
-                    //{
-                    //    //Cria a nova fila
-                    //    sEtapa = "Cria a nova fila";
-                    //    var options = new CreateQueueOptions($"transacao-{NomeClienteWs.ToLower()}");
-                    //    options.MaxDeliveryCount = int.MaxValue;
-                    //    options.LockDuration = TimeSpan.FromMinutes(5);
-                    //    options.MaxSizeInMegabytes = 5 * 1024;
-                    //    options.EnableBatchedOperations = true;
-                    //    queue.CreateQueueAsync(options).GetAwaiter().GetResult();
-                    //}
-
-                    string connectionString = "";
-                    //Inicia o componente para conexao com a fila
-                    sEtapa = "Inicia o componente para conexao com a fila";
-                    ServiceBusClient _client = new ServiceBusClient(connectionString);
-
-                    //Cria o componente para envio da mensagem para fila
-                    sEtapa = "Cria o componente para envio da mensagem para fila";
-                    ServiceBusSender _clientSender = _client.CreateSender($"oferta-consinco-{NomeClienteWs.ToLower()}");
-
-                    List<DadosTransacaoLote> listaCompras = new List<DadosTransacaoLote>();
-                    List<DadosTransacaoLote> listaFila = new List<DadosTransacaoLote>();
-
-                    ////A seta a lista que será inserida na fila
-                    //listaCompras.AddRange(listaFilaaaa);
-
-                    //while (listaCompras.Count() > 0)
-                    //{
-                    //    //Se o lote de compras tiver mais de 200 regitros, ele é dividido e inserido na fila por lote
-                    //    listaFila = listaCompras.Take(200).ToList();
-
-                    //    //Converte em json o objeto postado na api
-                    //    sEtapa = "Converte em json o objeto postado na api";
-                    //    string resultado = JsonConvert.SerializeObject(listaFila, Formatting.None);
-
-                    //    //Cria uma nova mensagem deixanto json em bytes
-                    //    sEtapa = "Cria uma nova mensagem deixanto json em bytes";
-                    //    ServiceBusMessage message = new ServiceBusMessage(Encoding.UTF8.GetBytes(resultado));
-
-                    //    //Envia a mensagem para a fila
-                    //    sEtapa = "Envia a mensagem para a fila";
-                    //    _clientSender.SendMessageAsync(message).GetAwaiter().GetResult();
-
-                    //    //Remove da fila de processamento, os registros inseridos na fila
-                    //    if (listaFila.Count > listaCompras.Count) listaCompras.RemoveRange(0, listaFila.Count);
-                    //    else listaCompras.RemoveRange(0, listaFila.Count);
-                    //}
-
-                    ////Fecha os componentes de conexão com a fila
-                    //_clientSender.CloseAsync();
-                    //_client.DisposeAsync();
-                }
-
-                //return true;
-            }
-            catch (Exception ex)
-            {
-                DadosLog dadosLog = new DadosLog { des_erro_tecnico = $"{sEtapa} - Erro ao enviar mensagem para fila. {ex.Message.ToString()}" };
-                Log.InserirLogIzio(NomeClienteWs, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
-
-                //return false;
-            }
-        }
-
         private Boolean InserirLoteTransacaoFila(List<DadosTransacaoLote> objTransacao)
         {
             string sEtapa = "";
+            List<DadosTransacaoLote> listaCompras = new List<DadosTransacaoLote>();
+            List<DadosTransacaoLote> listaFila = new List<DadosTransacaoLote>();
+
             try
             {
                 if (NomeClienteWs.ToLower() == "campelo" || NomeClienteWs.ToLower() == "lab")
                 {
-                    System.Net.ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls12;
+                    //Seta o protocolo de ssl de envio da mensagem para a fila
+                    ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+
+                    //A seta a lista que será inserida na fila
+                    listaCompras.AddRange(objTransacao);
 
                     //Coloca em cache os dados de utilizacao da fila
                     sEtapa = "Coloca em cache os dados de utilizacao da fila";
@@ -802,12 +716,6 @@ namespace TransacaoIzioRest.DAO
                     sEtapa = "Cria o componente para envio da mensagem para fila";
                     ServiceBusSender _clientSender = _client.CreateSender($"transacao-{NomeClienteWs.ToLower()}");
 
-                    List<DadosTransacaoLote> listaCompras = new List<DadosTransacaoLote>();
-                    List<DadosTransacaoLote> listaFila = new List<DadosTransacaoLote>();
-
-                    //A seta a lista que será inserida na fila
-                    listaCompras.AddRange(objTransacao);
-
                     while (listaCompras.Count() > 0)
                     {
                         //Se o lote de compras tiver mais de 200 regitros, ele é dividido e inserido na fila por lote
@@ -824,7 +732,7 @@ namespace TransacaoIzioRest.DAO
                         //Envia a mensagem para a fila
                         sEtapa = "Envia a mensagem para a fila";
                         _clientSender.SendMessageAsync(message).GetAwaiter().GetResult();
-
+                        
                         //Remove da fila de processamento, os registros inseridos na fila
                         if (listaFila.Count > listaCompras.Count) listaCompras.RemoveRange(0, listaFila.Count);
                         else listaCompras.RemoveRange(0, listaFila.Count);
@@ -886,8 +794,12 @@ namespace TransacaoIzioRest.DAO
                     sEtapa = "Inicia o componente para conexao com a fila";
                     ServiceBusClient _client = new ServiceBusClient(connectionString);
 
+                    //Seta que mensagem ficará em bloqueio e saíra da fila, até que seja concluida (CompleteMessageAsync).
+                    ServiceBusReceiverOptions option = new ServiceBusReceiverOptions();
+                    option.ReceiveMode = ServiceBusReceiveMode.PeekLock;
+                                        
                     // create a receiver that we can use to receive the message
-                    ServiceBusReceiver receiver = _client.CreateReceiver($"transacao-{NomeClienteWs.ToLower()}");
+                    ServiceBusReceiver receiver = _client.CreateReceiver($"transacao-{NomeClienteWs.ToLower()}",option);
 
                     // Abre a conexao com o banco de dados
                     sqlServer.StartConnection();
@@ -897,7 +809,8 @@ namespace TransacaoIzioRest.DAO
                     while (temMsg)
                     {
                         // the received message is a different type as it contains some service set properties
-                        var messages = receiver.ReceiveMessagesAsync(10).GetAwaiter().GetResult();
+                        var messages = receiver.ReceiveMessagesAsync(100).GetAwaiter().GetResult();
+                        //var messages = receiver.PeekMessagesAsync(50).GetAwaiter().GetResult();
 
                         if (messages != null && messages.Count() > 0)
                         {
@@ -1010,9 +923,8 @@ namespace TransacaoIzioRest.DAO
                                             //Para utilizar o controle de transacao
                                             sqlServer.Command.Connection,
                                             SqlBulkCopyOptions.TableLock |
-                                            SqlBulkCopyOptions.FireTriggers |
-                                            SqlBulkCopyOptions.UseInternalTransaction,
-                                            null
+                                            SqlBulkCopyOptions.FireTriggers ,
+                                            sqlServer.Trans
                                             ))
                                 using (
                                     var reader = ObjectReader.Create(listaViewizio_3,
@@ -1043,12 +955,27 @@ namespace TransacaoIzioRest.DAO
                                     "vlr_troco"))
                                 {
                                     bcp.BulkCopyTimeout = ConfigurationManager.AppSettings["TimeoutExecucao"] != null ? Convert.ToInt32(ConfigurationManager.AppSettings["TimeoutExecucao"]) : 600;
-                                    bcp.DestinationTableName = "viewizio_3";
+                                    bcp.DestinationTableName = "viewizio_3_2";
                                     bcp.WriteToServer(reader);
                                 }
 
                                 #endregion
+
+
+                                Parallel.ForEach(listaExcluirFila, new ParallelOptions { MaxDegreeOfParallelism = 10 }, (message) =>
+                                {
+                                    receiver.CompleteMessageAsync(message);
+                                });
+
+                                //limpa a lista para inserir novos callbacks
+                                listaViewizio_3.Clear();
+                                listaExcluirFila.Clear();
+                                listaLocal.Clear();
                             }
+                        }
+                        else
+                        {
+                            temMsg = false;
                         }
                     }
 

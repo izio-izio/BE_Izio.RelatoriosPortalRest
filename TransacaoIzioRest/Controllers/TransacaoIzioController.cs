@@ -829,11 +829,20 @@ namespace TransacaoIzioRest.Controllers
                 {
                     try
                     {
-                        //DAO.ServiceBus.ConsumirMensagemFila daoFila = new DAO.ServiceBus.ConsumirMensagemFila(cliente.des_chave_ws, cliente.des_token_rest);
+                        ImportaTransacaoDAO daoFila = new ImportaTransacaoDAO(cliente.des_chave_ws, cliente.des_token_rest);
                         
                         //Task<int> total = Task.FromResult(0);
-                        //total = daoFila.ConsumirFilaNotasSefazAsync(cliente.des_chave_ws, cliente.des_token_rest, 0);
-                        //retorno.payload.Add(new DadosConsumirFila() { des_nome_cliente = cliente.des_chave_ws, qtd_mensagens_fila = total.Id });
+                        var result = daoFila.ImportaLoteTransacaoFila();
+                        if (result.errors.Where(x => x.code == "200").Any())
+                            retorno.payload.Add(new DadosConsumirFila() { des_nome_cliente = cliente.des_chave_ws, qtd_mensagens_fila = Convert.ToInt32(result.errors.Where(x => x.code == "200").FirstOrDefault().message) });
+                        else
+                        {
+                            foreach (Erros erro in result.errors)
+                            {
+                                retorno.payload.Add(new DadosConsumirFila() { des_nome_cliente = cliente.des_chave_ws, des_observacao = erro.message });
+                            }
+                        }
+
                     }
                     catch (Exception ex)
                     {
@@ -846,11 +855,8 @@ namespace TransacaoIzioRest.Controllers
                 });
 
                 if(retorno.payload.Count () > 0  && retorno.payload.Where(x=> !string.IsNullOrEmpty(x.des_observacao)).Count() > 0)
-                {
                     return Request.CreateResponse(HttpStatusCode.BadRequest, retorno);
-                }
-
-                return Request.CreateResponse(HttpStatusCode.OK, retorno);
+                else return Request.CreateResponse(HttpStatusCode.OK, retorno);
 
             }
             catch (System.Exception ex)
