@@ -671,7 +671,10 @@ namespace TransacaoIzioRest.DAO
 
             try
             {
-                if (NomeClienteWs.ToLower() == "campelo" || NomeClienteWs.ToLower() == "costazul" || NomeClienteWs.ToLower() == "lab")
+                if (NomeClienteWs.ToLower() == "campelo" || 
+                    NomeClienteWs.ToLower() == "clubesuper" || 
+                    NomeClienteWs.ToLower() == "costazul" || 
+                    NomeClienteWs.ToLower() == "lab")
                 {
                     //Seta o protocolo de ssl de envio da mensagem para a fila
                     ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
@@ -955,7 +958,7 @@ namespace TransacaoIzioRest.DAO
                                     "vlr_troco"))
                                 {
                                     bcp.BulkCopyTimeout = ConfigurationManager.AppSettings["TimeoutExecucao"] != null ? Convert.ToInt32(ConfigurationManager.AppSettings["TimeoutExecucao"]) : 600;
-                                    bcp.DestinationTableName = "viewizio_3";
+                                    bcp.DestinationTableName = "viewizio_3_2";
                                     bcp.WriteToServer(reader);
                                 }
 
