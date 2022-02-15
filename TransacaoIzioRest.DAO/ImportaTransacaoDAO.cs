@@ -673,7 +673,9 @@ namespace TransacaoIzioRest.DAO
             {
                 if (NomeClienteWs.ToLower() == "campelo" || 
                     NomeClienteWs.ToLower() == "clubesuper" || 
-                    NomeClienteWs.ToLower() == "costazul" || 
+                    NomeClienteWs.ToLower() == "costazul" ||
+                    NomeClienteWs.ToLower() == "montreal" ||
+                    NomeClienteWs.ToLower() == "mendonca" ||
                     NomeClienteWs.ToLower() == "lab")
                 {
                     //Seta o protocolo de ssl de envio da mensagem para a fila
