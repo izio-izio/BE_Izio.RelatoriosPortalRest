@@ -819,6 +819,7 @@ namespace TransacaoIzioRest.DAO
 
                         if (messages != null && messages.Count() > 0)
                         {
+                            //Insere as mensagens retornadas da fila nas lista para carga na base de dados (viewizio_3)
                             foreach (ServiceBusReceivedMessage message in messages)
                             {
                                 //Converte a mensagem de Byte para texto (volta o json)
@@ -837,151 +838,153 @@ namespace TransacaoIzioRest.DAO
                                 if (DateTime.Now > datInicio.AddMinutes(5))
                                     temMsg = false;
                             }
-
-                            //Verifica se não existe mais mensagem na fila e a lista local está preenchida
-                            //ou
-                            //Verifica se a lista local tem 100 registros
-                            //Sendo afirmativo um dos dois casos, persiste no banco de dados os callbacks de retorno do sefaz
-                            //e
-                            //apaga da fila as notas persistidas
-                            if ((!temMsg && listaLocal.Count() > 0) || listaLocal.Count() >= 1000)
-                            {
-                                //Popula lista padrão para o bulkInsert na viewizio_3
-                                #region Monta lista padrão para o bulkInsert na viewizio_3
-                                foreach (DadosTransacaoLote dadosTrans in listaLocal.ToList())
-                                {
-                                    if (dadosTrans.dat_compra > new DateTime(1900, 01, 01))
-                                    {
-                                        listaViewizio_3.Add(new DadosLoteViewizio_3
-                                        {
-                                            CpfCliente = Convert.ToInt64(string.IsNullOrEmpty(dadosTrans.cod_cpf) == false ? dadosTrans.cod_cpf : "0"),
-                                            CpfCliente_2 = Convert.ToInt64(string.IsNullOrEmpty(dadosTrans.cod_cpf) == false ? dadosTrans.cod_cpf : "0"),
-                                            DataCompra = dadosTrans.dat_compra,
-                                            ValorCompra = dadosTrans.vlr_compra,
-                                            cupom = dadosTrans.cupom,
-                                            Pdv = dadosTrans.Pdv,
-                                            CodPagto = 0,
-                                            MeioPagto = dadosTrans.des_tipo_pagamento,
-                                            QtdeItens = dadosTrans.qtd_itens_compra,
-                                            CodEAN = dadosTrans.cod_ean,
-                                            CodProduto = Convert.ToInt64(dadosTrans.cod_produto),
-                                            DesProduto = dadosTrans.des_produto,
-                                            ValorItem = dadosTrans.vlr_item_compra,
-                                            vlr_desconto_item = dadosTrans.vlr_desconto_item,
-                                            Quantidade = dadosTrans.qtd_item_compra,
-                                            cod_usuario = dadosTrans.cod_usuario == null ? 0 : dadosTrans.cod_usuario.Value,
-                                            cod_pessoa = 0,
-                                            item = dadosTrans.nro_item_compra,
-                                            cod_loja = dadosTrans.cod_loja,
-                                            nsu_transacao = dadosTrans.nsu_transacao,
-                                            dat_geracao_nsu = dadosTrans.dat_geracao_nsu,
-                                            vlr_total_desconto = dadosTrans.vlr_total_desconto,
-                                            des_bin_cartao = dadosTrans.des_bin_cartao,
-                                            vlr_meiopagto = dadosTrans.vlr_meiopagto,
-                                            vlr_troco = dadosTrans.vlr_troco
-
-                                        });
-                                    }
-                                    else
-                                    {
-                                        listaViewizio_data.Add(new DadosLoteViewizio_3
-                                        {
-                                            CpfCliente = Convert.ToInt64(string.IsNullOrEmpty(dadosTrans.cod_cpf) == false ? dadosTrans.cod_cpf : "0"),
-                                            CpfCliente_2 = Convert.ToInt64(string.IsNullOrEmpty(dadosTrans.cod_cpf) == false ? dadosTrans.cod_cpf : "0"),
-                                            DataCompra = dadosTrans.dat_compra,
-                                            ValorCompra = dadosTrans.vlr_compra,
-                                            cupom = dadosTrans.cupom,
-                                            Pdv = dadosTrans.Pdv,
-                                            CodPagto = 0,
-                                            MeioPagto = dadosTrans.des_tipo_pagamento,
-                                            QtdeItens = dadosTrans.qtd_itens_compra,
-                                            CodEAN = dadosTrans.cod_ean,
-                                            CodProduto = Convert.ToInt64(dadosTrans.cod_produto),
-                                            DesProduto = dadosTrans.des_produto,
-                                            ValorItem = dadosTrans.vlr_item_compra,
-                                            vlr_desconto_item = dadosTrans.vlr_desconto_item,
-                                            Quantidade = dadosTrans.qtd_item_compra,
-                                            cod_usuario = dadosTrans.cod_usuario == null ? 0 : dadosTrans.cod_usuario.Value,
-                                            cod_pessoa = 0,
-                                            item = dadosTrans.nro_item_compra,
-                                            cod_loja = dadosTrans.cod_loja,
-                                            nsu_transacao = dadosTrans.nsu_transacao,
-                                            dat_geracao_nsu = dadosTrans.dat_geracao_nsu,
-                                            vlr_total_desconto = dadosTrans.vlr_total_desconto,
-                                            des_bin_cartao = dadosTrans.des_bin_cartao,
-                                            vlr_meiopagto = dadosTrans.vlr_meiopagto,
-                                            vlr_troco = dadosTrans.vlr_troco
-
-                                        });
-                                    }
-                                }
-
-                                #endregion
-
-                                totalLoteFila += listaViewizio_3.Count();
-
-                                //Trocar a execução por bulkInsert da lista
-                                #region Bulk Insert da lista
-
-                                using (var bcp = new SqlBulkCopy
-                                            (
-                                            //Para utilizar o controle de transacao
-                                            sqlServer.Command.Connection,
-                                            SqlBulkCopyOptions.TableLock |
-                                            SqlBulkCopyOptions.FireTriggers ,
-                                            sqlServer.Trans
-                                            ))
-                                using (
-                                    var reader = ObjectReader.Create(listaViewizio_3,
-                                    "CpfCliente",
-                                    "CpfCliente_2",
-                                    "DataCompra",
-                                    "ValorCompra",
-                                    "cupom",
-                                    "Pdv",
-                                    "CodPagto",
-                                    "MeioPagto",
-                                    "QtdeItens",
-                                    "CodEAN",
-                                    "CodProduto",
-                                    "DesProduto",
-                                    "ValorItem",
-                                    "vlr_desconto_item",
-                                    "Quantidade",
-                                    "cod_usuario",
-                                    "cod_pessoa",
-                                    "item",
-                                    "cod_loja",
-                                    "nsu_transacao",
-                                    "dat_geracao_nsu",
-                                    "vlr_total_desconto",
-                                    "des_bin_cartao",
-                                    "vlr_meiopagto",
-                                    "vlr_troco"))
-                                {
-                                    bcp.BulkCopyTimeout = ConfigurationManager.AppSettings["TimeoutExecucao"] != null ? Convert.ToInt32(ConfigurationManager.AppSettings["TimeoutExecucao"]) : 600;
-                                    bcp.DestinationTableName = "viewizio_3_2";
-                                    bcp.WriteToServer(reader);
-                                }
-
-                                #endregion
-
-
-                                Parallel.ForEach(listaExcluirFila, new ParallelOptions { MaxDegreeOfParallelism = 10 }, (message) =>
-                                {
-                                    receiver.CompleteMessageAsync(message);
-                                });
-
-                                //limpa a lista para inserir novos callbacks
-                                listaViewizio_3.Clear();
-                                listaExcluirFila.Clear();
-                                listaLocal.Clear();
-                            }
                         }
                         else
                         {
                             temMsg = false;
                         }
+
+                        //Verifica se não existe mais mensagem na fila e a lista local está preenchida
+                        //ou
+                        //Verifica se a lista local tem 100 registros
+                        //Sendo afirmativo um dos dois casos, persiste no banco de dados os callbacks de retorno do sefaz
+                        //e
+                        //apaga da fila as notas persistidas
+                        #region Verifica se não existe mais mensagem na fila e a lista local está preenchida
+                        if ((!temMsg && listaLocal.Count() > 0) || listaLocal.Count() >= 1000)
+                        {
+                            //Popula lista padrão para o bulkInsert na viewizio_3
+                            #region Monta lista padrão para o bulkInsert na viewizio_3
+                            foreach (DadosTransacaoLote dadosTrans in listaLocal.ToList())
+                            {
+                                if (dadosTrans.dat_compra > new DateTime(1900, 01, 01))
+                                {
+                                    listaViewizio_3.Add(new DadosLoteViewizio_3
+                                    {
+                                        CpfCliente = Convert.ToInt64(string.IsNullOrEmpty(dadosTrans.cod_cpf) == false ? dadosTrans.cod_cpf : "0"),
+                                        CpfCliente_2 = Convert.ToInt64(string.IsNullOrEmpty(dadosTrans.cod_cpf) == false ? dadosTrans.cod_cpf : "0"),
+                                        DataCompra = dadosTrans.dat_compra,
+                                        ValorCompra = dadosTrans.vlr_compra,
+                                        cupom = dadosTrans.cupom,
+                                        Pdv = dadosTrans.Pdv,
+                                        CodPagto = 0,
+                                        MeioPagto = dadosTrans.des_tipo_pagamento,
+                                        QtdeItens = dadosTrans.qtd_itens_compra,
+                                        CodEAN = dadosTrans.cod_ean,
+                                        CodProduto = Convert.ToInt64(dadosTrans.cod_produto),
+                                        DesProduto = dadosTrans.des_produto,
+                                        ValorItem = dadosTrans.vlr_item_compra,
+                                        vlr_desconto_item = dadosTrans.vlr_desconto_item,
+                                        Quantidade = dadosTrans.qtd_item_compra,
+                                        cod_usuario = dadosTrans.cod_usuario == null ? 0 : dadosTrans.cod_usuario.Value,
+                                        cod_pessoa = 0,
+                                        item = dadosTrans.nro_item_compra,
+                                        cod_loja = dadosTrans.cod_loja,
+                                        nsu_transacao = dadosTrans.nsu_transacao,
+                                        dat_geracao_nsu = dadosTrans.dat_geracao_nsu,
+                                        vlr_total_desconto = dadosTrans.vlr_total_desconto,
+                                        des_bin_cartao = dadosTrans.des_bin_cartao,
+                                        vlr_meiopagto = dadosTrans.vlr_meiopagto,
+                                        vlr_troco = dadosTrans.vlr_troco
+
+                                    });
+                                }
+                                else
+                                {
+                                    listaViewizio_data.Add(new DadosLoteViewizio_3
+                                    {
+                                        CpfCliente = Convert.ToInt64(string.IsNullOrEmpty(dadosTrans.cod_cpf) == false ? dadosTrans.cod_cpf : "0"),
+                                        CpfCliente_2 = Convert.ToInt64(string.IsNullOrEmpty(dadosTrans.cod_cpf) == false ? dadosTrans.cod_cpf : "0"),
+                                        DataCompra = dadosTrans.dat_compra,
+                                        ValorCompra = dadosTrans.vlr_compra,
+                                        cupom = dadosTrans.cupom,
+                                        Pdv = dadosTrans.Pdv,
+                                        CodPagto = 0,
+                                        MeioPagto = dadosTrans.des_tipo_pagamento,
+                                        QtdeItens = dadosTrans.qtd_itens_compra,
+                                        CodEAN = dadosTrans.cod_ean,
+                                        CodProduto = Convert.ToInt64(dadosTrans.cod_produto),
+                                        DesProduto = dadosTrans.des_produto,
+                                        ValorItem = dadosTrans.vlr_item_compra,
+                                        vlr_desconto_item = dadosTrans.vlr_desconto_item,
+                                        Quantidade = dadosTrans.qtd_item_compra,
+                                        cod_usuario = dadosTrans.cod_usuario == null ? 0 : dadosTrans.cod_usuario.Value,
+                                        cod_pessoa = 0,
+                                        item = dadosTrans.nro_item_compra,
+                                        cod_loja = dadosTrans.cod_loja,
+                                        nsu_transacao = dadosTrans.nsu_transacao,
+                                        dat_geracao_nsu = dadosTrans.dat_geracao_nsu,
+                                        vlr_total_desconto = dadosTrans.vlr_total_desconto,
+                                        des_bin_cartao = dadosTrans.des_bin_cartao,
+                                        vlr_meiopagto = dadosTrans.vlr_meiopagto,
+                                        vlr_troco = dadosTrans.vlr_troco
+
+                                    });
+                                }
+                            }
+
+                            #endregion
+
+                            totalLoteFila += listaViewizio_3.Count();
+
+                            //Trocar a execução por bulkInsert da lista
+                            #region Bulk Insert da lista
+
+                            using (var bcp = new SqlBulkCopy
+                                        (
+                                        //Para utilizar o controle de transacao
+                                        sqlServer.Command.Connection,
+                                        SqlBulkCopyOptions.TableLock |
+                                        SqlBulkCopyOptions.FireTriggers,
+                                        sqlServer.Trans
+                                        ))
+                            using (
+                                var reader = ObjectReader.Create(listaViewizio_3,
+                                "CpfCliente",
+                                "CpfCliente_2",
+                                "DataCompra",
+                                "ValorCompra",
+                                "cupom",
+                                "Pdv",
+                                "CodPagto",
+                                "MeioPagto",
+                                "QtdeItens",
+                                "CodEAN",
+                                "CodProduto",
+                                "DesProduto",
+                                "ValorItem",
+                                "vlr_desconto_item",
+                                "Quantidade",
+                                "cod_usuario",
+                                "cod_pessoa",
+                                "item",
+                                "cod_loja",
+                                "nsu_transacao",
+                                "dat_geracao_nsu",
+                                "vlr_total_desconto",
+                                "des_bin_cartao",
+                                "vlr_meiopagto",
+                                "vlr_troco"))
+                            {
+                                bcp.BulkCopyTimeout = ConfigurationManager.AppSettings["TimeoutExecucao"] != null ? Convert.ToInt32(ConfigurationManager.AppSettings["TimeoutExecucao"]) : 600;
+                                bcp.DestinationTableName = "viewizio_3_2";
+                                bcp.WriteToServer(reader);
+                            }
+
+                            #endregion
+
+                            //Exclui da fila as mensagens processadas e inseridas na base
+                            Parallel.ForEach(listaExcluirFila, new ParallelOptions { MaxDegreeOfParallelism = 10 }, (message) =>
+                            {
+                                receiver.CompleteMessageAsync(message);
+                            });
+
+                            //limpa a lista para inserir novos callbacks
+                            listaViewizio_3.Clear();
+                            listaExcluirFila.Clear();
+                            listaLocal.Clear();
+                        }
+                        #endregion
                     }
 
                     sqlServer.Commit();
