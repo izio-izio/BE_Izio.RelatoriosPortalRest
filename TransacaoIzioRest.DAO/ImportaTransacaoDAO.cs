@@ -687,11 +687,7 @@ namespace TransacaoIzioRest.DAO
                     //Coloca em cache os dados de utilizacao da fila
                     sEtapa = "Coloca em cache os dados de utilizacao da fila";
                     Dictionary<string, string> listParam = new Dictionary<string, string>();
-                    listParam = GetFromCache<Dictionary<string, string>>($"{NomeClienteWs}_servicebus_parmetroDAO", 1, () =>
-                    {
-                        ParametroDAO parametrosDAO = new ParametroDAO(NomeClienteWs, tokenAutenticacao);
-                        return parametrosDAO.ListarParametros("queue_azure,logarRequest,AzureBusConStr");
-                    });
+                    listParam = consultaParametroFila();
                     string connectionString = listParam.ContainsKey("AzureBusConStr") ? listParam["AzureBusConStr"] : "Endpoint=sb://izioservicebus.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=Dpnh2JPn9tgXGqRK9afC99bQI5qEDQfS3u55sU6F/oM=";
 
                     //Cria componente de verificação se a fila já está criada
@@ -1014,6 +1010,37 @@ namespace TransacaoIzioRest.DAO
 
             return listaErros;
 
+        }
+
+        public Dictionary<string, string> consultaParametroFila()
+        {
+            Dictionary<string, string> listParam = new Dictionary<string, string>();
+            int i = 0;
+
+            while (i < 3)
+            {
+                try
+                {
+                    listParam = GetFromCache<Dictionary<string, string>>($"{NomeClienteWs}_servicebus_parmetroDAO", 1, () =>
+                    {
+                        ParametroDAO parametrosDAO = new ParametroDAO(NomeClienteWs, tokenAutenticacao);
+                        return parametrosDAO.ListarParametros("queue_azure,logarRequest,AzureBusConStr");
+                    });
+                    i = 4;
+                }
+                catch (Exception ex)
+                {
+                    i++;
+
+                    if (!ex.Message.ToLower().Contains("timeout") || i >= 3)
+                    {
+                        throw;
+                    }
+                }
+                
+            }
+
+            return listParam;
         }
         #endregion
 
