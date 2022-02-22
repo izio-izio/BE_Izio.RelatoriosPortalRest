@@ -374,7 +374,7 @@ select @total ";
                 //Exclui os registros da compra ainda não processados na viewizio_3
                 sqlServer.Command.CommandText = @"delete 
                                                   from 
-                                                     viewizio_3_2 
+                                                     viewizio_3
                                                   where
                                                      datacompra = @datacompra and
                                                      valorcompra = @valorcompra and
