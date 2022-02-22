@@ -67,4 +67,16 @@ namespace TransacaoIzioRest.Models
     }
 
 
+    public class DadosFilaCancelamentoTransacao
+    {
+        public long cod_compra_cancelada { get; set; }
+        public DateTime dat_compra { get; set; }
+        public decimal vlr_compra { get; set; }
+        public long cod_loja { get; set; }
+        public long qtd_itens_compra { get; set; }
+        public string cupom { get; set; }
+        public string des_json_cancelamento { get; set; }
+        public DateTime dat_exclusao { get; set; }
+    }
+
 }

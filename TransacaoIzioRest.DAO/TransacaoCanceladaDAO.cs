@@ -1,12 +1,18 @@
-﻿using EmailRest.Models;
+﻿using Azure.Messaging.ServiceBus;
+using Azure.Messaging.ServiceBus.Administration;
+using EmailRest.Models;
 using Izio.Biblioteca;
+using Izio.Biblioteca.DAO;
 using Izio.Biblioteca.Model;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Linq;
 using System.Net;
+using System.Runtime.Caching;
+using System.Text;
 using System.Web;
 using TransacaoIzioRest.Models;
 
@@ -50,17 +56,17 @@ namespace TransacaoIzioRest.DAO
         {
             //Total de registros deletados
             Int32 totalRegistrosExcluidos = 0;
-
             var mensagemRetorno = "";
-
-            var sqlIzpay = new SqlServer(NomeClienteWs == "lab" ? "izpaylab" : "izpay");
 
             try
             {
-
-                sqlIzpay.StartConnection();
-                sqlIzpay.BeginTransaction();
-
+                //Envia para a fila o evento de cancelamento(exclusão) de compra
+                #region Envia para a fila o evento de cancelamento(exclusão) de compra
+                if (!InserirFilaTransacaoCancelada(objTransacao))
+                {
+                    enviarEmail("Erro no processamento cancelamento de compra: </br> </br> " + JsonConvert.SerializeObject(objTransacao), $"{NomeClienteWs} - Erro ao inserir cancelamento de compra na fila");
+                }
+                #endregion
 
                 // Abre a conexao com o banco de dados
                 sqlServer.StartConnection();
@@ -68,8 +74,7 @@ namespace TransacaoIzioRest.DAO
                 //Inicia o controle de transacao
                 sqlServer.BeginTransaction();
 
-
-
+                //Executa a execução dos registros da venda cancelada
                 #region Executa a execução dos registros da venda cancelada
 
                 sqlServer.Command.Parameters.Clear();
@@ -82,20 +87,16 @@ namespace TransacaoIzioRest.DAO
                 pdat_compra.ParameterName = "@datacompra";
                 pdat_compra.Value = objTransacao.dat_compra;
                 sqlServer.Command.Parameters.Add(pdat_compra);
-                sqlIzpay.Command.Parameters.AddWithValue("@datacompra", objTransacao.dat_compra);
 
                 IDbDataParameter pvalorcompra = sqlServer.Command.CreateParameter();
                 pvalorcompra.ParameterName = "@valorcompra";
                 pvalorcompra.Value = objTransacao.vlr_compra;
                 sqlServer.Command.Parameters.Add(pvalorcompra);
 
-                sqlIzpay.Command.Parameters.AddWithValue("@valorcompra", objTransacao.vlr_compra);
-
                 IDbDataParameter pcupom = sqlServer.Command.CreateParameter();
                 pcupom.ParameterName = "@cupom";
                 pcupom.Value = objTransacao.cupom;
                 sqlServer.Command.Parameters.Add(pcupom);
-                sqlIzpay.Command.Parameters.AddWithValue("@cupom", objTransacao.cupom);
 
                 IDbDataParameter pcod_loja = sqlServer.Command.CreateParameter();
                 pcod_loja.ParameterName = "@cod_loja";
@@ -123,104 +124,81 @@ namespace TransacaoIzioRest.DAO
                 if (totalRegistrosExcluidos == 0)
                 {
 
-                    //Exclui os registros da compra da tabela de compra identificada
-                    sqlServer.Command.CommandText = @"delete tri
-                                                  from 
-                                                     tab_transacao_itens tri with(nolock),
-                                                     tab_transacao trs with(nolock)
-                                                  where
-                                                     trs.dat_compra = CAST(@datacompra AS DATETIME2(0))  and
-                                                     trs.vlr_compra = @valorcompra and
-                                                     trs.cupom = @cupom and
-                                                     trs.cod_loja = @cod_loja and
-                                                     trs.cod_transacao = tri.cod_transacao ";
+                    //Exclui os itens da compra da tabela de itens de compra identificada
+                    sqlServer.Command.CommandText = @"
+declare @cod_transacao bigint
+declare @total int = 0
+select @cod_transacao = cod_transacao from tab_transacao with(nolock) where dat_compra = @datacompra and vlr_compra = @valorcompra and cupom = @cupom and cod_loja = @cod_loja
+
+set @cod_transacao =  coalesce(@cod_transacao,0)
+
+if (@cod_transacao > 0)
+begin
+    
+    delete tri
+    from 
+       tab_transacao_itens tri with(nolock)
+    where
+       tri.cod_transacao = @cod_transacao
+    set @total = @total  + @@rowcount
+
+    delete tri
+    from 
+       tab_transacao tri with(nolock)
+    where
+       tri.cod_transacao = @cod_transacao
+    set @total = @total  + @@rowcount
+end
+
+select @total
+";
 
                     //executa o delete e retorna o total de linhas afetatas
-                    totalRegistrosExcluidos += sqlServer.Command.ExecuteNonQuery();
-
-                    //Se o total de registros for maior que zero, indica que a compra cancelada era identifica e agora exclui os registros do
-                    //  cabeçalho da compra
-                    if (totalRegistrosExcluidos > 0)
-                    {
-
-                        // Consulta os creditos gerados para o cliente. 
-                        // caso a compra tenha gerado cashback, os créditos devem ser removidos da processadora
-                        #region Consulta os creditos gerados para o cliente, caso a compra tenha gerado cashback;
-
-                        
-                        #endregion
-
-
-                        //Exclui os registros da compra da tabela de compra identificada
-                        sqlServer.Command.CommandText = @"delete
-                                                          from 
-                                                             tab_transacao 
-                                                          where
-                                                             dat_compra = CAST(@datacompra AS DATETIME2(0)) and
-                                                             vlr_compra = @valorcompra and
-                                                             cupom = @cupom and
-                                                             cod_loja = @cod_loja ";
-
-
-                        //executa o delete e retorna o total de linhas afetatas
-                        totalRegistrosExcluidos += sqlServer.Command.ExecuteNonQuery();
-                    }
-                    else
-                    {
-                        //Exclui os registros da compra não identificada
-                        sqlServer.Command.CommandText = @"delete tri
-                                                          from 
-                                                             tab_transacao_itens_cpf tri with(nolock),
-                                                             tab_transacao_cpf trs with(nolock)
-                                                          where
-                                                             trs.dat_compra = CAST(@datacompra AS DATETIME2(0)) and
-                                                             trs.vlr_compra = @valorcompra and
-                                                             trs.cupom = @cupom and
-                                                             trs.cod_loja = @cod_loja and
-                                                             trs.cod_tab_transacao_cpf = tri.cod_tab_transacao_cpf 
-
-                                                          delete 
-                                                          from 
-                                                             tab_transacao_cpf
-                                                          where
-                                                             dat_compra = CAST(@datacompra AS DATETIME2(0)) and
-                                                             vlr_compra = @valorcompra and
-                                                             cupom = @cupom and
-                                                             cod_loja = @cod_loja ";
-
-                        //executa o delete e retorna o total de linhas afetatas
-                        totalRegistrosExcluidos += sqlServer.Command.ExecuteNonQuery();
-                    }
-
-                    if(totalRegistrosExcluidos > 0)
-                    {
-                        dynamic objCliente = Izio.Biblioteca.Utilidades.ConsultarConfiguracoesCliente(NomeClienteWs);
-
-                        if (objCliente != null && objCliente.payload != null && objCliente.payload.dadosAcesso != null && objCliente.payload.dadosEstilo != null)
-                        {
-                            if(objCliente.payload.dadosEstilo.cod_empresa_izpay > 0)
-                            {
-                                
-                                if (!ExcluiCreditoCashback(sqlIzpay,false, ((long) objCliente.payload.dadosEstilo.cod_empresa_izpay)))
-                                {
-                                    mensagemRetorno = " Não foi possível remover crétidos concedidos. ";
-                                }
-                            }
-                            
-
-                        }
-
-                        if (!ExcluiCreditoCashback(sqlServer))
-                        {
-                            mensagemRetorno = " Não foi possível remover crétidos concedidos";
-                        }
-                    }
+                    var result = sqlServer.Command.ExecuteScalar();
+                    if (result != null)
+                        totalRegistrosExcluidos += Convert.ToInt32(result);
                 }
 
+                if (totalRegistrosExcluidos == 0)
+                {
+                    //Exclui os registros da compra não identificada
+                    sqlServer.Command.CommandText = @"
+declare @cod_Transacao bigint
+declare @total int = 0
+select @cod_Transacao = cod_tab_transacao_cpf from tab_transacao_cpf with(nolock) where dat_compra = @datacompra and vlr_compra = @valorcompra and cupom = @cupom and cod_loja = @cod_loja
+
+set @cod_Transacao =  coalesce(@cod_Transacao,0)
+
+if (@cod_transacao > 0)
+begin
+    
+    delete tri
+    from 
+       tab_transacao_itens_cpf tri with(nolock)
+    where
+       tri.cod_tab_transacao_cpf = @cod_transacao
+    set @total = @total  + @@rowcount
+    delete tri
+    from 
+       tab_transacao_cpf tri with(nolock)
+    where
+       tri.cod_tab_transacao_cpf = @cod_transacao
+    set @total = @total  + @@rowcount
+end
+
+select @total ";
+
+                    //executa o delete e retorna o total de linhas afetatas
+                    //totalRegistrosExcluidos += sqlServer.Command.ExecuteNonQuery();
+
+                    var result = sqlServer.Command.ExecuteScalar();
+                    if (result != null)
+                        totalRegistrosExcluidos += Convert.ToInt32(result);
+
+                }
                 #endregion
 
                 sqlServer.Commit();
-                sqlIzpay.Commit();
 
                 retorno.errors = new List<Erros>();
 
@@ -228,28 +206,390 @@ namespace TransacaoIzioRest.DAO
                 if (totalRegistrosExcluidos == 0)
                 {
                     //Seta a lista de erros com o erro
-                    retorno.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = DadosNaoEncontrados + ", para exclusão da venda Cancelada." });
+                    retorno.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.NotFound).ToString(), message = DadosNaoEncontrados + ", para exclusão da venda Cancelada." });
                 }
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 sqlServer.Rollback();
-                sqlIzpay.Rollback();
-                DadosLog dadosLog = new DadosLog();
-                dadosLog.des_erro_tecnico = ex.ToString();
-
-                //Pegar a mensagem padrão retornada da api, caso não tenha mensagem de negocio para devolver na API
-                Log.InserirLogIzio(NomeClienteWs, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
-
                 throw;
             }
             finally
             {
-                sqlServer.CloseConnection();
+                if (sqlServer != null)
+                {
+                    if (sqlServer.Reader != null)
+                    {
+                        sqlServer.Reader.Close();
+                        sqlServer.Reader.Dispose();
+                    }
+
+                    sqlServer.CloseConnection();
+                }
             }
 
             return mensagemRetorno;
 
+        }
+
+        private Boolean InserirFilaTransacaoCancelada(DadosTransacaoCancelada objTransacao)
+        {
+            string sEtapa = "";
+            List<DadosTransacaoCancelada> listaCompras = new List<DadosTransacaoCancelada>();
+            List<DadosTransacaoCancelada> listaFila = new List<DadosTransacaoCancelada>();
+
+            try
+            {
+                if (NomeClienteWs.ToLower() == "campelo" ||
+                    NomeClienteWs.ToLower() == "clubesuper" ||
+                    NomeClienteWs.ToLower() == "costazul" ||
+                    NomeClienteWs.ToLower() == "montreal" ||
+                    NomeClienteWs.ToLower() == "mendonca" ||
+                    NomeClienteWs.ToLower() == "lab")
+                {
+                    //Seta o protocolo de ssl de envio da mensagem para a fila
+                    ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+
+                    //A seta a lista que será inserida na fila
+                    listaCompras.Add(objTransacao);
+
+                    //Coloca em cache os dados de utilizacao da fila
+                    sEtapa = "Coloca em cache os dados de utilizacao da fila";
+                    Dictionary<string, string> listParam = new Dictionary<string, string>();
+                    listParam = consultaParametroFila();
+                    string connectionString = listParam.ContainsKey("AzureBusConStr") ? listParam["AzureBusConStr"] : "Endpoint=sb://izioservicebus.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=Dpnh2JPn9tgXGqRK9afC99bQI5qEDQfS3u55sU6F/oM=";
+
+                    //Cria componente de verificação se a fila já está criada
+                    sEtapa = "Cria componente de verificação se a fila já está criada";
+                    ServiceBusAdministrationClient queue = new ServiceBusAdministrationClient(connectionString);
+                    var existQueue = queue.QueueExistsAsync($"cancelamento-transacao-{NomeClienteWs.ToLower()}").GetAwaiter().GetResult();
+
+                    //Se a fila não existir
+                    sEtapa = "Se a fila não existir";
+                    if (!existQueue)
+                    {
+                        //Cria a nova fila
+                        sEtapa = "Cria a nova fila";
+                        var options = new CreateQueueOptions($"cancelamento-transacao-{NomeClienteWs.ToLower()}");
+                        options.MaxDeliveryCount = int.MaxValue;
+                        options.LockDuration = TimeSpan.FromMinutes(5);
+                        options.MaxSizeInMegabytes = 5 * 1024;
+                        options.EnableBatchedOperations = true;
+                        queue.CreateQueueAsync(options).GetAwaiter().GetResult();
+                    }
+
+                    //Inicia o componente para conexao com a fila
+                    sEtapa = "Inicia o componente para conexao com a fila";
+                    ServiceBusClient _client = new ServiceBusClient(connectionString);
+
+                    //Cria o componente para envio da mensagem para fila
+                    sEtapa = "Cria o componente para envio da mensagem para fila";
+                    ServiceBusSender _clientSender = _client.CreateSender($"cancelamento-transacao-{NomeClienteWs.ToLower()}");
+
+                    while (listaCompras.Count() > 0)
+                    {
+                        //Se o lote de compras tiver mais de 200 regitros, ele é dividido e inserido na fila por lote
+                        listaFila = listaCompras.Take(200).ToList();
+
+                        //Converte em json o objeto postado na api
+                        sEtapa = "Converte em json o objeto postado na api";
+                        string resultado = JsonConvert.SerializeObject(listaFila, Formatting.None);
+
+                        //Cria uma nova mensagem deixando json em bytes
+                        sEtapa = "Cria uma nova mensagem deixanto json em bytes";
+                        ServiceBusMessage message = new ServiceBusMessage(Encoding.UTF8.GetBytes(resultado));
+
+                        //Envia a mensagem para a fila
+                        sEtapa = "Envia a mensagem para a fila";
+                        _clientSender.SendMessageAsync(message).GetAwaiter().GetResult();
+
+                        //Remove da fila de processamento, os registros inseridos na fila
+                        if (listaFila.Count > listaCompras.Count) listaCompras.RemoveRange(0, listaFila.Count);
+                        else listaCompras.RemoveRange(0, listaFila.Count);
+                    }
+
+                    //Fecha os componentes de conexão com a fila
+                    _clientSender.CloseAsync();
+                    _client.DisposeAsync();
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                DadosLog dadosLog = new DadosLog { des_erro_tecnico = $"{sEtapa} - Erro ao enviar mensagem para fila. {ex.Message.ToString()}" };
+                Log.InserirLogIzio(NomeClienteWs, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
+
+                return false;
+            }
+        }
+
+        public string ExcluirRegistroFilaCompraCancelada(DadosTransacaoCancelada objTransacao, ApiErrors retorno)
+        {
+            //Total de registros deletados
+            int totalRegistrosExcluidos = 0;
+            var mensagemRetorno = "";
+
+            try
+            {
+                // Abre a conexao com o banco de dados
+                sqlServer.StartConnection();
+
+                //Inicia o controle de transacao
+                sqlServer.BeginTransaction();
+
+                //Executa a execução dos registros da venda cancelada
+                #region Executa a execução dos registros da venda cancelada
+
+                sqlServer.Command.Parameters.Clear();
+                sqlServer.Command.CommandTimeout = ConfigurationManager.AppSettings["TimeoutExecucao"] != null ? Convert.ToInt32(ConfigurationManager.AppSettings["TimeoutExecucao"]) : 1200;
+
+                //Monta os parametros
+                #region Parametros
+                //Data da compra
+                IDbDataParameter pdat_compra = sqlServer.Command.CreateParameter();
+                pdat_compra.ParameterName = "@datacompra";
+                pdat_compra.Value = objTransacao.dat_compra;
+                sqlServer.Command.Parameters.Add(pdat_compra);
+
+                IDbDataParameter pvalorcompra = sqlServer.Command.CreateParameter();
+                pvalorcompra.ParameterName = "@valorcompra";
+                pvalorcompra.Value = objTransacao.vlr_compra;
+                sqlServer.Command.Parameters.Add(pvalorcompra);
+
+                IDbDataParameter pcupom = sqlServer.Command.CreateParameter();
+                pcupom.ParameterName = "@cupom";
+                pcupom.Value = objTransacao.cupom;
+                sqlServer.Command.Parameters.Add(pcupom);
+
+                IDbDataParameter pcod_loja = sqlServer.Command.CreateParameter();
+                pcod_loja.ParameterName = "@cod_loja";
+                pcod_loja.Value = objTransacao.cod_loja;
+                sqlServer.Command.Parameters.Add(pcod_loja);
+
+                // **********************************************************************************
+                // **********************************************************************************
+                #endregion
+
+                //Exclui os registros da compra ainda não processados na viewizio_3
+                sqlServer.Command.CommandText = @"delete 
+                                                  from 
+                                                     viewizio_3_2 
+                                                  where
+                                                     datacompra = @datacompra and
+                                                     valorcompra = @valorcompra and
+                                                     cupom = @cupom and
+                                                     cod_loja = @cod_loja ";
+
+                //executa o delete e retorna o total de linhas afetatas
+                totalRegistrosExcluidos += sqlServer.Command.ExecuteNonQuery();
+
+                //Se não excluiu nenhum registros passa para as tabelas finais (tab_transacao/tab_transacao_itens e tab_transacao_cpf/tab_transacao_itens_cpf)
+                if (totalRegistrosExcluidos == 0)
+                {
+
+                    //Exclui os itens da compra da tabela de itens de compra identificada
+                    sqlServer.Command.CommandText = @"
+declare @cod_transacao bigint
+declare @total int = 0
+select @cod_transacao = cod_transacao from tab_transacao with(nolock) where dat_compra = @datacompra and vlr_compra = @valorcompra and cupom = @cupom and cod_loja = @cod_loja
+
+set @cod_transacao =  coalesce(@cod_transacao,0)
+
+if (@cod_transacao > 0)
+begin
+    
+    delete tri
+    from 
+       tab_transacao_itens tri with(nolock)
+    where
+       tri.cod_transacao = @cod_transacao
+    set @total = @total  + @@rowcount
+
+    delete tri
+    from 
+       tab_transacao tri with(nolock)
+    where
+       tri.cod_transacao = @cod_transacao
+    set @total = @total  + @@rowcount
+end
+
+select @total
+";
+
+                    //executa o delete e retorna o total de linhas afetatas
+                    var result = sqlServer.Command.ExecuteScalar();
+                    if (result != null)
+                        totalRegistrosExcluidos += Convert.ToInt32(result);
+                }
+                
+                if(totalRegistrosExcluidos == 0)
+                {
+                    //Exclui os registros da compra não identificada
+                    sqlServer.Command.CommandText = @"
+declare @cod_Transacao bigint
+declare @total int = 0
+select @cod_Transacao = cod_tab_transacao_cpf from tab_transacao_cpf with(nolock) where dat_compra = @datacompra and vlr_compra = @valorcompra and cupom = @cupom and cod_loja = @cod_loja
+
+set @cod_Transacao =  coalesce(@cod_Transacao,0)
+
+if (@cod_transacao > 0)
+begin
+    
+    delete tri
+    from 
+       tab_transacao_itens_cpf tri with(nolock)
+    where
+       tri.cod_tab_transacao_cpf = @cod_transacao
+    set @total = @total  + @@rowcount
+    delete tri
+    from 
+       tab_transacao_cpf tri with(nolock)
+    where
+       tri.cod_tab_transacao_cpf = @cod_transacao
+    set @total = @total  + @@rowcount
+end
+
+select @total ";
+
+                    //executa o delete e retorna o total de linhas afetatas
+                    //totalRegistrosExcluidos += sqlServer.Command.ExecuteNonQuery();
+
+                    var result = sqlServer.Command.ExecuteScalar();
+                    if (result != null)
+                        totalRegistrosExcluidos += Convert.ToInt32(result);
+
+                }
+
+                //if (totalRegistrosExcluidos > 0)
+                //{
+                //    if (!ExcluiCreditoCashback(sqlServer))
+                //    {
+                //        mensagemRetorno = " Não foi possível remover crétidos concedidos";
+                //    }
+                //}
+
+                #endregion
+
+                sqlServer.Commit();
+
+                retorno.errors = new List<Erros>();
+
+                //Se total de linhas afetadas for igual a zero, indica que não foi excluido nenhum registros
+                if (totalRegistrosExcluidos == 0)
+                {
+                    //Seta a lista de erros com o erro
+                    retorno.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.NotFound).ToString(), message = DadosNaoEncontrados + ", para exclusão da venda Cancelada." });
+                }
+            }
+            catch (Exception ex)
+            {
+                sqlServer.Rollback();
+                throw;
+            }
+            finally
+            {
+                if (sqlServer != null)
+                {
+                    if (sqlServer.Reader != null)
+                    {
+                        sqlServer.Reader.Close();
+                        sqlServer.Reader.Dispose();
+                    }
+
+                    sqlServer.CloseConnection();
+                }
+            }
+
+            return mensagemRetorno;
+
+        }
+
+        public Dictionary<string, string> consultaParametroFila()
+        {
+            Dictionary<string, string> listParam = new Dictionary<string, string>();
+            int i = 0;
+
+            while (i < 3)
+            {
+                try
+                {
+                    listParam = GetFromCache<Dictionary<string, string>>($"{NomeClienteWs}_servicebus_parmetroDAO", 1, () =>
+                    {
+                        ParametroDAO parametrosDAO = new ParametroDAO(NomeClienteWs, tokenAutenticacao);
+                        return parametrosDAO.ListarParametros("queue_azure,logarRequest,AzureBusConStr");
+                    });
+                    i = 4;
+                }
+                catch (Exception ex)
+                {
+                    i++;
+
+                    if (!ex.Message.ToLower().Contains("timeout") || i >= 3)
+                    {
+                        throw;
+                    }
+
+                    //Dorme 3 segundos
+                    System.Threading.Thread.Sleep(3000);
+                }
+
+            }
+
+            return listParam;
+        }
+
+        public int ValidaCompraCancelada(DadosTransacaoCancelada dados)
+        {
+            int retorno = 0;
+            try
+            {
+                sqlServer.StartConnection();
+                sqlServer.Command.Parameters.Clear();
+                sqlServer.Command.Parameters.AddWithValue("@dat_compra",dados.dat_compra);
+                sqlServer.Command.Parameters.AddWithValue("@cupom", dados.cupom);
+                sqlServer.Command.Parameters.AddWithValue("@vlr_compra", dados.vlr_compra);
+                sqlServer.Command.Parameters.AddWithValue("@cod_loja", dados.cod_loja);
+
+                sqlServer.Command.CommandText = @"
+if not exists(select 1 from tab_lancamento_credito_campanha with(nolock) where dat_compra = @dat_compra and cupom = @cupom and vlr_compra = @vlr_compra and cod_loja = @cod_loja)
+begin
+  if not exists(select 1 from tab_lancamento_credito_campanha_numero_sorte with(nolock) where dat_compra = @dat_compra and cupom = @cupom and vlr_compra = @vlr_compra)
+  begin 
+     if not exists(select 1 from tab_lancamento_credito_campanha_selo with(nolock) where dat_compra = @dat_compra and cupom = @cupom and vlr_compra = @vlr_compra and cod_loja = @cod_loja)
+	    select 0
+     else 
+	    select 3
+  end
+  else
+     select 2
+end
+else
+  select 1
+";
+
+                var result = sqlServer.Command.ExecuteScalar();
+                if (result != null) retorno = (int)result;
+
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+            finally
+            {
+                if (sqlServer != null)
+                {
+                    if (sqlServer.Reader != null)
+                    {
+                        sqlServer.Reader.Close();
+                        sqlServer.Reader.Dispose();
+                    }
+
+                    sqlServer.CloseConnection();
+                }
+            }
+            return retorno;
         }
         #endregion
 
@@ -339,14 +679,15 @@ namespace TransacaoIzioRest.DAO
                 var sCodEmpresa = fl_loyalty ? "" : ", cod_empresa";
                 var sWhere = fl_loyalty ? "" : " AND cod_empresa = @cod_empresa_izpay ";
                 var lancamentoIntegrado = false;
+
                 sqlServer.Command.Parameters.AddWithValue("@cod_empresa_izpay", cod_empresa);
                 sqlServer.Command.CommandText = $@"select dat_cadastro,des_nsu_origem, cod_cnpj_estabelecimento, id_cartao, vlr_credito,cod_lancamento_credito_campanha,cod_lancamento_credito_etapa
-                                                          from 
-                                                             tab_lancamento_credito_campanha with(nolock)
-                                                          where
-                                                             dat_compra = CAST(@datacompra AS DATETIME2(0)) and
-                                                              vlr_compra = @valorcompra and
-                                                             cupom = @cupom and cod_lancamento_credito_etapa > 1 {sWhere}";
+                                                   from 
+                                                      tab_lancamento_credito_campanha with(nolock)
+                                                   where
+                                                      dat_compra = CAST(@datacompra AS DATETIME2(0)) and
+                                                      vlr_compra = @valorcompra and
+                                                      cupom = @cupom and cod_lancamento_credito_etapa > 1 {sWhere}";
 
                 sqlServer.Reader = sqlServer.Command.ExecuteReader();
 
@@ -395,12 +736,7 @@ WHERE cod_lancamento_credito_campanha IN (
             }
             catch (Exception ex)
             {
-                DadosLog dadosLog = new DadosLog();
-                dadosLog.des_erro_tecnico = "Erro Generico no cancelamento:" + ex.ToString();
-
-                //Pegar a mensagem padrão retornada da api, caso não tenha mensagem de negocio para devolver na API
-                Log.InserirLogIzio(NomeClienteWs, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
-                throw ex;
+                throw;
             }
             finally
             {
@@ -416,5 +752,66 @@ WHERE cod_lancamento_credito_campanha IN (
 
         #endregion
 
+        public static TEntity GetFromCache<TEntity>(string key, int numHorasCache, Func<TEntity> valueFactory) where TEntity : class
+        {
+            ObjectCache cache = MemoryCache.Default;
+            // the lazy class provides lazy initializtion which will eavaluate the valueFactory expression only if the item does not exist in cache
+            var newValue = new Lazy<TEntity>(valueFactory);
+            CacheItemPolicy policy = new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.Now.AddHours(numHorasCache) };
+            //The line below returns existing item or adds the new value if it doesn't exist
+            var value = cache.AddOrGetExisting(key, newValue, policy) as Lazy<TEntity>;
+            return (value ?? newValue).Value; // Lazy<T> handles the locking itself
+        }
+        private void enviarEmail(string desTexto, string desTitulo)
+        {
+            try
+            {
+
+
+                List<Header> lstHeader = new List<Header>();
+                lstHeader.Add(new Header
+                {
+                    name = "tokenAutenticacao",
+                    value = tokenAutenticacao
+                });
+
+                var acesso = Utilidades.ConsultarConfiguracoesCliente(NomeClienteWs);
+
+
+                int i = 0;
+
+                EmailTemplateEnvio email = new EmailTemplateEnvio
+                {
+                    des_email = "monitoramento@izio.com.br",
+                    des_cod_campanha = 0,
+                    cod_tipo_email_template = (int)TipoTemplate.TEMPLATE_CONTEUDO_GENERICO,
+                    des_complemneto = desTexto,
+                    des_titulo_email = desTitulo
+
+                };
+
+                var result = Utilidades.ChamadaApiExternaStatusCode(
+                                                 tipoRequisicao: "POST",
+                                                 metodo: "EmailRest/api/Email/EnvioEmailTemplate/",
+                                                 body: JsonConvert.SerializeObject(email),
+                                                 url: "https://api.izio.com.br/",
+                                                 Headers: lstHeader);
+
+                if (result != null)
+                {
+                    result = result;
+                }
+            }
+            catch (Exception ex)
+            {
+                DadosLog dadosLog = new DadosLog();
+                dadosLog.des_erro_tecnico = "Erro ao enviar email processamento fila: " + ex.Message;
+
+                //Pegar a mensagem padrão retornada da api, caso não tenha mensagem de negocio para devolver na API
+                Log.InserirLogIzio(NomeClienteWs, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
+
+                throw;
+            }
+        }
     }
 }

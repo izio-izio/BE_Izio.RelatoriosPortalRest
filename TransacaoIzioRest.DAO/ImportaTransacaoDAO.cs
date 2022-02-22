@@ -544,9 +544,9 @@ namespace TransacaoIzioRest.DAO
             try
             {
                 //Insere o request na fila - Azure.Messaging.ServiceBus - Service Bus
-                if (!InserirLoteTransacaoFila(objTransacao))
+                if (!InserirFilaLoteTransacao(objTransacao))
                 {
-                    enviarEmail("Erro no processamento do lote: </br> </br> " + JsonConvert.SerializeObject(objTransacao), $"{NomeClienteWs} - Erro ao inserir na fila");
+                    enviarEmail("Erro no processamento do lote: </br> </br> " + JsonConvert.SerializeObject(objTransacao), $"{NomeClienteWs} - Erro ao inserir na fila lote de transação");
                 }
 
                 // Abre a conexao com o banco de dados
@@ -663,7 +663,7 @@ namespace TransacaoIzioRest.DAO
 
         }
 
-        private Boolean InserirLoteTransacaoFila(List<DadosTransacaoLote> objTransacao)
+        private Boolean InserirFilaLoteTransacao(List<DadosTransacaoLote> objTransacao)
         {
             string sEtapa = "";
             List<DadosTransacaoLote> listaCompras = new List<DadosTransacaoLote>();
@@ -755,7 +755,53 @@ namespace TransacaoIzioRest.DAO
             }
         }
 
-        public ApiErrors ImportaLoteTransacaoFila()
+        public ApiErrors ProcessarFilaLoteTransacao()
+        {
+            ApiErrors listaErros = new ApiErrors();
+            listaErros.errors = new List<Erros>();
+            string sEtapa = "";
+            int totalLoteFila = 0;
+
+            try
+            {
+                var retFilaTransacao = ImportarFilaLoteTransacao();
+                var retFilaCancelamento = ImportarFilaCancelamentoTransacao();
+
+                if (retFilaTransacao != null && retFilaTransacao.errors != null && retFilaTransacao.errors.Count() > 0)
+                {
+                    listaErros.errors.AddRange(retFilaTransacao.errors);
+                }
+
+                if (retFilaCancelamento != null && retFilaCancelamento.errors != null && retFilaCancelamento.errors.Count() > 0)
+                {
+                    listaErros.errors.AddRange(retFilaCancelamento.errors);
+                }
+
+            }
+            catch (System.Exception ex)
+            {
+                sqlServer.Rollback();
+
+                DadosLog dadosLog = new DadosLog();
+                dadosLog.des_erro_tecnico = ex.ToString();
+                Log.InserirLogIzio(NomeClienteWs, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
+
+                //Seta a lista de erros com o erro
+                listaErros.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.BadRequest).ToString(), message = ex.ToString() });
+
+                //Envia email para o monitoramento caso de erro ao inserir na fila
+                enviarEmail($"{sEtapa} - Verificar o request na sis_log </br></br>{ex.ToString()}", $"{NomeClienteWs} - Erro consumir lote de compra da fila (ServiceBus)");
+            }
+            finally
+            {
+                sqlServer.CloseConnection();
+            }
+
+            return listaErros;
+
+        }
+
+        public ApiErrors ImportarFilaLoteTransacao()
         {
             ApiErrors listaErros = new ApiErrors();
             listaErros.errors = new List<Erros>();
@@ -798,9 +844,9 @@ namespace TransacaoIzioRest.DAO
                     //Seta que mensagem ficará em bloqueio e saíra da fila, até que seja concluida (CompleteMessageAsync).
                     ServiceBusReceiverOptions option = new ServiceBusReceiverOptions();
                     option.ReceiveMode = ServiceBusReceiveMode.PeekLock;
-                                        
+
                     // create a receiver that we can use to receive the message
-                    ServiceBusReceiver receiver = _client.CreateReceiver($"transacao-{NomeClienteWs.ToLower()}",option);
+                    ServiceBusReceiver receiver = _client.CreateReceiver($"transacao-{NomeClienteWs.ToLower()}", option);
 
                     // Abre a conexao com o banco de dados
                     sqlServer.StartConnection();
@@ -963,7 +1009,7 @@ namespace TransacaoIzioRest.DAO
                                 "vlr_troco"))
                             {
                                 bcp.BulkCopyTimeout = ConfigurationManager.AppSettings["TimeoutExecucao"] != null ? Convert.ToInt32(ConfigurationManager.AppSettings["TimeoutExecucao"]) : 600;
-                                bcp.DestinationTableName = "viewizio_3";
+                                bcp.DestinationTableName = "viewizio_3_2";
                                 bcp.WriteToServer(reader);
                             }
 
@@ -984,6 +1030,204 @@ namespace TransacaoIzioRest.DAO
                     }
 
                     sqlServer.Commit();
+
+                    //Adiciona na lista de retorna a quantidade de lote processados
+                    listaErros.errors.Add(new Erros() { code = "200", message = totalLoteFila.ToString() });
+                }
+            }
+            catch (System.Exception ex)
+            {
+                sqlServer.Rollback();
+
+                DadosLog dadosLog = new DadosLog();
+                dadosLog.des_erro_tecnico = ex.ToString();
+                Log.InserirLogIzio(NomeClienteWs, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
+
+                //Seta a lista de erros com o erro
+                listaErros.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.BadRequest).ToString(), message = ex.ToString() });
+
+                //Envia email para o monitoramento caso de erro ao inserir na fila
+                enviarEmail($"{sEtapa} - Verificar o request na sis_log </br></br>{ex.ToString()}", $"{NomeClienteWs} - Erro consumir lote de compra da fila (ServiceBus)");
+            }
+            finally
+            {
+                sqlServer.CloseConnection();
+            }
+
+            return listaErros;
+
+        }
+
+        public ApiErrors ImportarFilaCancelamentoTransacao()
+        {
+            ApiErrors listaErros = new ApiErrors();
+            listaErros.errors = new List<Erros>();
+
+            //Lista padrão para bulkt Insert na viewizio_3
+            List<DadosTransacaoCancelada> listaViewizio_3 = new List<DadosTransacaoCancelada>();
+            List<DadosTransacaoCancelada> listaViewizio_data = new List<DadosTransacaoCancelada>();
+            List<DadosFilaCancelamentoTransacao> listaCancelamento = new List<DadosFilaCancelamentoTransacao>();
+            string sEtapa = "";
+            int totalLoteFila = 0;
+            try
+            {
+                //Coloca em cache os dados para conexão com a fila
+                Dictionary<string, string> listParam = new Dictionary<string, string>();
+                listParam = GetFromCache<Dictionary<string, string>>($"{NomeClienteWs}_servicebus_parmetroDAO", 1, () =>
+                {
+                    ParametroDAO parametrosDAO = new ParametroDAO(NomeClienteWs, tokenAutenticacao);
+                    return parametrosDAO.ListarParametros("queue_azure,logarRequest,AzureBusConStr");
+                });
+                string connectionString = listParam.ContainsKey("AzureBusConStr") ? listParam["AzureBusConStr"] : "Endpoint=sb://izioservicebus.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=Dpnh2JPn9tgXGqRK9afC99bQI5qEDQfS3u55sU6F/oM=";
+
+                //Cria componente de verificação se a fila já está criada
+                sEtapa = "Cria componente de verificação se a fila já está criada";
+                ServiceBusAdministrationClient queue = new ServiceBusAdministrationClient(connectionString);
+                var existQueue = queue.QueueExistsAsync($"cancelamento-transacao-{NomeClienteWs.ToLower()}").GetAwaiter().GetResult();
+
+                //Se a fila existir, consome as mensagens
+                sEtapa = "Se a fila não existir";
+                if (existQueue)
+                {
+                    //Variaveis do processamento
+                    var listaLocal = new List<DadosTransacaoCancelada>();
+                    List<ServiceBusReceivedMessage> listaExcluirFila = new List<ServiceBusReceivedMessage>();
+                    Boolean temMsg = true;
+                    DateTime datInicio = DateTime.Now;
+
+                    //Inicia o componente para conexao com a fila
+                    sEtapa = "Inicia o componente para conexao com a fila";
+                    ServiceBusClient _client = new ServiceBusClient(connectionString);
+
+                    //Seta que mensagem ficará em bloqueio e saíra da fila, até que seja concluida (CompleteMessageAsync).
+                    ServiceBusReceiverOptions option = new ServiceBusReceiverOptions();
+                    option.ReceiveMode = ServiceBusReceiveMode.PeekLock;
+
+                    // create a receiver that we can use to receive the message
+                    ServiceBusReceiver receiver = _client.CreateReceiver($"cancelamento-transacao-{NomeClienteWs.ToLower()}", option);
+
+                    //Enquanto existir mensagem na fila fica no processamento
+                    while (temMsg)
+                    {
+                        // the received message is a different type as it contains some service set properties
+                        var messages = receiver.ReceiveMessagesAsync(100).GetAwaiter().GetResult();
+
+                        if (messages != null && messages.Count() > 0)
+                        {
+                            //Insere as mensagens retornadas da fila nas lista para carga na base de dados (viewizio_3)
+                            foreach (ServiceBusReceivedMessage message in messages)
+                            {
+                                //Converte a mensagem de Byte para texto (volta o json)
+                                string item = Encoding.UTF8.GetString(message.Body.ToArray());
+
+                                List<DadosTransacaoCancelada> lote = new List<DadosTransacaoCancelada>();
+                                lote = JsonConvert.DeserializeObject<List<DadosTransacaoCancelada>>(item);
+                                listaLocal.AddRange(lote);
+                                listaExcluirFila.Add(message);
+
+                                listaCancelamento.Add(new DadosFilaCancelamentoTransacao()
+                                {
+                                    cod_loja = lote.FirstOrDefault().cod_loja,
+                                    cupom = lote.FirstOrDefault().cupom,
+                                    dat_compra = lote.FirstOrDefault().dat_compra,
+                                    dat_exclusao = message.EnqueuedTime.DateTime,
+                                    des_json_cancelamento = JsonConvert.SerializeObject(item),
+                                    qtd_itens_compra = lote.FirstOrDefault().qtd_itens_compra,
+                                    vlr_compra = lote.FirstOrDefault().vlr_compra
+                                });
+
+                                //Verifica se a data e hora da mensagem é menor que a data do inicio do processamento.
+                                //O processamento só ocorre para mensagens recebidas antes da data e hora do inicio do processamento
+                                if (temMsg)
+                                    temMsg = TimeZoneInfo.ConvertTime(message.EnqueuedTime, TimeZoneInfo.FindSystemTimeZoneById("E. South America Standard Time")) < datInicio ? true : false;
+
+                                if (DateTime.Now > datInicio.AddMinutes(5))
+                                    temMsg = false;
+                            }
+                        }
+                        else
+                        {
+                            temMsg = false;
+                        }
+
+                        //Verifica se não existe mais mensagem na fila e a lista local está preenchida
+                        //ou
+                        //Verifica se a lista local tem 100 registros
+                        //Sendo afirmativo um dos dois casos, persiste no banco de dados os callbacks de retorno do sefaz
+                        //e
+                        //apaga da fila as notas persistidas
+                        #region Verifica se não existe mais mensagem na fila e a lista local está preenchida
+                        if ((!temMsg && listaLocal.Count() > 0) || listaLocal.Count() >= 1000)
+                        {
+                            totalLoteFila += listaLocal.Count();
+
+                            TransacaoCanceladaDAO dao = new TransacaoCanceladaDAO(NomeClienteWs,tokenAutenticacao);
+
+                            foreach (DadosFilaCancelamentoTransacao item in listaCancelamento)
+                            {
+                                DadosTransacaoCancelada dados = new DadosTransacaoCancelada()
+                                {
+                                    cod_loja = item.cod_loja,
+                                    cupom = item.cupom,
+                                    dat_compra = item.dat_compra,
+                                    qtd_itens_compra = (int)item.qtd_itens_compra,
+                                    vlr_compra = item.vlr_compra
+                                };
+
+                                //Aplica a exclusão do registro
+                                dao.ExcluirRegistroFilaCompraCancelada(dados, listaErros);
+                            }
+
+                            //Trocar a execução por bulkInsert da lista
+                            #region Bulk Insert da lista
+
+                            // Abre a conexao com o banco de dados
+                            sqlServer.StartConnection();
+                            sqlServer.BeginTransaction();
+
+                            using (var bcp = new SqlBulkCopy
+                                        (
+                                        //Para utilizar o controle de transacao
+                                        sqlServer.Command.Connection,
+                                        SqlBulkCopyOptions.TableLock |
+                                        SqlBulkCopyOptions.FireTriggers,
+                                        sqlServer.Command.Transaction
+                                        ))
+                            using (
+                                var reader = ObjectReader.Create(listaCancelamento,
+                                "cod_compra_cancelada",
+                                "dat_compra",
+                                "vlr_compra",
+                                "cod_loja",
+                                "qtd_itens_compra",
+                                "cupom",
+                                "des_json_cancelamento",
+                                "dat_exclusao"))
+                            {
+                                bcp.BulkCopyTimeout = ConfigurationManager.AppSettings["TimeoutExecucao"] != null ? Convert.ToInt32(ConfigurationManager.AppSettings["TimeoutExecucao"]) : 600;
+                                bcp.DestinationTableName = "tab_compra_cancelada";
+                                bcp.WriteToServer(reader);
+                            }
+
+                            #endregion
+
+                            //Exclui da fila as mensagens processadas e inseridas na base
+                            Parallel.ForEach(listaExcluirFila, new ParallelOptions { MaxDegreeOfParallelism = 10 }, (message) =>
+                            {
+                                receiver.CompleteMessageAsync(message);
+                            });
+
+                            //limpa a lista para inserir novos callbacks
+                            listaViewizio_3.Clear();
+                            listaExcluirFila.Clear();
+                            listaLocal.Clear();
+
+                            //Commit
+                            sqlServer.Commit();
+                        }
+                        #endregion
+                    }
+
 
                     //Adiciona na lista de retorna a quantidade de lote processados
                     listaErros.errors.Add(new Erros() { code = "200", message = totalLoteFila.ToString() });

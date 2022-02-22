@@ -431,45 +431,59 @@ namespace TransacaoIzioRest.Controllers
                 #endregion
 
                 //Cria objeto para processamento das transacoes
-                TransacaoCanceladaDAO excluiTransacao = new TransacaoCanceladaDAO(sNomeCliente,tokenAutenticacao);
-                var retorno = excluiTransacao.ExcluirRegistrosCompraCancelada(objTransacao, HttpContext.Current.Request.ServerVariables["REMOTE_ADDR"], listaErros);
+                TransacaoCanceladaDAO excluiTransacao = new TransacaoCanceladaDAO(sNomeCliente, tokenAutenticacao);
 
-                if (listaErros.errors != null && listaErros.errors.Count > 0)
+                int validacao = excluiTransacao.ValidaCompraCancelada(objTransacao);
+
+                if (validacao == 0)
                 {
-                    return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
+                    var retorno = excluiTransacao.ExcluirRegistrosCompraCancelada(objTransacao, HttpContext.Current.Request.ServerVariables["REMOTE_ADDR"], listaErros);
+
+                    if (listaErros.errors != null && listaErros.errors.Count > 0)
+                    {
+                        return Request.CreateResponse(HttpStatusCode.NotFound, listaErros);
+                    }
+                    else
+                    {
+                        retornoSucesso.payload = new Sucesso();
+                        retornoSucesso.payload.code = Convert.ToInt32(HttpStatusCode.OK).ToString();
+                        retornoSucesso.payload.message = SucessoExclusao + retorno;
+
+                        return Request.CreateResponse(HttpStatusCode.OK, retornoSucesso);
+                    }
                 }
                 else
                 {
-                    retornoSucesso.payload = new Sucesso();
-                    retornoSucesso.payload.code = Convert.ToInt32(HttpStatusCode.OK).ToString();
-                    retornoSucesso.payload.message = SucessoExclusao+ retorno;
-
-                    return Request.CreateResponse(HttpStatusCode.OK, retornoSucesso);
+                    switch (validacao)
+                    {
+                        case 1:
+                            {
+                                listaErros.errors.Add(new Erros() {code = Convert.ToInt32(HttpStatusCode.BadRequest).ToString(), message = "A compra não pode ser cancelada, por que já foi gerado cashback para ela." });
+                                break;
+                            }
+                        case 2:
+                            {
+                                listaErros.errors.Add(new Erros() { code = Convert.ToInt32(HttpStatusCode.BadRequest).ToString(), message = "A compra não pode ser cancelada, por que já foi gerado numero da sorte para ela." });
+                                break;
+                            }
+                        case 3:
+                            {
+                                listaErros.errors.Add(new Erros() { code = Convert.ToInt32(HttpStatusCode.BadRequest).ToString(), message = "A compra não pode ser cancelada, por que já foi gerado selos para ela." });
+                                break;
+                            }
+                    }
+                    return Request.CreateResponse(HttpStatusCode.BadRequest, listaErros);
                 }
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
-
-                if (listaErros.errors == null)
-                {
-                    listaErros.errors = new List<Erros>();
-                }
-
                 //Seta o Objeto com o Erro ocorrido
+                DadosLog dadosLog = new DadosLog();
+                dadosLog.des_erro_tecnico = ex.ToString();
+                Log.InserirLogIzio(sNomeCliente, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
+
                 listaErros.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = "Erro interno na exclusão da compra, favor contactar o administrador." });
-
-                if (!ex.Message.ToUpper().Contains("TOKEN"))
-                {
-                    DadosLog dadosLog = new DadosLog();
-                    dadosLog.des_erro_tecnico = ex.ToString();
-
-                    //Pegar a mensagem padrão retornada da api, caso não tenha mensagem de negocio para devolver na API
-                    Log.InserirLogIzio(sNomeCliente, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
-                }
-
-                //trocar o status code
                 return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
-
             }
         }
 
@@ -832,7 +846,7 @@ namespace TransacaoIzioRest.Controllers
                         ImportaTransacaoDAO daoFila = new ImportaTransacaoDAO(cliente.des_chave_ws, cliente.des_token_rest);
                         
                         //Task<int> total = Task.FromResult(0);
-                        var result = daoFila.ImportaLoteTransacaoFila();
+                        var result = daoFila.ProcessarFilaLoteTransacao();
                         if (result.errors.Where(x => x.code == "200").Any())
                             retorno.payload.Add(new DadosConsumirFila() { des_nome_cliente = cliente.des_chave_ws, qtd_mensagens_fila = Convert.ToInt32(result.errors.Where(x => x.code == "200").FirstOrDefault().message) });
                         else
