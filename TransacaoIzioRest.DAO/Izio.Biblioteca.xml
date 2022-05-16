@@ -12,15 +12,41 @@
             <param name="token"></param>
             <returns></returns>
         </member>
-        <member name="M:Izio.Biblioteca.AzureBlob.DeleteFileBase64(System.Object,System.String)">
+        <member name="M:Izio.Biblioteca.AzureBlob.UploadFileBase64Image(System.Object,System.String,System.Boolean)">
             <summary>
-            Deleta o arquivo no Azure Blob
+            Upload de arquivo em base 64 para o Azure Blob na pasta IMAGE
             </summary>
             <param name="dadosAzure"></param>
             <param name="token"></param>
             <returns></returns>
         </member>
+        <member name="M:Izio.Biblioteca.AzureBlob.UploadFileBase64_v2(System.Object,System.String,System.Boolean)">
+            <summary>
+            Upload de arquivo em base 64 para o Azure Blob
+            PORÉM, esse não faz deserealização, motivo pelo qual dava erro em grandes arquivos zip.
+            </summary>
+            <param name="dadosAzure"></param>
+            <param name="token"></param>
+            <param name="fl_permanente"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Izio.Biblioteca.AzureBlob.DeleteFileBase64(System.Object,System.String)">
+            <summary>
+            Deleta o arquivo no Azure Blob
+            </summary>
+            <param name="dadosAzure">Dados para exclusao do arquivo</param>
+            <param name="token">Token do cliente</param>
+            <returns>Vazio para sucesso ou erro ocorrido na exclusão do arquivo no azure blob</returns>
+        </member>
         <member name="M:Izio.Biblioteca.AzureBlob.uploadFileAzure(System.Object,System.Object,System.Boolean)">
+            <summary>
+            Realiza o upload do arquivo no Azure Blob Service
+            </summary>
+            <param name="dadosAzure"></param>
+            <param name="objConfigCliente"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Izio.Biblioteca.AzureBlob.uploadFileAzureImage(System.Object,System.Object,System.Boolean)">
             <summary>
             Realiza o upload do arquivo no Azure Blob Service
             </summary>
@@ -32,8 +58,9 @@
             <summary>
             Realiza o delete do arquivo no Azure Blob Service
             </summary>
-            <param name="des_url_file_azure_blob"></param>
-            <returns></returns>
+            <param name="dadosAzure">Dados do arquivo que será excluído</param>
+            <param name="objConfigCliente">Configuracao do cliente para exclusao</param>
+            <returns>Vazio para sucesso ou erro ocorrido na exclusão do arquivo no azure blob</returns>
         </member>
         <member name="T:Izio.Biblioteca.ListaErros">
             <summary>
@@ -142,6 +169,18 @@
             <param name="retornaUrlArquivo">Caso o valor seja true retornará apenas a URL do arquivo CSV e nao enviará o email.</param>
             <param name="cod_usuario">Código do usuário que solicitou a exportação.</param>
             <param name="password">Senha para proteger o arquivo excel.</param>
+        </member>
+        <member name="M:Izio.Biblioteca.ExportacaoArquivo.ExportarArquivo(System.String,System.Byte[],System.String,System.String,System.Boolean)">
+            <summary>
+            Método que realiza exportação de arquivos. Esse método se difere por receber um array de bytes do arquivo já criando anteriormente.
+            A aplicação dele se dá em cenários em que o zip precisa ser previamente criado com varios arquivos compactados.
+            </summary>
+            <param name="NomeCliente">nome do cliente</param>
+            <param name="arrayByteArquivo">zip previamente criado</param>
+            <param name="des_email">destinatário</param>
+            <param name="nomeArquivo">nome do arquivo</param>
+            <param name="bol_permanent">flag permanente</param>
+            <returns></returns>
         </member>
         <member name="T:Izio.Biblioteca.Model.ApiErrors">
             <summary>
