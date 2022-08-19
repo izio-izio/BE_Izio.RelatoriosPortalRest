@@ -574,7 +574,7 @@ namespace TransacaoIzioRest.DAO
                         QtdeItens = dadosTrans.qtd_itens_compra,
                         CodEAN = dadosTrans.cod_ean,
                         CodProduto = Convert.ToInt64(dadosTrans.cod_produto),
-                        DesProduto = dadosTrans.des_produto,
+                        DesProduto = dadosTrans.des_produto.Length > 100 ? dadosTrans.des_produto.Substring(0,100) : dadosTrans.des_produto,
                         ValorItem = dadosTrans.vlr_item_compra,
                         vlr_desconto_item = dadosTrans.vlr_desconto_item,
                         Quantidade = dadosTrans.qtd_item_compra,
