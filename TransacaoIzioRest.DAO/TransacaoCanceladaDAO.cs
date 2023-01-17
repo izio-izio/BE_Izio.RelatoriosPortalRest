@@ -62,10 +62,10 @@ namespace TransacaoIzioRest.DAO
             {
                 //Envia para a fila o evento de cancelamento(exclusão) de compra
                 #region Envia para a fila o evento de cancelamento(exclusão) de compra
-                if (!InserirFilaTransacaoCancelada(objTransacao))
-                {
-                    enviarEmail("Erro no processamento cancelamento de compra: </br> </br> " + JsonConvert.SerializeObject(objTransacao), $"{NomeClienteWs} - Erro ao inserir cancelamento de compra na fila");
-                }
+                //if (!InserirFilaTransacaoCancelada(objTransacao))
+                //{
+                //    enviarEmail("Erro no processamento cancelamento de compra: </br> </br> " + JsonConvert.SerializeObject(objTransacao), $"{NomeClienteWs} - Erro ao inserir cancelamento de compra na fila");
+                //}
                 #endregion
 
                 // Abre a conexao com o banco de dados
