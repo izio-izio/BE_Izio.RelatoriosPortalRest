@@ -545,11 +545,11 @@ namespace TransacaoIzioRest.DAO
      
             try
             {
-                //Insere o request na fila - Azure.Messaging.ServiceBus - Service Bus
-                if (!InserirFilaLoteTransacao(objTransacao))
-                {
-                    enviarEmail("Erro no processamento do lote: </br> </br> " + JsonConvert.SerializeObject(objTransacao), $"{NomeClienteWs} - Erro ao inserir na fila lote de transação");
-                }
+                ////Insere o request na fila - Azure.Messaging.ServiceBus - Service Bus
+                //if (!InserirFilaLoteTransacao(objTransacao))
+                //{
+                //    enviarEmail("Erro no processamento do lote: </br> </br> " + JsonConvert.SerializeObject(objTransacao), $"{NomeClienteWs} - Erro ao inserir na fila lote de transação");
+                //}
 
                 // Abre a conexao com o banco de dados
                 sqlServer.StartConnection();
