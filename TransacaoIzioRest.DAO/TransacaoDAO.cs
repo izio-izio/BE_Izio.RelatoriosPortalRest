@@ -54,9 +54,8 @@ namespace TransacaoIzioRest.DAO
                                                   left join
                                                      tab_loja tlj with(nolock) on tlj.cod_loja = trs.cod_loja 
                                                   left join
-                                                     tab_lancamento_credito_campanha tlc with(nolock) on tlc.cod_transacao = trs.cod_transacao
+                                                     tab_lancamento_credito_campanha tlc with(nolock) on tlc.cod_transacao = trs.cod_transacao and trs.cod_pessoa = tlc.cod_pessoa
                                                   where
-                                                      trs.cod_pessoa = tlc.cod_pessoa and
                                                       trs.dat_compra between '{anoMes}01 00:00:01' and '{anoMes}{DateTime.DaysInMonth(Convert.ToInt32(anoMes.Substring(0,4)), Convert.ToInt32(anoMes.Substring(4, 2))).ToString()} 23:59:59' and 
                                                       trs.cod_pessoa = @cod_pessoa 
                                                    group by trs.cod_transacao,
