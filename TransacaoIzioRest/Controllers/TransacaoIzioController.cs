@@ -47,6 +47,7 @@ namespace TransacaoIzioRest.Controllers
 
             //Objeto de retorno do metodo com os publicos cadastrados na campanha
             RetornoConsultaTransacao retornoConsulta = new RetornoConsultaTransacao();
+            retornoConsulta.payload = new Payload();
 
             //Objeto para processamento local da API
             DadosConsultaTransacao dadosConsulta = new DadosConsultaTransacao();
@@ -65,8 +66,22 @@ namespace TransacaoIzioRest.Controllers
 
                 #endregion
 
+                //Se nao for informado o anomes, retorna sem conteudo a consulta, para nao gerar erro no backend
+                if (string.IsNullOrEmpty(anoMes))
+                {
+                    retornoConsulta.payload = dadosConsulta.payload;
+                    return Request.CreateResponse(HttpStatusCode.OK, retornoConsulta);
+                }
+
+                //Se nao for informado o codigoPessoa, retorna sem conteudo a consulta, para nao gerar erro no backend
+                if (string.IsNullOrEmpty(codigoPessoa))
+                {
+                    retornoConsulta.payload = dadosConsulta.payload;
+                    return Request.CreateResponse(HttpStatusCode.OK, retornoConsulta);
+                }
+
                 //Executa metodo para consulta das transacações
-                DAO.TransacaoDAO consulta = new DAO.TransacaoDAO(sNomeCliente);
+                TransacaoDAO consulta = new TransacaoDAO(sNomeCliente);
                 dadosConsulta = consulta.ConsultaUltimasTransacao(Convert.ToInt64(codigoPessoa), anoMes);
 
                 if (dadosConsulta.payload != null && (dadosConsulta.payload.listaTransacao != null && dadosConsulta.payload.listaTransacao.Count > 0))
@@ -123,6 +138,7 @@ namespace TransacaoIzioRest.Controllers
 
             //Objeto para processamento local da API
             RetornoDadosItensTransacao dadosConsulta = new RetornoDadosItensTransacao();
+            dadosConsulta.payload = new PayloadItensTransacao();
 
             //Objeto de retorno contendo os erros da execução da API
             ApiErrors listaErros = new ApiErrors();
@@ -134,8 +150,15 @@ namespace TransacaoIzioRest.Controllers
                 sNomeCliente = Request.Headers.GetValues("sNomeCliente").First();
                 tokenAutenticacao = Request.Headers.GetValues("tokenAutenticacao").First();
 
+                //Se nao for informado o codigoTransacao, retorna sem conteudo a consulta, para nao gerar erro no backend
+                if (string.IsNullOrEmpty(codigoTransacao))
+                {
+                    retornoConsulta.payload = dadosConsulta.payload;
+                    return Request.CreateResponse(HttpStatusCode.OK, retornoConsulta);
+                }
+
                 //Executa metodo para consulta das transacações
-                DAO.TransacaoDAO consulta = new DAO.TransacaoDAO(sNomeCliente);
+                TransacaoDAO consulta = new TransacaoDAO(sNomeCliente);
                 dadosConsulta = consulta.ConsultaItensTransacao(Convert.ToInt64(codigoTransacao));
 
                 if (dadosConsulta.payload != null && (dadosConsulta.payload.listaItensTransacao != null && dadosConsulta.payload.listaItensTransacao.Count > 0))
