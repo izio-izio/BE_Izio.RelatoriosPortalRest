@@ -47,6 +47,7 @@ namespace TransacaoIzioRest.Controllers
 
             //Objeto de retorno do metodo com os publicos cadastrados na campanha
             RetornoConsultaTransacao retornoConsulta = new RetornoConsultaTransacao();
+            retornoConsulta.payload = new Payload();
 
             //Objeto para processamento local da API
             DadosConsultaTransacao dadosConsulta = new DadosConsultaTransacao();
@@ -65,8 +66,22 @@ namespace TransacaoIzioRest.Controllers
 
                 #endregion
 
+                //Se nao for informado o anomes, retorna sem conteudo a consulta, para nao gerar erro no backend
+                if (string.IsNullOrEmpty(anoMes))
+                {
+                    retornoConsulta.payload = dadosConsulta.payload;
+                    return Request.CreateResponse(HttpStatusCode.OK, retornoConsulta);
+                }
+
+                //Se nao for informado o codigoPessoa, retorna sem conteudo a consulta, para nao gerar erro no backend
+                if (string.IsNullOrEmpty(codigoPessoa))
+                {
+                    retornoConsulta.payload = dadosConsulta.payload;
+                    return Request.CreateResponse(HttpStatusCode.OK, retornoConsulta);
+                }
+
                 //Executa metodo para consulta das transacações
-                DAO.TransacaoDAO consulta = new DAO.TransacaoDAO(sNomeCliente);
+                TransacaoDAO consulta = new TransacaoDAO(sNomeCliente);
                 dadosConsulta = consulta.ConsultaUltimasTransacao(Convert.ToInt64(codigoPessoa), anoMes);
 
                 if (dadosConsulta.payload != null && (dadosConsulta.payload.listaTransacao != null && dadosConsulta.payload.listaTransacao.Count > 0))
@@ -123,6 +138,7 @@ namespace TransacaoIzioRest.Controllers
 
             //Objeto para processamento local da API
             RetornoDadosItensTransacao dadosConsulta = new RetornoDadosItensTransacao();
+            dadosConsulta.payload = new PayloadItensTransacao();
 
             //Objeto de retorno contendo os erros da execução da API
             ApiErrors listaErros = new ApiErrors();
@@ -134,8 +150,15 @@ namespace TransacaoIzioRest.Controllers
                 sNomeCliente = Request.Headers.GetValues("sNomeCliente").First();
                 tokenAutenticacao = Request.Headers.GetValues("tokenAutenticacao").First();
 
+                //Se nao for informado o codigoTransacao, retorna sem conteudo a consulta, para nao gerar erro no backend
+                if (string.IsNullOrEmpty(codigoTransacao))
+                {
+                    retornoConsulta.payload = dadosConsulta.payload;
+                    return Request.CreateResponse(HttpStatusCode.OK, retornoConsulta);
+                }
+
                 //Executa metodo para consulta das transacações
-                DAO.TransacaoDAO consulta = new DAO.TransacaoDAO(sNomeCliente);
+                TransacaoDAO consulta = new TransacaoDAO(sNomeCliente);
                 dadosConsulta = consulta.ConsultaItensTransacao(Convert.ToInt64(codigoTransacao));
 
                 if (dadosConsulta.payload != null && (dadosConsulta.payload.listaItensTransacao != null && dadosConsulta.payload.listaItensTransacao.Count > 0))
@@ -639,7 +662,7 @@ namespace TransacaoIzioRest.Controllers
         }
 
         /// <summary>
-        /// Metodo para retonar as compras dos ultimos 6 meses do cliente
+        /// Retorna o total de desconto que o cliente recebeu no periodo
         /// </summary>
         /// <param name="codigoPessoa">Codigo da pessoa para a consulta das compras</param>
         /// <param name="qtdMes"> consulta das compras neste periodo</param>
@@ -895,5 +918,142 @@ namespace TransacaoIzioRest.Controllers
             }
         }
 
+        /// <summary>
+        /// Método para consumir a fila de compras canceladas
+        /// </summary>
+        /// <remarks>
+        /// Método para consumir a fila (serviceBus) de compras canceladas. As compras canceladas que estão na fila, deverão ser enviadas para o datalake para exclusão.
+        /// 
+        /// ### Processamento ###
+        /// - Somente é permitido a execução com o token do Izio.
+        /// - Lista de clientes enviada com valor 0, indica que todos os clientes serão processados.
+        /// - Lista de clientes, quando tiver mais de um cliente, separar por virgula (Ex: 15,7,20).
+        /// - O processamento será feito em paralelo entre os clientes, caso número de threads seja maior que 1.
+        /// - As mensagens são lidas da fila, quando o lote lido inteirar 1000 registros é persistido no arquivo parquet.
+        /// - As mensagens são apagadas da fila, somente se tiver ocorrido com sucesso a persistência no arquivo parquet.
+        /// - As mensagens ficam na fila por 7 dias e depois são excluídas automaticamente.
+        /// 
+        /// </remarks>
+        /// <param name="listaClientes">Lista de clientes para o processamento</param>
+        /// <param name="numThreads">Numero de threads para o processamento</param>
+        /// <returns></returns>
+        [HttpPost, Utilidades.ValidaTokenAutenticacao]
+        [Route("api/TransacaoIzio/ConsumirFilaCancelamentoLote")]
+        //[ApiExplorerSettings(IgnoreApi = true)]
+        [SwaggerResponse("200", typeof(RetornoTransacao<DadosConsumirFila>))]
+        [SwaggerResponse("401", typeof(ApiErrors))]
+        [SwaggerResponse("500", typeof(ApiErrors))]
+        public HttpResponseMessage ConsumirFilaCancelamentoLote(string listaClientes, int numThreads = 1)
+        {
+            //Nome do cliente que esta executando a API, gerado após validação do Token
+            string sNomeCliente = "";
+            string tokenAutenticacao = "";
+
+            //Objeto de retorno contendo os erros da execução da API
+            ApiErrors listaErros = new ApiErrors();
+            listaErros.errors = new List<Erros>();
+
+            RetornoTransacao<DadosConsumirFila> retorno = new RetornoTransacao<DadosConsumirFila>();
+            retorno.payload = new List<DadosConsumirFila>();
+
+            try
+            {
+                //Valida Token no Izio
+                #region Valida Token no Izio
+                sNomeCliente = Request.Headers.GetValues("sNomeCliente").First();
+                tokenAutenticacao = Request.Headers.GetValues("tokenAutenticacao").First();
+
+                if (sNomeCliente.ToLower() != "izio")
+                {
+                    listaErros.errors.Add(new Erros() { code = Convert.ToInt32(HttpStatusCode.PreconditionFailed).ToString(), message = "Execução permitida apenas com o token do Izio." });
+                }
+                else
+                {
+                    if (string.IsNullOrEmpty(listaClientes))
+                    {
+                        listaErros.errors.Add(new Erros() { code = Convert.ToInt32(HttpStatusCode.PreconditionFailed).ToString(), message = "É necessário informar a lista de clientes ou enviar 0 para processar todos os clientes." });
+                    }
+
+                    if (numThreads < 1 || numThreads > 3)
+                    {
+                        listaErros.errors.Add(new Erros() { code = Convert.ToInt32(HttpStatusCode.PreconditionFailed).ToString(), message = "Numero de threads tem que ser maior que 0 ou menor ou igual a 3." });
+                    }
+                }
+
+                if (listaErros.errors.Count() > 0)
+                {
+                    return Request.CreateResponse(HttpStatusCode.PreconditionFailed, listaErros);
+                }
+                #endregion
+
+                //Consulta base do Izio os dados do cliente para processamento
+                #region Consulta base do Izio os dados do cliente para processamento
+                ImportaTransacaoDAO dao = new ImportaTransacaoDAO(sNomeCliente, tokenAutenticacao);
+                var clientes = dao.ListarClientes(listaClientes);
+
+                if (!clientes.Any())
+                {
+                    listaErros.errors.Add(new Erros() { code = Convert.ToInt32(HttpStatusCode.PreconditionFailed).ToString(), message = "Nenhum cliente foi encontrado para o processamento." });
+                    return Request.CreateResponse(HttpStatusCode.PreconditionFailed, listaErros);
+                }
+                #endregion
+
+
+                //Monta parallel foreach do processamento
+                Parallel.ForEach(clientes, new ParallelOptions { MaxDegreeOfParallelism = numThreads }, (cliente) =>
+                {
+                    try
+                    {
+                        ImportaTransacaoDAO daoFila = new ImportaTransacaoDAO(cliente.des_chave_ws, cliente.des_token_rest);
+
+                        //Task<int> total = Task.FromResult(0);
+                        var result = daoFila.ImportarFilaCancelamentoTransacao();
+                        if (result.errors.Where(x => x.code == "200").Any())
+                            retorno.payload.Add(new DadosConsumirFila() { des_nome_cliente = cliente.des_chave_ws, qtd_mensagens_fila = Convert.ToInt32(result.errors.Where(x => x.code == "200").FirstOrDefault().message) });
+                        else
+                        {
+                            foreach (Erros erro in result.errors)
+                            {
+                                retorno.payload.Add(new DadosConsumirFila() { des_nome_cliente = cliente.des_chave_ws, des_observacao = erro.message });
+                            }
+                        }
+
+                    }
+                    catch (Exception ex)
+                    {
+                        DadosLog dadosLog = new DadosLog();
+                        dadosLog.des_erro_tecnico = $@"Erro ao consumir a fila, ex: [{JsonConvert.SerializeObject(ex)}]";
+                        Log.InserirLogIzio(cliente.des_chave_ws, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
+
+                        retorno.payload.Add(new DadosConsumirFila() { des_nome_cliente = cliente.des_chave_ws, qtd_mensagens_fila = 0, des_observacao = $"Cliente [{cliente.id} - {cliente.des_chave_ws}] ocorreu erro consumir a fila, ex: {JsonConvert.SerializeObject(ex)}." });
+                    }
+                });
+
+                if (retorno.payload.Count() > 0 && retorno.payload.Where(x => !string.IsNullOrEmpty(x.des_observacao)).Count() > 0)
+                    return Request.CreateResponse(HttpStatusCode.BadRequest, retorno);
+                else return Request.CreateResponse(HttpStatusCode.OK, retorno);
+
+            }
+            catch (System.Exception ex)
+            {
+
+                if (listaErros.errors == null)
+                {
+                    listaErros.errors = new List<Erros>();
+                }
+                //Seta o Objeto com o Erro ocorrido
+                listaErros.errors.Add(new Erros { code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(), message = "Erro interno a exclusão das vendas em lote, favor contactar o administrador." });
+
+                DadosLog dadosLog = new DadosLog();
+                dadosLog.des_erro_tecnico = ex.ToString();
+
+                //Pegar a mensagem padrão retornada da api, caso não tenha mensagem de negocio para devolver na API
+                Log.InserirLogIzio(sNomeCliente, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
+
+                //trocar o status code
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
+
+            }
+        }
     }
 }
