@@ -62,10 +62,10 @@ namespace TransacaoIzioRest.DAO
             {
                 //Envia para a fila o evento de cancelamento(exclusão) de compra
                 #region Envia para a fila o evento de cancelamento(exclusão) de compra
-                //if (!InserirFilaTransacaoCancelada(objTransacao))
-                //{
-                //    enviarEmail("Erro no processamento cancelamento de compra: </br> </br> " + JsonConvert.SerializeObject(objTransacao), $"{NomeClienteWs} - Erro ao inserir cancelamento de compra na fila");
-                //}
+                if (!InserirFilaTransacaoCancelada(objTransacao))
+                {
+                    enviarEmail("Erro no processamento cancelamento de compra: </br> </br> " + JsonConvert.SerializeObject(objTransacao), $"{NomeClienteWs} - Erro ao inserir cancelamento de compra na fila");
+                }
                 #endregion
 
                 // Abre a conexao com o banco de dados
@@ -83,25 +83,10 @@ namespace TransacaoIzioRest.DAO
                 //Monta os parametros
                 #region Parametros
                 //Data da compra
-                IDbDataParameter pdat_compra = sqlServer.Command.CreateParameter();
-                pdat_compra.ParameterName = "@datacompra";
-                pdat_compra.Value = objTransacao.dat_compra;
-                sqlServer.Command.Parameters.Add(pdat_compra);
-
-                IDbDataParameter pvalorcompra = sqlServer.Command.CreateParameter();
-                pvalorcompra.ParameterName = "@valorcompra";
-                pvalorcompra.Value = objTransacao.vlr_compra;
-                sqlServer.Command.Parameters.Add(pvalorcompra);
-
-                IDbDataParameter pcupom = sqlServer.Command.CreateParameter();
-                pcupom.ParameterName = "@cupom";
-                pcupom.Value = objTransacao.cupom;
-                sqlServer.Command.Parameters.Add(pcupom);
-
-                IDbDataParameter pcod_loja = sqlServer.Command.CreateParameter();
-                pcod_loja.ParameterName = "@cod_loja";
-                pcod_loja.Value = objTransacao.cod_loja;
-                sqlServer.Command.Parameters.Add(pcod_loja);
+                sqlServer.Command.Parameters.AddWithValue("@datacompra", objTransacao.dat_compra);
+                sqlServer.Command.Parameters.AddWithValue("@valorcompra", objTransacao.vlr_compra);
+                sqlServer.Command.Parameters.AddWithValue("@cupom", objTransacao.cupom);
+                sqlServer.Command.Parameters.AddWithValue("@cod_loja", objTransacao.cod_loja);
 
                 // **********************************************************************************
                 // **********************************************************************************
@@ -189,8 +174,6 @@ end
 select @total ";
 
                     //executa o delete e retorna o total de linhas afetatas
-                    //totalRegistrosExcluidos += sqlServer.Command.ExecuteNonQuery();
-
                     var result = sqlServer.Command.ExecuteScalar();
                     if (result != null)
                         totalRegistrosExcluidos += Convert.ToInt32(result);
@@ -240,84 +223,77 @@ select @total ";
 
             try
             {
-                if (NomeClienteWs.ToLower() == "campelo" ||
-                    NomeClienteWs.ToLower() == "clubesuper" ||
-                    NomeClienteWs.ToLower() == "costazul" ||
-                    NomeClienteWs.ToLower() == "montreal" ||
-                    NomeClienteWs.ToLower() == "mendonca" ||
-                    NomeClienteWs.ToLower() == "lab")
+
+                //Seta o protocolo de ssl de envio da mensagem para a fila
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+
+                //A seta a lista que será inserida na fila
+                listaCompras.Add(objTransacao);
+
+                //Coloca em cache os dados de utilizacao da fila
+                sEtapa = "Coloca em cache os dados de utilizacao da fila";
+                Dictionary<string, string> listParam = new Dictionary<string, string>();
+                listParam = consultaParametroFila();
+                string connectionString = listParam.ContainsKey("AzureBusConStr") ? listParam["AzureBusConStr"] : "Endpoint=sb://izioservicebus.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=Dpnh2JPn9tgXGqRK9afC99bQI5qEDQfS3u55sU6F/oM=";
+
+                //Cria componente de verificação se a fila já está criada
+                sEtapa = "Cria componente de verificação se a fila já está criada";
+                ServiceBusAdministrationClient queue = new ServiceBusAdministrationClient(connectionString);
+                var existQueue = queue.QueueExistsAsync($"cancelamento-transacao-{NomeClienteWs.ToLower()}").GetAwaiter().GetResult();
+
+                //Se a fila não existir
+                sEtapa = "Se a fila não existir";
+                if (!existQueue)
                 {
-                    //Seta o protocolo de ssl de envio da mensagem para a fila
-                    ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-
-                    //A seta a lista que será inserida na fila
-                    listaCompras.Add(objTransacao);
-
-                    //Coloca em cache os dados de utilizacao da fila
-                    sEtapa = "Coloca em cache os dados de utilizacao da fila";
-                    Dictionary<string, string> listParam = new Dictionary<string, string>();
-                    listParam = consultaParametroFila();
-                    string connectionString = listParam.ContainsKey("AzureBusConStr") ? listParam["AzureBusConStr"] : "Endpoint=sb://izioservicebus.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=Dpnh2JPn9tgXGqRK9afC99bQI5qEDQfS3u55sU6F/oM=";
-
-                    //Cria componente de verificação se a fila já está criada
-                    sEtapa = "Cria componente de verificação se a fila já está criada";
-                    ServiceBusAdministrationClient queue = new ServiceBusAdministrationClient(connectionString);
-                    var existQueue = queue.QueueExistsAsync($"cancelamento-transacao-{NomeClienteWs.ToLower()}").GetAwaiter().GetResult();
-
-                    //Se a fila não existir
-                    sEtapa = "Se a fila não existir";
-                    if (!existQueue)
-                    {
-                        //Cria a nova fila
-                        sEtapa = "Cria a nova fila";
-                        var options = new CreateQueueOptions($"cancelamento-transacao-{NomeClienteWs.ToLower()}");
-                        options.MaxDeliveryCount = int.MaxValue;
-                        options.LockDuration = TimeSpan.FromMinutes(5);
-                        options.MaxSizeInMegabytes = 5 * 1024;
-                        options.EnableBatchedOperations = true;
-                        queue.CreateQueueAsync(options).GetAwaiter().GetResult();
-                    }
-
-                    //Inicia o componente para conexao com a fila
-                    sEtapa = "Inicia o componente para conexao com a fila";
-                    ServiceBusClient _client = new ServiceBusClient(connectionString);
-
-                    //Cria o componente para envio da mensagem para fila
-                    sEtapa = "Cria o componente para envio da mensagem para fila";
-                    ServiceBusSender _clientSender = _client.CreateSender($"cancelamento-transacao-{NomeClienteWs.ToLower()}");
-
-                    while (listaCompras.Count() > 0)
-                    {
-                        //Se o lote de compras tiver mais de 200 regitros, ele é dividido e inserido na fila por lote
-                        listaFila = listaCompras.Take(200).ToList();
-
-                        //Converte em json o objeto postado na api
-                        sEtapa = "Converte em json o objeto postado na api";
-                        string resultado = JsonConvert.SerializeObject(listaFila, Formatting.None);
-
-                        //Cria uma nova mensagem deixando json em bytes
-                        sEtapa = "Cria uma nova mensagem deixanto json em bytes";
-                        ServiceBusMessage message = new ServiceBusMessage(Encoding.UTF8.GetBytes(resultado));
-
-                        //Envia a mensagem para a fila
-                        sEtapa = "Envia a mensagem para a fila";
-                        _clientSender.SendMessageAsync(message).GetAwaiter().GetResult();
-
-                        //Remove da fila de processamento, os registros inseridos na fila
-                        if (listaFila.Count > listaCompras.Count) listaCompras.RemoveRange(0, listaFila.Count);
-                        else listaCompras.RemoveRange(0, listaFila.Count);
-                    }
-
-                    //Fecha os componentes de conexão com a fila
-                    _clientSender.CloseAsync();
-                    _client.DisposeAsync();
+                    //Cria a nova fila
+                    sEtapa = "Cria a nova fila";
+                    var options = new CreateQueueOptions($"cancelamento-transacao-{NomeClienteWs.ToLower()}");
+                    options.MaxDeliveryCount = int.MaxValue;
+                    options.LockDuration = TimeSpan.FromMinutes(5);
+                    options.MaxSizeInMegabytes = 5 * 1024;
+                    options.EnableBatchedOperations = true;
+                    queue.CreateQueueAsync(options).GetAwaiter().GetResult();
                 }
+
+                //Inicia o componente para conexao com a fila
+                sEtapa = "Inicia o componente para conexao com a fila";
+                ServiceBusClient _client = new ServiceBusClient(connectionString);
+
+                //Cria o componente para envio da mensagem para fila
+                sEtapa = "Cria o componente para envio da mensagem para fila";
+                ServiceBusSender _clientSender = _client.CreateSender($"cancelamento-transacao-{NomeClienteWs.ToLower()}");
+
+                while (listaCompras.Count() > 0)
+                {
+                    //Se o lote de compras tiver mais de 200 regitros, ele é dividido e inserido na fila por lote
+                    listaFila = listaCompras.Take(200).ToList();
+
+                    //Converte em json o objeto postado na api
+                    sEtapa = "Converte em json o objeto postado na api";
+                    string resultado = JsonConvert.SerializeObject(listaFila, Formatting.None);
+
+                    //Cria uma nova mensagem deixando json em bytes
+                    sEtapa = "Cria uma nova mensagem deixanto json em bytes";
+                    ServiceBusMessage message = new ServiceBusMessage(Encoding.UTF8.GetBytes(resultado));
+
+                    //Envia a mensagem para a fila
+                    sEtapa = "Envia a mensagem para a fila";
+                    _clientSender.SendMessageAsync(message).GetAwaiter().GetResult();
+
+                    //Remove da fila de processamento, os registros inseridos na fila
+                    if (listaFila.Count > listaCompras.Count) listaCompras.RemoveRange(0, listaFila.Count);
+                    else listaCompras.RemoveRange(0, listaFila.Count);
+                }
+
+                //Fecha os componentes de conexão com a fila
+                _clientSender.CloseAsync();
+                _client.DisposeAsync();
 
                 return true;
             }
             catch (Exception ex)
             {
-                DadosLog dadosLog = new DadosLog { des_erro_tecnico = $"{sEtapa} - Erro ao enviar mensagem para fila. {ex.Message.ToString()}" };
+                DadosLog dadosLog = new DadosLog { des_erro_tecnico = $"Cancelamento Compra - {sEtapa} - Erro ao enviar mensagem para fila. {ex.Message.ToString()}" };
                 Log.InserirLogIzio(NomeClienteWs, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
 
                 return false;
