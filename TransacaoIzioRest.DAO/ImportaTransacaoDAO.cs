@@ -767,17 +767,17 @@ namespace TransacaoIzioRest.DAO
             try
             {
                 var retFilaTransacao = ImportarFilaLoteTransacao();
-                var retFilaCancelamento = ImportarFilaCancelamentoTransacao();
+                //var retFilaCancelamento = ImportarFilaCancelamentoTransacao();
 
                 if (retFilaTransacao != null && retFilaTransacao.errors != null && retFilaTransacao.errors.Count() > 0)
                 {
                     listaErros.errors.AddRange(retFilaTransacao.errors);
                 }
 
-                if (retFilaCancelamento != null && retFilaCancelamento.errors != null && retFilaCancelamento.errors.Count() > 0)
-                {
-                    listaErros.errors.AddRange(retFilaCancelamento.errors);
-                }
+                //if (retFilaCancelamento != null && retFilaCancelamento.errors != null && retFilaCancelamento.errors.Count() > 0)
+                //{
+                //    listaErros.errors.AddRange(retFilaCancelamento.errors);
+                //}
 
             }
             catch (System.Exception ex)
@@ -1062,6 +1062,12 @@ namespace TransacaoIzioRest.DAO
 
         public ApiErrors ImportarFilaCancelamentoTransacao()
         {
+            //*******************************************
+            //Fluxo de execucao do metodo
+            //Lê da fila os registros de compras canceladas 
+            //Insere os registros das compras canceladas na tabela tab_compra_cancelada
+            //Exclui a compra cancelada da base
+
             ApiErrors listaErros = new ApiErrors();
             listaErros.errors = new List<Erros>();
 
@@ -1071,9 +1077,11 @@ namespace TransacaoIzioRest.DAO
             List<DadosFilaCancelamentoTransacao> listaCancelamento = new List<DadosFilaCancelamentoTransacao>();
             string sEtapa = "";
             int totalLoteFila = 0;
+
             try
             {
-                //Coloca em cache os dados para conexão com a fila
+                //Le da fila os registros de compra cancelada
+                #region Le da fila os registros de compra cancelada
                 Dictionary<string, string> listParam = new Dictionary<string, string>();
                 listParam = GetFromCache<Dictionary<string, string>>($"{NomeClienteWs}_servicebus_parmetroDAO", 1, () =>
                 {
@@ -1081,6 +1089,7 @@ namespace TransacaoIzioRest.DAO
                     return parametrosDAO.ListarParametros("queue_azure,logarRequest,AzureBusConStr");
                 });
                 string connectionString = listParam.ContainsKey("AzureBusConStr") ? listParam["AzureBusConStr"] : "Endpoint=sb://izioservicebus.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=Dpnh2JPn9tgXGqRK9afC99bQI5qEDQfS3u55sU6F/oM=";
+                #endregion
 
                 //Cria componente de verificação se a fila já está criada
                 sEtapa = "Cria componente de verificação se a fila já está criada";
@@ -1114,6 +1123,7 @@ namespace TransacaoIzioRest.DAO
                         // the received message is a different type as it contains some service set properties
                         var messages = receiver.ReceiveMessagesAsync(100).GetAwaiter().GetResult();
 
+                        //Se encontrou mensagens na fila, consome os registros da fila de 100 em 100
                         if (messages != null && messages.Count() > 0)
                         {
                             //Insere as mensagens retornadas da fila nas lista para carga na base de dados (viewizio_3)
@@ -1159,10 +1169,14 @@ namespace TransacaoIzioRest.DAO
                         //e
                         //apaga da fila as notas persistidas
                         #region Verifica se não existe mais mensagem na fila e a lista local está preenchida
-                        if ((!temMsg && listaLocal.Count() > 0) || listaLocal.Count() >= 1000)
+                        if ((!temMsg && listaLocal.Count() > 0) || listaLocal.Count() >= 100)
                         {
                             totalLoteFila += listaLocal.Count();
 
+                            //Apaga da base a compra cancelada
+                            //Caso ocorra erro nesta parte os registros continuaram na fila, para reprocessamento
+                            sEtapa = "Apaga da base a compra cancelada";
+                            #region Apaga da base a compra cancelada
                             TransacaoCanceladaDAO dao = new TransacaoCanceladaDAO(NomeClienteWs,tokenAutenticacao);
 
                             foreach (DadosFilaCancelamentoTransacao item in listaCancelamento)
@@ -1176,12 +1190,16 @@ namespace TransacaoIzioRest.DAO
                                     vlr_compra = item.vlr_compra
                                 };
 
-                                //Aplica a exclusão do registro
+                                //Aplica a exclusão do registro - Exclui a compra da base 
+                                //Caso ocorra erro nesta parte os registros continuaram na fila, para reprocessamento
                                 dao.ExcluirRegistroFilaCompraCancelada(dados, listaErros);
                             }
 
-                            //Trocar a execução por bulkInsert da lista
-                            #region Bulk Insert da lista
+                            #endregion
+
+                            //Trocar a execução por bulkInsert da lista de compras canceladas
+                            //Caso ocorra erro nesta parte, a compra ja vai estar excluida da base, mais contiuará na fila, para ser inserida na tabela de controle
+                            #region Bulk Insert da lista de compras canceladas
 
                             // Abre a conexao com o banco de dados
                             sqlServer.StartConnection();
@@ -1207,13 +1225,14 @@ namespace TransacaoIzioRest.DAO
                                 "dat_exclusao"))
                             {
                                 bcp.BulkCopyTimeout = ConfigurationManager.AppSettings["TimeoutExecucao"] != null ? Convert.ToInt32(ConfigurationManager.AppSettings["TimeoutExecucao"]) : 600;
-                                bcp.DestinationTableName = "tab_compra_cancelada";
+                                bcp.DestinationTableName = "tab_compra_cancelada"; // tabela de controle de compras canceladas
                                 bcp.WriteToServer(reader);
                             }
 
                             #endregion
 
                             //Exclui da fila as mensagens processadas e inseridas na base
+                            #region Exclui da fila as mensagens processadas e inseridas na base
                             Parallel.ForEach(listaExcluirFila, new ParallelOptions { MaxDegreeOfParallelism = 10 }, (message) =>
                             {
                                 receiver.CompleteMessageAsync(message);
@@ -1223,6 +1242,7 @@ namespace TransacaoIzioRest.DAO
                             listaViewizio_3.Clear();
                             listaExcluirFila.Clear();
                             listaLocal.Clear();
+                            #endregion
 
                             //Commit
                             sqlServer.Commit();
@@ -1230,6 +1250,8 @@ namespace TransacaoIzioRest.DAO
                         #endregion
                     }
 
+                    receiver.CloseAsync();
+                    _client.DisposeAsync();
 
                     //Adiciona na lista de retorna a quantidade de lote processados
                     listaErros.errors.Add(new Erros() { code = "200", message = totalLoteFila.ToString() });
@@ -1625,5 +1647,8 @@ namespace TransacaoIzioRest.DAO
             var value = cache.AddOrGetExisting(key, newValue, policy) as Lazy<TEntity>;
             return (value ?? newValue).Value; // Lazy<T> handles the locking itself
         }
+
     }
+
+
 }

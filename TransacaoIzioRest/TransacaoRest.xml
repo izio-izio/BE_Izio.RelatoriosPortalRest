@@ -73,7 +73,7 @@
         </member>
         <member name="M:TransacaoIzioRest.Controllers.TransacaoIzioRestController.ConsultaTotalDesconto(System.Int64,System.Int32)">
             <summary>
-            Metodo para retonar as compras dos ultimos 6 meses do cliente
+            Retorna o total de desconto que o cliente recebeu no periodo
             </summary>
             <param name="codigoPessoa">Codigo da pessoa para a consulta das compras</param>
             <param name="qtdMes"> consulta das compras neste periodo</param>
@@ -92,6 +92,27 @@
             - O processamento será feito em paralelo entre os clientes, caso número de threads seja maior que 1.
             - As mensagens são lidas da fila, quando o lote lido inteirar 1000 registros é persistido na base o lote de compra.
             - As mensagens são apagadas da fila, somente se tiver ocorrido com sucesso a persistência no banco de dados.
+            - As mensagens ficam na fila por 7 dias e depois são excluídas automaticamente.
+            
+            </remarks>
+            <param name="listaClientes">Lista de clientes para o processamento</param>
+            <param name="numThreads">Numero de threads para o processamento</param>
+            <returns></returns>
+        </member>
+        <member name="M:TransacaoIzioRest.Controllers.TransacaoIzioRestController.ConsumirFilaCancelamentoLote(System.String,System.Int32)">
+            <summary>
+            Método para consumir a fila de compras canceladas
+            </summary>
+            <remarks>
+            Método para consumir a fila (serviceBus) de compras canceladas. As compras canceladas que estão na fila, deverão ser enviadas para o datalake para exclusão.
+            
+            ### Processamento ###
+            - Somente é permitido a execução com o token do Izio.
+            - Lista de clientes enviada com valor 0, indica que todos os clientes serão processados.
+            - Lista de clientes, quando tiver mais de um cliente, separar por virgula (Ex: 15,7,20).
+            - O processamento será feito em paralelo entre os clientes, caso número de threads seja maior que 1.
+            - As mensagens são lidas da fila, quando o lote lido inteirar 1000 registros é persistido no arquivo parquet.
+            - As mensagens são apagadas da fila, somente se tiver ocorrido com sucesso a persistência no arquivo parquet.
             - As mensagens ficam na fila por 7 dias e depois são excluídas automaticamente.
             
             </remarks>
