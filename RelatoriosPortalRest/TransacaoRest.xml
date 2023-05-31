@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>RelatoriosPortalRest</name>
+    </assembly>
+    <members>
+        <member name="M:RelatoriosPortalRest.Controllers.RelatoriosPortalController.ConsultarUsuarios(System.Int32,System.String,System.String,System.String)">
+            <summary>
+                Consulta a relação de usuários cadastrados no varejo informado
+            </summary>
+                ### Fluxo de utilização ###
+                <para>
+                    *** É necessário o Token do Cliente ***
+                    
+                    A API de consulta no lambda as informações dos usuários no endpoint usuarios-cadastrados.
+                    
+                </para>
+            
+                ### Valores de retorno ###
+                <para>
+                    Para cada tipo de filtro de entrada é retornado um objeto.
+                    Fluxo 1
+                        período > 0: Retorna as informações de usuários com as informações consolidadas por período;
+                        codLoja: É possível combinar com o filtro de lojas;
+                        primeiraData e ultimaData: devem ser vazias;
+                    Fluxo 2
+                        periodo = 0 obrigatóriamente;
+                        codLoja = null obrigatóriamente;
+                        primeiraData e ultimaData: devem ser informadas as 2 datas para análise no formato YYYY-MM-DD
+                </para>
+                
+            
+                ### Status de retorno da API ###
+                <para>
+                    Status Code 200 = Sucesso na requisição;
+                    Status Code 400 = Bad Request (Dados inseridos para utilização da API incorretos);
+                    Status Code 500 = Internal Server Error (Ocorreu um erro no lado do servidor para buscar os dados);
+                </para>
+            <param name="periodo">Período (DEFAULT = 1)</param>
+            <param name="codLoja">Código das lojas separados por vírgula</param>
+            <param name="primeiraData">Data inicial (YYYY-MM-DD)</param>
+            <param name="ultimaData">Data final (YYYY-MM-DD)</param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>

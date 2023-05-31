@@ -14,11 +14,11 @@
     <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>TransacaoRest</RootNamespace>
-    <AssemblyName>TransacaoRest</AssemblyName>
+    <RootNamespace>RelatoriosPortalRest</RootNamespace>
+    <AssemblyName>RelatoriosPortalRest</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <UseIISExpress>true</UseIISExpress>
-    <Use64BitIISExpress />
+    <Use64BitIISExpress>true</Use64BitIISExpress>
     <IISExpressSSLPort />
     <IISExpressAnonymousAuthentication />
     <IISExpressWindowsAuthentication />
@@ -43,7 +43,8 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>TransacaoRest.xml</DocumentationFile>
+    <DocumentationFile>bin\RelatoriosPortalRest.xml</DocumentationFile>
+    <RegisterForComInterop>false</RegisterForComInterop>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -53,7 +54,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>TransacaoRest.xml</DocumentationFile>
+    <DocumentationFile>bin\RelatoriosPortalRest.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="ClosedXML, Version=0.95.2.0, Culture=neutral, processorArchitecture=MSIL">
@@ -241,8 +242,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\WebApiConfig.cs" />
-    <Compile Include="Controllers\TransacaoCabecalhoController.cs" />
-    <Compile Include="Controllers\TransacaoIzioController.cs" />
+    <Compile Include="Controllers\RelatoriosPortalRestController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -262,13 +262,13 @@
     <Folder Include="App_Data\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\TransacaoIzioRest.DAO\TransacaoIzioRest.DAO.csproj">
+    <ProjectReference Include="..\RelatoriosPortalRest.DAO\RelatoriosPortalRest.DAO.csproj">
       <Project>{f8b3da4f-5811-4d19-aa40-032367cc8c34}</Project>
-      <Name>TransacaoIzioRest.DAO</Name>
+      <Name>RelatoriosPortalRest.DAO</Name>
     </ProjectReference>
-    <ProjectReference Include="..\TransacaoIzioRest.Models\TransacaoIzioRest.Models.csproj">
+    <ProjectReference Include="..\RelatoriosPortalRest.Models\RelatoriosPortalRest.Models.csproj">
       <Project>{72e29550-f83a-41b7-84d6-4d04f011a47a}</Project>
-      <Name>TransacaoIzioRest.Models</Name>
+      <Name>RelatoriosPortalRest.Models</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup>

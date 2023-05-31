@@ -1,19 +1,19 @@
 ﻿using NSwag;
 using NSwag.AspNet.Owin;
 using NSwag.SwaggerGeneration.Processors.Security;
+using RelatoriosPortalRest;
+using System;
 using System.Configuration;
 using System.Web;
-using System;
 using System.Web.Http;
 using System.Web.Routing;
 
-namespace TransacaoIzioRest
+namespace RelatoriosPortalRest
 {
     public class WebApiApplication : System.Web.HttpApplication
     {
         protected void Application_Start()
         {
-
             RouteTable.Routes.MapOwinPath("swagger", app =>
             {
                 app.UseSwaggerUi3(typeof(WebApiApplication).Assembly, s =>
@@ -29,17 +29,14 @@ namespace TransacaoIzioRest
                     s.GeneratorSettings.OperationProcessors.Add(new OperationSecurityScopeProcessor("tokenAutenticacao"));
                     s.PostProcess = document =>
                     {
-                        document.Info.Title = HttpContext.Current.ApplicationInstance.GetType().BaseType.Assembly.GetName().Name.ToString();
+                        document.Info.Title = System.Reflection.Assembly.GetExecutingAssembly().GetName().Name;
                         document.Info.Version = ConfigurationManager.AppSettings.Get("apiVersion") ?? "1.0.0";
+
                     };
                 });
             });
 
             GlobalConfiguration.Configure(WebApiConfig.Register);
-        }
-
-        protected void Application_BeginRequest(Object sender, EventArgs e)
-        {
         }
     }
 }

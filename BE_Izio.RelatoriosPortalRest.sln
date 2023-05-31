@@ -1,13 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29009.5
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33723.286
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TransacaoIzioRest", "TransacaoIzioRest\TransacaoIzioRest.csproj", "{5B5F3D24-5F47-4190-8966-454EC9B2DA3B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RelatoriosPortalRest", "RelatoriosPortalRest\RelatoriosPortalRest.csproj", "{5B5F3D24-5F47-4190-8966-454EC9B2DA3B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TransacaoIzioRest.Models", "TransacaoIzioRest.Models\TransacaoIzioRest.Models.csproj", "{72E29550-F83A-41B7-84D6-4D04F011A47A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RelatoriosPortalRest.Models", "RelatoriosPortalRest.Models\RelatoriosPortalRest.Models.csproj", "{72E29550-F83A-41B7-84D6-4D04F011A47A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TransacaoIzioRest.DAO", "TransacaoIzioRest.DAO\TransacaoIzioRest.DAO.csproj", "{F8B3DA4F-5811-4D19-AA40-032367CC8C34}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RelatoriosPortalRest.DAO", "RelatoriosPortalRest.DAO\RelatoriosPortalRest.DAO.csproj", "{F8B3DA4F-5811-4D19-AA40-032367CC8C34}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

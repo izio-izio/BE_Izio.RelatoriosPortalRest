@@ -2,29 +2,24 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard1.6</TargetFramework>
-    <AssemblyName>TransacaoIzioRest.Models</AssemblyName>
-    <RootNamespace>TransacaoRest</RootNamespace>
+    <AssemblyName>RelatoriosPortalRest.Models</AssemblyName>
+    <RootNamespace>RelatoriosPortalRest</RootNamespace>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <AppxAutoIncrementPackageRevision>True</AppxAutoIncrementPackageRevision>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile>TransacaoIzioRest.Models.xml</DocumentationFile>
+    <DocumentationFile>RelatoriosPortalRest.Models.xml</DocumentationFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DocumentationFile>TransacaoIzioRest.Models.xml</DocumentationFile>
+    <DocumentationFile>RelatoriosPortalRest.Models.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="TransacaoIzioRest.Models.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    <PackageReference Include="System.Net.Http" Version="4.3.4" />
   </ItemGroup>
 <PropertyGroup>
    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
