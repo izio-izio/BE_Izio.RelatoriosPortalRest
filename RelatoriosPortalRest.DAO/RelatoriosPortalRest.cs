@@ -272,5 +272,117 @@ namespace RelatoriosPortalRest.DAO
 
             return Tuple.Create(dataAgregado, data);
         }
+
+        public Tuple<SegmentoMaiVendidoAgregado, ProdutosMaisVendidosAgregado> ProdutosReceita(int arvore, string xApiKey, string codLoja = "", string primeiraData = "", string ultimaData = "")
+        {
+            string sFiltros = "";
+            SegmentoMaiVendidoAgregado segmento = new SegmentoMaiVendidoAgregado();
+            ProdutosMaisVendidosAgregado produto = new ProdutosMaisVendidosAgregado();
+            List<Header> lstHeader = new List<Header>();
+
+            if (!String.IsNullOrEmpty(codLoja))
+            {
+                sFiltros += $@"&codLoja={codLoja}";
+            }
+
+            if (!String.IsNullOrEmpty(primeiraData))
+            {
+                sFiltros += $@"&primeiraData={primeiraData}";
+            }
+
+            if (!String.IsNullOrEmpty(ultimaData))
+            {
+                sFiltros += $@"&ultimaData={ultimaData}";
+            }
+
+            if (arvore > 0)
+            {
+                sFiltros += $@"&arvore={arvore}";
+            }
+
+            string url = $@"https://gs5n8yh1ci.execute-api.us-east-1.amazonaws.com/prod/izio/loyalty/v1/produtos-receita?varejo={NomeClienteWs.ToLower()}{sFiltros}";
+            try
+            {
+                lstHeader.Add(new Header { name = "x-api-key", value = xApiKey });
+
+                var response = Utilidades.ChamadaApiExterna
+                    (
+                        tipoRequisicao: "GET",
+                        url: url,
+                        metodo: "",
+                        Headers: lstHeader
+
+                    );
+
+                if (response != null)
+                {
+                    if (arvore == 1)
+                    {
+                        segmento = JsonConvert.DeserializeObject<SegmentoMaiVendidoAgregado>(response);
+                    }
+                    else if (arvore == 2)
+                    {
+                        produto = JsonConvert.DeserializeObject<ProdutosMaisVendidosAgregado>(response);
+                    }
+                }
+            }
+
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return Tuple.Create(segmento, produto);
+        }
+
+        public GastoPorGrupoAgregado GastoPorGrupo(string xApiKey, string codLoja = "", string primeiraData = "", string ultimaData = "")
+        {
+            string sFiltros = "";
+            GastoPorGrupoAgregado data = new GastoPorGrupoAgregado();
+            List<Header> lstHeader = new List<Header>();
+
+            if (!String.IsNullOrEmpty(codLoja))
+            {
+                sFiltros += $@"&codLoja={codLoja}";
+            }
+
+            if (!String.IsNullOrEmpty(primeiraData))
+            {
+                sFiltros += $@"&primeiraData={primeiraData}";
+            }
+
+            if (!String.IsNullOrEmpty(ultimaData))
+            {
+                sFiltros += $@"&ultimaData={ultimaData}";
+            }
+
+
+            string url = $@"https://gs5n8yh1ci.execute-api.us-east-1.amazonaws.com/prod/izio/loyalty/v1/gasto-grupo?varejo={NomeClienteWs.ToLower()}{sFiltros}";
+            try
+            {
+                lstHeader.Add(new Header { name = "x-api-key", value = xApiKey });
+
+                var response = Utilidades.ChamadaApiExterna
+                    (
+                        tipoRequisicao: "GET",
+                        url: url,
+                        metodo: "",
+                        Headers: lstHeader
+
+                    );
+
+                if (response != null)
+                {
+                   data = JsonConvert.DeserializeObject<GastoPorGrupoAgregado>(response);
+                }
+            }
+
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return data;
+        }
     }
 }

@@ -8,10 +8,15 @@ namespace RelatoriosPortalRest.Models
 {
     using System.Collections.Generic;
 
-    public class UsuariosCadastrados
+    public class Headers
     {
         public int statusCode { get; set; }
         public Dictionary<string, string> headers { get; set; }
+    }
+
+    public class UsuariosCadastrados: Headers
+    {
+
         public List<UsuariosCadastradosVisaoRapida> dataVisaoRapida { get; set; }
         public List<UsuariosCadastradosMensal> dataMensal { get; set; }
     }
@@ -29,10 +34,8 @@ namespace RelatoriosPortalRest.Models
     }
 
 
-    public class UsuariosCadastradosData
+    public class UsuariosCadastradosData : Headers
     {
-        public int statusCode { get; set; }
-        public Dictionary<string, string> headers { get; set; }
         public List<UsuariosCadastradosAgregado> dataAregado { get; set; }
         public List<UsuariosCadastradosDiario> dataDiario { get; set; }
     }
@@ -49,10 +52,8 @@ namespace RelatoriosPortalRest.Models
     }
 
 
-    public class VendasIdentificadas
+    public class VendasIdentificadas : Headers
     {
-        public int statusCode { get; set; }
-        public Dictionary<string, string> headers { get; set; }
         public List<VendasIdentificadasVisaoRapida> dataVisaoRapida { get; set; }
         public List<VendasIdentificadasMensal> dataMensal { get; set; }
     }
@@ -80,15 +81,13 @@ namespace RelatoriosPortalRest.Models
     }
 
 
-    public class VendasIdentificadasData
+    public class VendasIdentificadasData : Headers
     {
-        public int statusCode { get; set; }
-        public Dictionary<string, string> headers { get; set; }
-        public List<VendasIdentificadasAregado> dataAregado { get; set; }
+        public List<VendasIdentificadasAgregado> dataAregado { get; set; }
         public List<VendasIdentificadasDiario> dataDiario { get; set; }
     }
 
-    public class VendasIdentificadasAregado
+    public class VendasIdentificadasAgregado
     {
         public decimal ticket_medio_identificado { get; set; }
         public decimal ticket_medio_total { get; set; }
@@ -111,10 +110,8 @@ namespace RelatoriosPortalRest.Models
         public decimal porcentagem_receita_identificada { get; set; }
     }
 
-    public class PessoasAtivas
+    public class PessoasAtivas : Headers
     {
-        public int statusCode { get; set; }
-        public Dictionary<string, string> headers { get; set; }
         public List<PessoasAtivasVisaoRapida> dataVisaoRapida { get; set; }
         public List<PessoasAtivasMensal> dataMensal { get; set; }
     }
@@ -131,15 +128,13 @@ namespace RelatoriosPortalRest.Models
         public int pessoas_distintas { get; set; }
     }
 
-    public class PessoasAtivasData
+    public class PessoasAtivasData : Headers
     {
-        public int statusCode { get; set; }
-        public Dictionary<string, string> headers { get; set; }
-        public List<PessoasAtivasAregado> dataAregado { get; set; }
+        public List<PessoasAtivasAgregado> dataAregado { get; set; }
         public List<PessoasAtivasDiario> dataDiario { get; set; }
     }
 
-    public class PessoasAtivasAregado
+    public class PessoasAtivasAgregado
     {
         public int pessoas_distintas { get; set; }
     }
@@ -150,10 +145,8 @@ namespace RelatoriosPortalRest.Models
         public int pessoas_distintas { get; set; }
     }
 
-    public class FrequenciaGastoMedio
+    public class FrequenciaGastoMedio : Headers
     {
-        public int statusCode { get; set; }
-        public Dictionary<string, string> headers { get; set; }
         public List<FrequenciaGastoMedioVisaoRapida> dataVisaoRapida { get; set; }
         public List<FrequenciaGastoMedioMensal> dataMensal { get; set; }
     }
@@ -172,15 +165,13 @@ namespace RelatoriosPortalRest.Models
         public decimal gasto_medio { get; set; }
     }
 
-    public class FrequenciaGastoMedioData
+    public class FrequenciaGastoMedioData : Headers
     {
-        public int statusCode { get; set; }
-        public Dictionary<string, string> headers { get; set; }
-        public List<FrequenciaGastoMedioAregado> dataAregado { get; set; }
+        public List<FrequenciaGastoMedioAgregado> dataAregado { get; set; }
         public List<FrequenciaGastoMedioDiario> dataDiario { get; set; }
     }
 
-    public class FrequenciaGastoMedioAregado
+    public class FrequenciaGastoMedioAgregado
     {
         public decimal frequencia_identificada { get; set; }
         public decimal gasto_medio { get; set; }
@@ -191,6 +182,44 @@ namespace RelatoriosPortalRest.Models
         public string dia { get; set; }
         public decimal frequencia_identificada { get; set; }
         public decimal gasto_medio { get; set; }
+    }
+
+    public class GastoPorGrupoAgregado : Headers
+    {
+        public List<GastoPorGrupo> dataAregado { get; set; }
+    }
+
+
+    public class GastoPorGrupo
+    {
+        public string grupo_gasto_medio { get; set; }
+        public double gasto_grupo { get; set; }
+        public double porcentagem_gasto_receita { get; set; }
+        public double porcentagem_nao_identificada { get; set; }
+    }
+
+    public class SegmentoMaiVendidoAgregado: Headers
+    {
+        public List<SegmentoMaisVendido> dataAregado { get; set; }
+    }
+
+
+    public class SegmentoMaisVendido
+    {
+        public double receita { get; set; }
+        public string des_secao { get; set; }
+    }
+
+    public class ProdutosMaisVendidosAgregado : Headers
+    {
+        public List<ProdutoMaisVendido> dataAregado { get; set; }
+    }
+
+    public class ProdutoMaisVendido
+    {
+        public double receita { get; set; }
+        public double qtd_vendida { get; set; }
+        public string des_produto { get; set; }
     }
 
 }
