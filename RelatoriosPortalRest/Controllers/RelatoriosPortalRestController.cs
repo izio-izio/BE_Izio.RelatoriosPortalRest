@@ -264,7 +264,7 @@ namespace RelatoriosPortalRest.Controllers
         ///         Fluxo 2
         ///             periodo = 0 obrigatóriamente;
         ///             codLoja = null obrigatóriamente;
-        ///             primeiraData e ultimaData: devem ser informadas as 2 datas para análise no formato YYYY-MM-DD
+        ///             primeiraData e ultimaData: devem ser informadas as 2 datas para análise no formato YYYYMMDD
         ///     </para>
         ///     
         ///     ### Filtros QueryParam ###
@@ -488,7 +488,7 @@ namespace RelatoriosPortalRest.Controllers
         ///         Fluxo 2
         ///             periodo = 0 obrigatóriamente;
         ///             codLoja = null obrigatóriamente;
-        ///             primeiraData e ultimaData: devem ser informadas as 2 datas para análise no formato YYYY-MM-DD
+        ///             primeiraData e ultimaData: devem ser informadas as 2 datas para análise no formato YYYYMMDD
         ///     </para>
         ///     
         ///     ### Filtros QueryParam ###
