@@ -36,7 +36,7 @@ namespace RelatoriosPortalRest.Models
 
     public class UsuariosCadastradosData : Headers
     {
-        public List<UsuariosCadastradosAgregado> dataAregado { get; set; }
+        public List<UsuariosCadastradosAgregado> dataAgregado { get; set; }
         public List<UsuariosCadastradosDiario> dataDiario { get; set; }
     }
 
@@ -83,7 +83,7 @@ namespace RelatoriosPortalRest.Models
 
     public class VendasIdentificadasData : Headers
     {
-        public List<VendasIdentificadasAgregado> dataAregado { get; set; }
+        public List<VendasIdentificadasAgregado> dataAgregado { get; set; }
         public List<VendasIdentificadasDiario> dataDiario { get; set; }
     }
 
@@ -130,7 +130,7 @@ namespace RelatoriosPortalRest.Models
 
     public class PessoasAtivasData : Headers
     {
-        public List<PessoasAtivasAgregado> dataAregado { get; set; }
+        public List<PessoasAtivasAgregado> dataAgregado { get; set; }
         public List<PessoasAtivasDiario> dataDiario { get; set; }
     }
 
@@ -167,7 +167,7 @@ namespace RelatoriosPortalRest.Models
 
     public class FrequenciaGastoMedioData : Headers
     {
-        public List<FrequenciaGastoMedioAgregado> dataAregado { get; set; }
+        public List<FrequenciaGastoMedioAgregado> dataAgregado { get; set; }
         public List<FrequenciaGastoMedioDiario> dataDiario { get; set; }
     }
 
@@ -186,7 +186,7 @@ namespace RelatoriosPortalRest.Models
 
     public class GastoPorGrupoAgregado : Headers
     {
-        public List<GastoPorGrupo> dataAregado { get; set; }
+        public List<GastoPorGrupo> dataAgregado { get; set; }
     }
 
 
@@ -200,7 +200,7 @@ namespace RelatoriosPortalRest.Models
 
     public class SegmentoMaiVendidoAgregado: Headers
     {
-        public List<SegmentoMaisVendido> dataAregado { get; set; }
+        public List<SegmentoMaisVendido> dataAgregado { get; set; }
     }
 
 
@@ -212,7 +212,7 @@ namespace RelatoriosPortalRest.Models
 
     public class ProdutosMaisVendidosAgregado : Headers
     {
-        public List<ProdutoMaisVendido> dataAregado { get; set; }
+        public List<ProdutoMaisVendido> dataAgregado { get; set; }
     }
 
     public class ProdutoMaisVendido
