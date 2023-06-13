@@ -7,6 +7,7 @@ using RelatoriosPortalRest.Models;
 using ServiceStack;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -34,15 +35,15 @@ namespace RelatoriosPortalRest.Controllers
         ///         Fluxo 2
         ///             periodo = 0 obrigatóriamente;
         ///             codLoja = null obrigatóriamente;
-        ///             primeiraData e ultimaData: devem ser informadas as 2 datas para análise no formato YYYY-MM-DD
+        ///             primeiraData e ultimaData: devem ser informadas as 2 datas para análise no formato YYYYMMDD
         ///     </para>
         ///     
         ///     ### Filtros QueryParam ###
         ///     <para>
         ///         "periodo" (int) - Default = 1: retorna os períodos agregados;
         ///         "codLoja" string - Separadas por vírgula;
-        ///         "primeiraData" string: Data inicial (YYYY-MM-DD);
-        ///         "ultimaData" string: Data final (YYYY-MM-DD)
+        ///         "primeiraData" string: Data inicial (YYYYMMDD);
+        ///         "ultimaData" string: Data final (YYYYMMDD)
         ///     </para>
         /// 
         ///     ### Status de retorno da API ###
@@ -54,8 +55,8 @@ namespace RelatoriosPortalRest.Controllers
         /// </remarks>
         /// <param name="periodo">Período (DEFAULT = 1)</param>
         /// <param name="codLoja">Código das lojas separados por vírgula</param>
-        /// <param name="primeiraData">Data inicial (YYYY-MM-DD)</param>
-        /// <param name="ultimaData">Data final (YYYY-MM-DD)</param>
+        /// <param name="primeiraData">Data inicial (YYYYMMDD)</param>
+        /// <param name="ultimaData">Data final (YYYYMMDD)</param>
         /// <returns></returns>
         [HttpGet, Utilidades.ValidaTokenAutenticacao]
         [Route("api/Relatorios/UsuariosCadastrados")]
@@ -127,6 +128,12 @@ namespace RelatoriosPortalRest.Controllers
                     });
                     return Request.CreateResponse(HttpStatusCode.BadRequest, listaErros);
                 }
+
+                DateTime primeira = DateTime.ParseExact(primeiraData, "yyyyMMdd", CultureInfo.InvariantCulture);
+                primeiraData = primeira.ToString("yyyy-MM-dd");
+
+                DateTime ultima = DateTime.ParseExact(ultimaData, "yyyyMMdd", CultureInfo.InvariantCulture);
+                ultimaData = ultima.ToString("yyyy-MM-dd");
             }
             
             if (periodo != null && periodo > 0)
