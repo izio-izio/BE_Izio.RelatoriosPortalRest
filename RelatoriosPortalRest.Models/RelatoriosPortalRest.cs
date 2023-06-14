@@ -60,23 +60,23 @@ namespace RelatoriosPortalRest.Models
 
     public class VendasIdentificadasVisaoRapida
     {
-        public decimal receita_identificada { get; set; }
-        public decimal ticket_medio_identificado { get; set; }
-        public decimal ticket_medio_total { get; set; }
-        public decimal receita_total { get; set; }
-        public decimal porcentagem_receita_identificada { get; set; }
-        public decimal num_transacoes_identificadas { get; set; }
+        public decimal? receita_identificada { get; set; }
+        public decimal? ticket_medio_identificado { get; set; }
+        public decimal? ticket_medio_total { get; set; }
+        public decimal? receita_total { get; set; }
+        public decimal? porcentagem_receita_identificada { get; set; }
+        public decimal? num_transacoes_identificadas { get; set; }
         public string flag_dias { get; set; }
     }
 
     public class VendasIdentificadasMensal
     {
-        public decimal receita_identificada { get; set; }
-        public decimal ticket_medio_identificado { get; set; }
-        public decimal ticket_medio_total { get; set; }
-        public decimal receita_total { get; set; }
-        public decimal porcentagem_receita_identificada { get; set; }
-        public decimal num_transacoes_identificadas { get; set; }
+        public decimal? receita_identificada { get; set; }
+        public decimal? ticket_medio_identificado { get; set; }
+        public decimal? ticket_medio_total { get; set; }
+        public decimal? receita_total { get; set; }
+        public decimal? porcentagem_receita_identificada { get; set; }
+        public decimal? num_transacoes_identificadas { get; set; }
         public string mes { get; set; }
     }
 
@@ -89,25 +89,25 @@ namespace RelatoriosPortalRest.Models
 
     public class VendasIdentificadasAgregado
     {
-        public decimal ticket_medio_identificado { get; set; }
-        public decimal ticket_medio_total { get; set; }
-        public decimal receita_identificada { get; set; }
-        public decimal receita_total { get; set; }
-        public decimal porcentagem_receita_identificada { get; set; }
-        public decimal num_transacoes_identificadas { get; set; }
+        public decimal? ticket_medio_identificado { get; set; }
+        public decimal? ticket_medio_total { get; set; }
+        public decimal? receita_identificada { get; set; }
+        public decimal? receita_total { get; set; }
+        public decimal? porcentagem_receita_identificada { get; set; }
+        public decimal? num_transacoes_identificadas { get; set; }
     }
 
     public class VendasIdentificadasDiario
     {
-        public decimal receita_identificada { get; set; }
-        public decimal receita_total { get; set; }
-        public decimal num_transacoes_identificadas { get; set; }
-        public decimal num_transacoes_totais { get; set; }
-        public decimal ticket_medio_identificado { get; set; }
+        public decimal? receita_identificada { get; set; }
+        public decimal? receita_total { get; set; }
+        public decimal? num_transacoes_identificadas { get; set; }
+        public decimal? num_transacoes_totais { get; set; }
+        public decimal? ticket_medio_identificado { get; set; }
         public string ano { get; set; }
         public string mes { get; set; }
         public string dia { get; set; }
-        public decimal porcentagem_receita_identificada { get; set; }
+        public decimal? porcentagem_receita_identificada { get; set; }
     }
 
     public class PessoasAtivas : Headers
@@ -154,15 +154,15 @@ namespace RelatoriosPortalRest.Models
     public class FrequenciaGastoMedioVisaoRapida
     {
         public string flag_dias { get; set; }
-        public decimal frequencia_identificada { get; set; }
-        public decimal gasto_medio { get; set; }
+        public decimal? frequencia_identificada { get; set; }
+        public decimal? gasto_medio { get; set; }
     }
 
     public class FrequenciaGastoMedioMensal
     {
         public string mes { get; set; }
-        public decimal frequencia_identificada { get; set; }
-        public decimal gasto_medio { get; set; }
+        public decimal? frequencia_identificada { get; set; }
+        public decimal? gasto_medio { get; set; }
     }
 
     public class FrequenciaGastoMedioData : Headers
@@ -173,15 +173,15 @@ namespace RelatoriosPortalRest.Models
 
     public class FrequenciaGastoMedioAgregado
     {
-        public decimal frequencia_identificada { get; set; }
-        public decimal gasto_medio { get; set; }
+        public decimal? frequencia_identificada { get; set; }
+        public decimal? gasto_medio { get; set; }
     }
 
     public class FrequenciaGastoMedioDiario
     {
         public string dia { get; set; }
-        public decimal frequencia_identificada { get; set; }
-        public decimal gasto_medio { get; set; }
+        public decimal? frequencia_identificada { get; set; }
+        public decimal? gasto_medio { get; set; }
     }
 
     public class GastoPorGrupoAgregado : Headers
