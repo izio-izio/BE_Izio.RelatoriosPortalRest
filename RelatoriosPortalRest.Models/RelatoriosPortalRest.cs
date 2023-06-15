@@ -222,4 +222,61 @@ namespace RelatoriosPortalRest.Models
         public string des_produto { get; set; }
     }
 
+
+    public class LojaReceita : Headers
+    {
+        public List<LojaReceitaAgregado> dataAgregado { get; set; }
+        public List<DataBairro> dataBairro { get; set; }
+    }
+
+    public class LojaReceitaAgregado
+    {
+        public string des_cidade { get; set; }
+        public string des_estado { get; set; }
+        public string des_nome_loja { get; set; }
+        public string des_bairro { get; set; }
+        public string cod_loja { get; set; }
+        public double receita { get; set; }
+    }
+
+    public class DataBairro
+    {
+        public string des_bairro { get; set; }
+        public double receita { get; set; }
+    }
+
+    public class SegmentacaoPessoasCategoria : Headers
+    {
+        public List<SegmentacaoPessoas> data { get; set; }
+    }
+
+    public class SegmentacaoPessoas
+    {
+        public string clube { get; set; }
+        public double receita { get; set; }
+        public double num_transacoes { get; set; }
+        public double num_pessoas { get; set; }
+        public double ticket_medio { get; set; }
+        public double frequencia { get; set; }
+        public double gasto_medio { get; set; }
+    }
+
+    public class SegmentacaoPessoasPeriodo: Headers
+    {
+        public List<SegmentacaoPessoasPeriodoPeriodoData> data { get; set; }
+    }
+
+    public class SegmentacaoPessoasPeriodoPeriodoData
+    {
+        public string periodo { get; set; }
+        public double bronze_prata { get; set; }
+        public double bronze_ouro { get; set; }
+        public double ouro_prata { get; set; }
+        public double ouro_bronze { get; set; }
+        public double prata_prata { get; set; }
+        public double bronze_bronze { get; set; }
+        public double prata_bronze { get; set; }
+        public double prata_ouro { get; set; }
+    }
+
 }

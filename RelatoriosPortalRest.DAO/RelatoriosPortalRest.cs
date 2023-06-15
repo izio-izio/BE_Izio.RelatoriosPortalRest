@@ -384,5 +384,117 @@ namespace RelatoriosPortalRest.DAO
 
             return data;
         }
+
+        public LojaReceita LojaReceita(string xApiKey, string codLoja = "", string primeiraData = "", string ultimaData = "")
+        {
+            string sFiltros = "";
+            LojaReceita data = new LojaReceita();
+            List<Header> lstHeader = new List<Header>();
+
+            if (!String.IsNullOrEmpty(codLoja))
+            {
+                sFiltros += $@"&codLoja={codLoja}";
+            }
+
+            if (!String.IsNullOrEmpty(primeiraData))
+            {
+                sFiltros += $@"&primeiraData={primeiraData}";
+            }
+
+            if (!String.IsNullOrEmpty(ultimaData))
+            {
+                sFiltros += $@"&ultimaData={ultimaData}";
+            }
+
+
+            string url = $@"https://gs5n8yh1ci.execute-api.us-east-1.amazonaws.com/prod/izio/loyalty/v1/loja-receita?varejo={NomeClienteWs.ToLower()}{sFiltros}";
+            try
+            {
+                lstHeader.Add(new Header { name = "x-api-key", value = xApiKey });
+
+                var response = Utilidades.ChamadaApiExterna
+                    (
+                        tipoRequisicao: "GET",
+                        url: url,
+                        metodo: "",
+                        Headers: lstHeader
+
+                    );
+
+                if (response != null)
+                {
+                    data = JsonConvert.DeserializeObject<LojaReceita>(response);
+                }
+            }
+
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return data;
+        }
+
+        public Tuple<SegmentacaoPessoasCategoria, SegmentacaoPessoasPeriodo> SegmentacaoPessoas(int segmentacao, string xApiKey, string codLoja = "", string primeiraData = "", string ultimaData = "")
+        {
+            string sFiltros = "";
+            SegmentacaoPessoasCategoria categoria = new SegmentacaoPessoasCategoria();
+            SegmentacaoPessoasPeriodo periodo = new SegmentacaoPessoasPeriodo();
+            List<Header> lstHeader = new List<Header>();
+
+            if (!String.IsNullOrEmpty(codLoja))
+            {
+                sFiltros += $@"&codLoja={codLoja}";
+            }
+
+            if (!String.IsNullOrEmpty(primeiraData))
+            {
+                sFiltros += $@"&primeiraData={primeiraData}";
+            }
+
+            if (!String.IsNullOrEmpty(ultimaData))
+            {
+                sFiltros += $@"&ultimaData={ultimaData}";
+            }
+
+            if (segmentacao > 0)
+            {
+                sFiltros += $@"&segmentacao={segmentacao}";
+            }
+
+            string url = $@"https://gs5n8yh1ci.execute-api.us-east-1.amazonaws.com/prod/izio/loyalty/v1/segmentacao-clientes?varejo={NomeClienteWs.ToLower()}{sFiltros}";
+            try
+            {
+                lstHeader.Add(new Header { name = "x-api-key", value = xApiKey });
+
+                var response = Utilidades.ChamadaApiExterna
+                    (
+                        tipoRequisicao: "GET",
+                        url: url,
+                        metodo: "",
+                        Headers: lstHeader
+
+                    );
+
+                if (response != null)
+                {
+                    if (segmentacao == 1)
+                    {
+                        categoria = JsonConvert.DeserializeObject<SegmentacaoPessoasCategoria>(response);
+                    }
+                    else if (segmentacao == 2)
+                    {
+                        periodo = JsonConvert.DeserializeObject<SegmentacaoPessoasPeriodo>(response);
+                    }
+                }
+            }
+
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return Tuple.Create(categoria, periodo);
+        }
     }
 }

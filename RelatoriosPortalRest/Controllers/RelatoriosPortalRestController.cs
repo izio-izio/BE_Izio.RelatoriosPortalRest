@@ -1288,6 +1288,364 @@ namespace RelatoriosPortalRest.Controllers
                 return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
             }
         }
+
+
+        /// <summary>
+        ///     Consulta a relação de receitas por lojas no varejo informado
+        /// </summary>
+        /// <remarks>
+        ///     ### É necessário o Token do Cliente ###
+        ///     ### Fluxo de utilização ###
+        ///     A API de consulta no lambda as informações dos usuários no endpoint loja-receita.
+        ///     
+        ///     <para>
+        ///         Para cada tipo de filtro de entrada é retornado um objeto.
+        ///         Fluxo
+        ///             codLoja: É possível combinar com o filtro de lojas;
+        ///             primeiraData e ultimaData: obrigatórias para o período de análise;
+        ///     </para>
+        ///     
+        ///     ### Filtros QueryParam ###
+        ///     <para>
+        ///         "codLoja" string - Separadas por vírgula;
+        ///         "primeiraData" string: Data inicial (YYYYMMDD);
+        ///         "ultimaData" string: Data final (YYYYMMDD)
+        ///     </para>
+        /// 
+        ///     ### Status de retorno da API ###
+        ///     <para>
+        ///         Status Code 200 = Sucesso na requisição;
+        ///         Status Code 400 = Bad Request (Dados inseridos para utilização da API incorretos);
+        ///         Status Code 500 = Internal Server Error (Ocorreu um erro no lado do servidor para buscar os dados);
+        ///     </para>
+        /// </remarks>
+        /// <param name="codLoja">Código das lojas separados por vírgula</param>
+        /// <param name="primeiraData">Data inicial (YYYYMMDD)</param>
+        /// <param name="ultimaData">Data final (YYYYMMDD)</param>
+        /// <returns></returns>
+        [HttpGet, Utilidades.ValidaTokenAutenticacao]
+        [Route("api/Relatorios/ReceitaLojas")]
+        [SwaggerResponse("200", typeof(LojaReceita))]
+        [SwaggerResponse("500", typeof(ApiErrors))]
+        [SwaggerResponse("401", typeof(ApiErrors))]
+        public HttpResponseMessage ReceitaLojas(string primeiraData, string ultimaData, string codLoja = "")
+        {
+            #region variáveis e objetos usados no processamento           
+            string sNomeCliente = null;
+            string tokenAutenticacao = null;
+
+            ApiErrors listaErros = new ApiErrors()
+            {
+                errors = new List<Erros>()
+            };
+            #endregion
+
+            #region Validação campos de entrada
+
+            if (!string.IsNullOrEmpty(primeiraData) && string.IsNullOrEmpty(ultimaData))
+            {
+                listaErros.errors.Add(new Erros
+                {
+                    code = Convert.ToInt32(HttpStatusCode.BadRequest).ToString(),
+                    message = "Ultima data deve ser informada."
+                });
+                return Request.CreateResponse(HttpStatusCode.BadRequest, listaErros);
+            }
+
+            if (string.IsNullOrEmpty(primeiraData) && !string.IsNullOrEmpty(ultimaData))
+            {
+                listaErros.errors.Add(new Erros
+                {
+                    code = Convert.ToInt32(HttpStatusCode.BadRequest).ToString(),
+                    message = "Primeira data deve ser informada."
+                });
+                return Request.CreateResponse(HttpStatusCode.BadRequest, listaErros);
+            }
+
+            if (string.IsNullOrEmpty(primeiraData) && string.IsNullOrEmpty(ultimaData))
+            {
+                listaErros.errors.Add(new Erros
+                {
+                    code = Convert.ToInt32(HttpStatusCode.BadRequest).ToString(),
+                    message = "É necessário inserir a data para pesquisa."
+                });
+                return Request.CreateResponse(HttpStatusCode.BadRequest, listaErros);
+            }
+
+            #endregion
+
+            try
+            {
+                sNomeCliente = Request.Headers.GetValues("sNomeCliente").First().ToLower();
+                tokenAutenticacao = Request.Headers.GetValues("tokenAutenticacao").First();
+
+                ParametroDAO param = new ParametroDAO("Izio");
+                Dictionary<string, string> listParam = new Dictionary<string, string>();
+
+                listParam = param.ListarParametros("yhub-xapikey");
+                string xApiKey = listParam["yhub-xapikey"];
+
+                RelatoriosPortalRestDAO dao = new RelatoriosPortalRestDAO(sNomeCliente, tokenAutenticacao);
+                LojaReceita retorno = dao.LojaReceita(xApiKey, codLoja, primeiraData, ultimaData);
+
+                if (retorno != null)
+                {
+                    if (retorno.statusCode == 200)
+                    {
+                        return Request.CreateResponse(HttpStatusCode.OK, retorno);
+                    }
+                    else
+                    {
+                        DadosLog dadosLog = new DadosLog
+                        {
+                            des_erro_tecnico = "Ocorreu um erro ao buscar as informações da YHUB no endpoint: ReceitaLojas" + retorno.ToJson()
+                        };
+
+                        Log.InserirLogIzio(sNomeCliente, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
+
+                        listaErros.errors.Add(new Erros
+                        {
+                            code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(),
+                            message = "Ocorreu um erro ao buscar os dados."
+                        });
+                        return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
+                    }
+                }
+
+                else
+                {
+                    listaErros.errors.Add(new Erros
+                    {
+                        code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(),
+                        message = "Ocorreu um erro ao buscar os dados."
+                    });
+                    return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                DadosLog dadosLog = new DadosLog
+                {
+                    des_erro_tecnico = ex.ToString()
+                };
+
+                Log.InserirLogIzio(sNomeCliente, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
+
+                listaErros.errors.Add(
+                    new Erros
+                    {
+                        code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(),
+                        message = ex.Message
+                    });
+
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
+            }
+        }
+
+
+        /// <summary>
+        ///     Consulta a relação de segmentação de clientes (Ouro, Prata ou Bronze) no varejo informado
+        /// </summary>
+        /// <remarks>
+        ///     ### É necessário o Token do Cliente ###
+        ///     ### Fluxo de utilização ###
+        ///     A API de consulta no lambda as informações dos usuários no endpoint segmentacao-clientes.
+        ///     
+        ///     <para>
+        ///         Para cada tipo de filtro de entrada é retornado um objeto.
+        ///         Fluxo 1
+        ///             segmentacao = 1: Retorna as informações de segmentação de pessoas por gasto granular;
+        ///             codLoja: É possível combinar com o filtro de lojas;
+        ///             primeiraData e ultimaData: devem ser informadas as 2 datas para análise no formato YYYYMMDD;
+        ///         Fluxo 2
+        ///             segmentacao = 2: Retorna as informações de segmentação de pessoas por gasto semanal;
+        ///             codLoja = null obrigatóriamente;
+        ///             primeiraData e ultimaData: devem ser informadas as 2 datas para análise no formato YYYYMMDD;
+        ///     </para>
+        ///     
+        ///     ### Filtros QueryParam ###
+        ///     <para>
+        ///         "segmentacao" (int) - 1 ou 2 - Retorna as segmentações das pessoas (Ouro, Prata ou Bronze);
+        ///         "codLoja" string - Separadas por vírgula;
+        ///         "primeiraData" string: Data inicial (YYYYMMDD);
+        ///         "ultimaData" string: Data final (YYYYMMDD)
+        ///     </para>
+        /// 
+        ///     ### Status de retorno da API ###
+        ///     <para>
+        ///         Status Code 200 = Sucesso na requisição;
+        ///         Status Code 400 = Bad Request (Dados inseridos para utilização da API incorretos);
+        ///         Status Code 500 = Internal Server Error (Ocorreu um erro no lado do servidor para buscar os dados);
+        ///     </para>
+        /// </remarks>
+        /// <param name="arvore">1 - Granular / 2 - Semanal</param>
+        /// <param name="codLoja">Código das lojas separados por vírgula</param>
+        /// <param name="primeiraData">Data inicial (YYYYMMDD)</param>
+        /// <param name="ultimaData">Data final (YYYYMMDD)</param>
+        /// <returns></returns>
+        [HttpGet, Utilidades.ValidaTokenAutenticacao]
+        [Route("api/Relatorios/SegmentacaoPessoas")]
+        [SwaggerResponse("200", typeof(SegmentacaoPessoasCategoria))]
+        [SwaggerResponse("200", typeof(SegmentacaoPessoasPeriodo))]
+        [SwaggerResponse("500", typeof(ApiErrors))]
+        [SwaggerResponse("401", typeof(ApiErrors))]
+        public HttpResponseMessage SegmentacaoPessoas(string primeiraData, string ultimaData, int segmentacao, string codLoja = "")
+        {
+            #region variáveis e objetos usados no processamento           
+            string sNomeCliente = null;
+            string tokenAutenticacao = null;
+
+            ApiErrors listaErros = new ApiErrors()
+            {
+                errors = new List<Erros>()
+            };
+            #endregion
+
+            #region Validação campos de entrada
+
+            if (!string.IsNullOrEmpty(primeiraData) && string.IsNullOrEmpty(ultimaData))
+            {
+                listaErros.errors.Add(new Erros
+                {
+                    code = Convert.ToInt32(HttpStatusCode.BadRequest).ToString(),
+                    message = "Ultima data deve ser informada."
+                });
+                return Request.CreateResponse(HttpStatusCode.BadRequest, listaErros);
+            }
+
+            if (string.IsNullOrEmpty(primeiraData) && !string.IsNullOrEmpty(ultimaData))
+            {
+                listaErros.errors.Add(new Erros
+                {
+                    code = Convert.ToInt32(HttpStatusCode.BadRequest).ToString(),
+                    message = "Primeira data deve ser informada."
+                });
+                return Request.CreateResponse(HttpStatusCode.BadRequest, listaErros);
+            }
+
+            if (string.IsNullOrEmpty(primeiraData) && string.IsNullOrEmpty(ultimaData) && segmentacao <= 0)
+            {
+                listaErros.errors.Add(new Erros
+                {
+                    code = Convert.ToInt32(HttpStatusCode.BadRequest).ToString(),
+                    message = "É necessário inserir ao menos 1 filtro para a busca."
+                });
+                return Request.CreateResponse(HttpStatusCode.BadRequest, listaErros);
+            }
+
+            if (!string.IsNullOrEmpty(primeiraData) && !string.IsNullOrEmpty(ultimaData))
+            {
+                if (segmentacao <= 0 || segmentacao > 2)
+                {
+                    listaErros.errors.Add(new Erros
+                    {
+                        code = Convert.ToInt32(HttpStatusCode.BadRequest).ToString(),
+                        message = "Não é possível buscar pela segmentacao de busca informada."
+                    });
+                    return Request.CreateResponse(HttpStatusCode.BadRequest, listaErros);
+                }
+            }
+
+            if (segmentacao == null || segmentacao <= 0 || segmentacao > 2)
+            {
+                listaErros.errors.Add(new Erros
+                {
+                    code = Convert.ToInt32(HttpStatusCode.BadRequest).ToString(),
+                    message = "Não é possível buscar pela segmentacao de busca informada."
+                });
+                return Request.CreateResponse(HttpStatusCode.BadRequest, listaErros);
+            }
+
+
+            #endregion
+
+            try
+            {
+                sNomeCliente = Request.Headers.GetValues("sNomeCliente").First().ToLower();
+                tokenAutenticacao = Request.Headers.GetValues("tokenAutenticacao").First();
+
+                ParametroDAO param = new ParametroDAO("Izio");
+                Dictionary<string, string> listParam = new Dictionary<string, string>();
+
+                listParam = param.ListarParametros("yhub-xapikey");
+                string xApiKey = listParam["yhub-xapikey"];
+
+                SegmentacaoPessoasCategoria categoria = new SegmentacaoPessoasCategoria();
+                SegmentacaoPessoasPeriodo periodo = new SegmentacaoPessoasPeriodo();
+
+                RelatoriosPortalRestDAO dao = new RelatoriosPortalRestDAO(sNomeCliente, tokenAutenticacao);
+                Tuple<SegmentacaoPessoasCategoria, SegmentacaoPessoasPeriodo> retorno = dao.SegmentacaoPessoas(segmentacao, xApiKey, codLoja, primeiraData, ultimaData);
+
+                categoria = retorno.Item1;
+                periodo = retorno.Item2;
+
+                if (retorno != null)
+                {
+
+                    if (retorno.Item1.statusCode == 200 || retorno.Item2.statusCode == 200)
+                    {
+
+                        if (segmentacao == 1)
+                        {
+                            return Request.CreateResponse(HttpStatusCode.OK, categoria);
+                        }
+
+                        else
+                        {
+                            return Request.CreateResponse(HttpStatusCode.OK, periodo);
+                        }
+                    }
+
+                    else
+                    {
+                        DadosLog dadosLog = new DadosLog
+                        {
+                            des_erro_tecnico = "Ocorreu um erro ao buscar as informações da YHUB no endpoint: SegmentacaoPessoas" + retorno.ToJson()
+                        };
+
+                        Log.InserirLogIzio(sNomeCliente, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
+
+                        listaErros.errors.Add(new Erros
+                        {
+                            code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(),
+                            message = "Ocorreu um erro ao buscar os dados."
+                        });
+                        return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
+                    }
+
+                }
+
+                else
+                {
+                    listaErros.errors.Add(new Erros
+                    {
+                        code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(),
+                        message = "Ocorreu um erro ao buscar os dados."
+                    });
+                    return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                DadosLog dadosLog = new DadosLog
+                {
+                    des_erro_tecnico = ex.ToString()
+                };
+
+                Log.InserirLogIzio(sNomeCliente, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
+
+                listaErros.errors.Add(
+                    new Erros
+                    {
+                        code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(),
+                        message = ex.Message
+                    });
+
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
+            }
+        }
     }
 }
 
