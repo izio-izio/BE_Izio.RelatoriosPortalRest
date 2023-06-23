@@ -265,6 +265,10 @@ namespace RelatoriosPortalRest.Controllers
         ///             periodo = 0 obrigatóriamente;
         ///             codLoja = null obrigatóriamente;
         ///             primeiraData e ultimaData: devem ser informadas as 2 datas para análise no formato YYYYMMDD
+        ///         Fluxo 3
+        ///             periodo = 0 obrigatóriamente;
+        ///             codLoja = obrigatório;
+        ///             primeiraData e ultimaData: devem ser informadas as 2 datas para análise no formato YYYYMMDD
         ///     </para>
         ///     
         ///     ### Filtros QueryParam ###
@@ -349,15 +353,6 @@ namespace RelatoriosPortalRest.Controllers
                     return Request.CreateResponse(HttpStatusCode.BadRequest, listaErros);
                 }
 
-                if (!string.IsNullOrEmpty(codLoja))
-                {
-                    listaErros.errors.Add(new Erros
-                    {
-                        code = Convert.ToInt32(HttpStatusCode.BadRequest).ToString(),
-                        message = "O filtro de loja só é possível com o período > 0."
-                    });
-                    return Request.CreateResponse(HttpStatusCode.BadRequest, listaErros);
-                }
             }
 
             if (periodo != null && periodo > 0)
@@ -373,15 +368,6 @@ namespace RelatoriosPortalRest.Controllers
                 }
             }
 
-            if (periodo == 0 && !string.IsNullOrEmpty(codLoja))
-            {
-                listaErros.errors.Add(new Erros
-                {
-                    code = Convert.ToInt32(HttpStatusCode.BadRequest).ToString(),
-                    message = "É necessário informar o período para filtro de lojas."
-                });
-                return Request.CreateResponse(HttpStatusCode.BadRequest, listaErros);
-            }
 
             #endregion
 
@@ -489,6 +475,10 @@ namespace RelatoriosPortalRest.Controllers
         ///             periodo = 0 obrigatóriamente;
         ///             codLoja = null obrigatóriamente;
         ///             primeiraData e ultimaData: devem ser informadas as 2 datas para análise no formato YYYYMMDD
+        ///         Fluxo 3
+        ///             periodo = 0 obrigatóriamente;
+        ///             codLoja = obrigatório;
+        ///             primeiraData e ultimaData: devem ser informadas as 2 datas para análise no formato YYYYMMDD
         ///     </para>
         ///     
         ///     ### Filtros QueryParam ###
@@ -569,16 +559,6 @@ namespace RelatoriosPortalRest.Controllers
                     {
                         code = Convert.ToInt32(HttpStatusCode.BadRequest).ToString(),
                         message = "Não é possível buscar pelo período com as datas informadas."
-                    });
-                    return Request.CreateResponse(HttpStatusCode.BadRequest, listaErros);
-                }
-
-                if (!string.IsNullOrEmpty(codLoja))
-                {
-                    listaErros.errors.Add(new Erros
-                    {
-                        code = Convert.ToInt32(HttpStatusCode.BadRequest).ToString(),
-                        message = "O filtro de loja só é possível com o período > 0."
                     });
                     return Request.CreateResponse(HttpStatusCode.BadRequest, listaErros);
                 }
@@ -713,6 +693,10 @@ namespace RelatoriosPortalRest.Controllers
         ///             periodo = 0 obrigatóriamente;
         ///             codLoja = null obrigatóriamente;
         ///             primeiraData e ultimaData: devem ser informadas as 2 datas para análise no formato YYYYMMDD
+        ///         Fluxo 3
+        ///             periodo = 0 obrigatóriamente;
+        ///             codLoja = obrigatório;
+        ///             primeiraData e ultimaData: devem ser informadas as 2 datas para análise no formato YYYYMMDD
         ///     </para>
         ///     
         ///     ### Filtros QueryParam ###
@@ -793,16 +777,6 @@ namespace RelatoriosPortalRest.Controllers
                     {
                         code = Convert.ToInt32(HttpStatusCode.BadRequest).ToString(),
                         message = "Não é possível buscar pelo período com as datas informadas."
-                    });
-                    return Request.CreateResponse(HttpStatusCode.BadRequest, listaErros);
-                }
-
-                if (!string.IsNullOrEmpty(codLoja))
-                {
-                    listaErros.errors.Add(new Erros
-                    {
-                        code = Convert.ToInt32(HttpStatusCode.BadRequest).ToString(),
-                        message = "O filtro de loja só é possível com o período > 0."
                     });
                     return Request.CreateResponse(HttpStatusCode.BadRequest, listaErros);
                 }
@@ -939,6 +913,10 @@ namespace RelatoriosPortalRest.Controllers
         ///             arvore = 2: Retorna as informações de produtos mais vendidos por período;
         ///             codLoja = null obrigatóriamente;
         ///             primeiraData e ultimaData: devem ser informadas as 2 datas para análise no formato YYYYMMDD;
+        ///         Fluxo 3
+        ///             arvore = 1 ou 2 obrigatóriamente;
+        ///             codLoja = obrigatório;
+        ///             primeiraData e ultimaData: devem ser informadas as 2 datas para análise no formato YYYYMMDD
         ///     </para>
         ///     
         ///     ### Filtros QueryParam ###
@@ -1019,16 +997,6 @@ namespace RelatoriosPortalRest.Controllers
                     {
                         code = Convert.ToInt32(HttpStatusCode.BadRequest).ToString(),
                         message = "Não é possível buscar pela arvore de busca informada."
-                    });
-                    return Request.CreateResponse(HttpStatusCode.BadRequest, listaErros);
-                }
-
-                if (!string.IsNullOrEmpty(codLoja))
-                {
-                    listaErros.errors.Add(new Erros
-                    {
-                        code = Convert.ToInt32(HttpStatusCode.BadRequest).ToString(),
-                        message = "O filtro de loja só é possível com o período > 0."
                     });
                     return Request.CreateResponse(HttpStatusCode.BadRequest, listaErros);
                 }
@@ -1462,11 +1430,15 @@ namespace RelatoriosPortalRest.Controllers
         ///             segmentacao = 2: Retorna as informações de segmentação de pessoas por gasto semanal;
         ///             codLoja = null obrigatóriamente;
         ///             primeiraData e ultimaData: devem ser informadas as 2 datas para análise no formato YYYYMMDD;
+        ///         Fluxo 3
+        ///             arvore = 1 ou 2 obrigatóriamente;
+        ///             codLoja = obrigatório;
+        ///             primeiraData e ultimaData: devem ser informadas as 2 datas para análise no formato YYYYMMDD
         ///     </para>
         ///     
         ///     ### Filtros QueryParam ###
         ///     <para>
-        ///         "segmentacao" (int) - 1 ou 2 - Retorna as segmentações das pessoas (Ouro, Prata ou Bronze);
+        ///         "segmentacao" (int) - 1;
         ///         "codLoja" string - Separadas por vírgula;
         ///         "primeiraData" string: Data inicial (YYYYMMDD);
         ///         "ultimaData" string: Data final (YYYYMMDD)
@@ -1479,7 +1451,7 @@ namespace RelatoriosPortalRest.Controllers
         ///         Status Code 500 = Internal Server Error (Ocorreu um erro no lado do servidor para buscar os dados);
         ///     </para>
         /// </remarks>
-        /// <param name="arvore">1 - Granular / 2 - Semanal</param>
+        /// <param name="segmentacao">1 - Granular / 2 - Semanal</param>
         /// <param name="codLoja">Código das lojas separados por vírgula</param>
         /// <param name="primeiraData">Data inicial (YYYYMMDD)</param>
         /// <param name="ultimaData">Data final (YYYYMMDD)</param>
