@@ -577,16 +577,6 @@ namespace RelatoriosPortalRest.Controllers
                 }
             }
 
-            if (periodo == 0 && !string.IsNullOrEmpty(codLoja))
-            {
-                listaErros.errors.Add(new Erros
-                {
-                    code = Convert.ToInt32(HttpStatusCode.BadRequest).ToString(),
-                    message = "É necessário informar o período para filtro de lojas."
-                });
-                return Request.CreateResponse(HttpStatusCode.BadRequest, listaErros);
-            }
-
             #endregion
 
             try
@@ -793,16 +783,6 @@ namespace RelatoriosPortalRest.Controllers
                     });
                     return Request.CreateResponse(HttpStatusCode.BadRequest, listaErros);
                 }
-            }
-
-            if (periodo == 0 && !string.IsNullOrEmpty(codLoja))
-            {
-                listaErros.errors.Add(new Erros
-                {
-                    code = Convert.ToInt32(HttpStatusCode.BadRequest).ToString(),
-                    message = "É necessário informar o período para filtro de lojas."
-                });
-                return Request.CreateResponse(HttpStatusCode.BadRequest, listaErros);
             }
 
             #endregion
