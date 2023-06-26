@@ -109,6 +109,22 @@ namespace RelatoriosPortalRest.Controllers
 
             if (!string.IsNullOrEmpty(primeiraData) && !string.IsNullOrEmpty(ultimaData))
             {
+                DateTime primeira = DateTime.ParseExact(primeiraData, "yyyyMMdd", CultureInfo.InvariantCulture);
+                DateTime ultima = DateTime.ParseExact(ultimaData, "yyyyMMdd", CultureInfo.InvariantCulture);
+
+                if (ultima < primeira)
+                {
+                    listaErros.errors.Add(new Erros
+                    {
+                        code = Convert.ToInt32(HttpStatusCode.BadRequest).ToString(),
+                        message = "Primeira data deve ser menor que a última data para análise."
+                    });
+                    return Request.CreateResponse(HttpStatusCode.BadRequest, listaErros);
+                }
+            }
+
+            if (!string.IsNullOrEmpty(primeiraData) && !string.IsNullOrEmpty(ultimaData))
+            {
                 if(periodo != null && periodo > 0)
                 {
                     listaErros.errors.Add(new Erros
@@ -159,21 +175,7 @@ namespace RelatoriosPortalRest.Controllers
                 return Request.CreateResponse(HttpStatusCode.BadRequest, listaErros);
             }
 
-            if (!string.IsNullOrEmpty(primeiraData) && !string.IsNullOrEmpty(ultimaData))
-            {
-                DateTime primeira = DateTime.ParseExact(primeiraData, "yyyyMMdd", CultureInfo.InvariantCulture);
-                DateTime ultima = DateTime.ParseExact(ultimaData, "yyyyMMdd", CultureInfo.InvariantCulture);
 
-                if (ultima < primeira)
-                {
-                    listaErros.errors.Add(new Erros
-                    {
-                        code = Convert.ToInt32(HttpStatusCode.BadRequest).ToString(),
-                        message = "Primeira data deve ser menor que a última data para análise."
-                    });
-                    return Request.CreateResponse(HttpStatusCode.BadRequest, listaErros);
-                }
-            }
 
             #endregion
 
