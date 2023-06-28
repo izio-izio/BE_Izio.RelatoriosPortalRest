@@ -227,7 +227,7 @@ namespace RelatoriosPortalRest.Controllers
                         listaErros.errors.Add(new Erros
                         {
                             code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(),
-                            message = "Ocorreu um erro ao buscar os dados."
+                            message = "Não existem dados para o período informado."
                         });
                         return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
                     }
@@ -238,7 +238,7 @@ namespace RelatoriosPortalRest.Controllers
                     listaErros.errors.Add(new Erros
                     {
                         code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(),
-                        message = "Ocorreu um erro ao buscar os dados."
+                        message = "Não existem dados para o período informado."
                     });
                     return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
                 }
@@ -453,7 +453,7 @@ namespace RelatoriosPortalRest.Controllers
                         listaErros.errors.Add(new Erros
                         {
                             code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(),
-                            message = "Ocorreu um erro ao buscar os dados."
+                            message = "Não existem dados para o período informado."
                         });
                         return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
                     }
@@ -464,7 +464,7 @@ namespace RelatoriosPortalRest.Controllers
                     listaErros.errors.Add(new Erros
                     {
                         code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(),
-                        message = "Ocorreu um erro ao buscar os dados."
+                        message = "Não existem dados para o período informado."
                     });
                     return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
                 }
@@ -677,7 +677,7 @@ namespace RelatoriosPortalRest.Controllers
                         listaErros.errors.Add(new Erros
                         {
                             code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(),
-                            message = "Ocorreu um erro ao buscar os dados."
+                            message = "Não existem dados para o período informado."
                         });
                         return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
                     }
@@ -688,7 +688,7 @@ namespace RelatoriosPortalRest.Controllers
                     listaErros.errors.Add(new Erros
                     {
                         code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(),
-                        message = "Ocorreu um erro ao buscar os dados."
+                        message = "Não existem dados para o período informado."
                     });
                     return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
                 }
@@ -902,7 +902,7 @@ namespace RelatoriosPortalRest.Controllers
                         listaErros.errors.Add(new Erros
                         {
                             code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(),
-                            message = "Ocorreu um erro ao buscar os dados."
+                            message = "Não existem dados para o período informado."
                         });
                         return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
                     }
@@ -914,7 +914,7 @@ namespace RelatoriosPortalRest.Controllers
                     listaErros.errors.Add(new Erros
                     {
                         code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(),
-                        message = "Ocorreu um erro ao buscar os dados."
+                        message = "Não existem dados para o período informado."
                     });
                     return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
                 }
@@ -1126,7 +1126,7 @@ namespace RelatoriosPortalRest.Controllers
                         listaErros.errors.Add(new Erros
                         {
                             code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(),
-                            message = "Ocorreu um erro ao buscar os dados."
+                            message = "Não existem dados para o período informado."
                         });
                         return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
                     }
@@ -1138,7 +1138,7 @@ namespace RelatoriosPortalRest.Controllers
                     listaErros.errors.Add(new Erros
                     {
                         code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(),
-                        message = "Ocorreu um erro ao buscar os dados."
+                        message = "Não existem dados para o período informado."
                     });
                     return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
                 }
@@ -1298,7 +1298,7 @@ namespace RelatoriosPortalRest.Controllers
                         listaErros.errors.Add(new Erros
                         {
                             code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(),
-                            message = "Ocorreu um erro ao buscar os dados."
+                            message = "Não existem dados para o período informado."
                         });
                         return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
                     }
@@ -1309,7 +1309,7 @@ namespace RelatoriosPortalRest.Controllers
                     listaErros.errors.Add(new Erros
                     {
                         code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(),
-                        message = "Ocorreu um erro ao buscar os dados."
+                        message = "Não existem dados para o período informado."
                     });
                     return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
                 }
@@ -1468,7 +1468,7 @@ namespace RelatoriosPortalRest.Controllers
                         listaErros.errors.Add(new Erros
                         {
                             code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(),
-                            message = "Ocorreu um erro ao buscar os dados."
+                            message = "Não existem dados para o período informado."
                         });
                         return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
                     }
@@ -1479,7 +1479,7 @@ namespace RelatoriosPortalRest.Controllers
                     listaErros.errors.Add(new Erros
                     {
                         code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(),
-                        message = "Ocorreu um erro ao buscar os dados."
+                        message = "Não existem dados para o período informado."
                     });
                     return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
                 }
@@ -1691,7 +1691,7 @@ namespace RelatoriosPortalRest.Controllers
                         listaErros.errors.Add(new Erros
                         {
                             code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(),
-                            message = "Ocorreu um erro ao buscar os dados."
+                            message = "Não existem dados para o período informado."
                         });
                         return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
                     }
@@ -1703,7 +1703,7 @@ namespace RelatoriosPortalRest.Controllers
                     listaErros.errors.Add(new Erros
                     {
                         code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(),
-                        message = "Ocorreu um erro ao buscar os dados."
+                        message = "Não existem dados para o período informado."
                     });
                     return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
                 }
@@ -1804,7 +1804,7 @@ namespace RelatoriosPortalRest.Controllers
                     listaErros.errors.Add(new Erros
                     {
                         code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(),
-                        message = "Ocorreu um erro ao buscar os dados."
+                        message = "Não existem dados para o período informado."
                     });
                     return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
                 }
