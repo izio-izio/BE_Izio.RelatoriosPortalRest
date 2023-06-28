@@ -496,5 +496,42 @@ namespace RelatoriosPortalRest.DAO
 
             return Tuple.Create(categoria, periodo);
         }
+
+
+        public DataUltimaAtualizacao BuscarDataUltimaAtualizacao(string xApiKey)
+        {
+            string sFiltros = "";
+            DataUltimaAtualizacao retorno = new DataUltimaAtualizacao();
+            List<Header> lstHeader = new List<Header>();
+
+
+            string url = $@"https://gs5n8yh1ci.execute-api.us-east-1.amazonaws.com/prod/izio/loyalty/v1/segmentacao-clientes?varejo={NomeClienteWs.ToLower()}{sFiltros}";
+            try
+            {
+                lstHeader.Add(new Header { name = "x-api-key", value = xApiKey });
+
+                var response = Utilidades.ChamadaApiExterna
+                    (
+                        tipoRequisicao: "GET",
+                        url: url,
+                        metodo: "",
+                        Headers: lstHeader
+
+                    );
+
+                if (response != null)
+                {
+                    retorno = JsonConvert.DeserializeObject<DataUltimaAtualizacao>(response);
+
+                }
+            }
+
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return retorno;
+        }
     }
 }

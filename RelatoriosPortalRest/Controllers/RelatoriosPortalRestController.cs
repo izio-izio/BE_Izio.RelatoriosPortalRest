@@ -1728,6 +1728,109 @@ namespace RelatoriosPortalRest.Controllers
                 return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
             }
         }
+
+
+        /// <summary>
+        ///     Consulta a data de última atualização no varejo informado
+        /// </summary>
+        /// <remarks>
+        ///     ### É necessário o Token do Cliente ###
+        ///     ### Fluxo de utilização ###
+        ///     A API de consulta no lambda a data de última atualização.
+        ///     
+        ///     <para>
+        ///         Busca as informações da última atualização no Data Lake.
+        ///     </para>
+        /// 
+        ///     ### Status de retorno da API ###
+        ///     <para>
+        ///         Status Code 200 = Sucesso na requisição;
+        ///         Status Code 400 = Bad Request (Dados inseridos para utilização da API incorretos);
+        ///         Status Code 500 = Internal Server Error (Ocorreu um erro no lado do servidor para buscar os dados);
+        ///     </para>
+        /// </remarks>
+        /// <returns></returns>
+        [HttpGet, Utilidades.ValidaTokenAutenticacao]
+        [Route("api/Relatorios/DataUltimaAtualizacao")]
+        [SwaggerResponse("200", typeof(SegmentacaoPessoasCategoria))]
+        [SwaggerResponse("500", typeof(ApiErrors))]
+        [SwaggerResponse("401", typeof(ApiErrors))]
+        public HttpResponseMessage DataUltimaAtualizacao()
+        {
+            #region variáveis e objetos usados no processamento           
+            string sNomeCliente = null;
+            string tokenAutenticacao = null;
+
+            ApiErrors listaErros = new ApiErrors()
+            {
+                errors = new List<Erros>()
+            };
+            #endregion
+
+            try
+            {
+                sNomeCliente = Request.Headers.GetValues("sNomeCliente").First().ToLower();
+                tokenAutenticacao = Request.Headers.GetValues("tokenAutenticacao").First();
+
+                ParametroDAO param = new ParametroDAO("Izio");
+                Dictionary<string, string> listParam = new Dictionary<string, string>();
+
+                listParam = param.ListarParametros("yhub-xapikey");
+                string xApiKey = listParam["yhub-xapikey"];
+
+                SegmentacaoPessoasCategoria categoria = new SegmentacaoPessoasCategoria();
+                SegmentacaoPessoasPeriodo periodo = new SegmentacaoPessoasPeriodo();
+
+                RelatoriosPortalRestDAO dao = new RelatoriosPortalRestDAO(sNomeCliente, tokenAutenticacao);
+                DataUltimaAtualizacao retorno = dao.BuscarDataUltimaAtualizacao(xApiKey);
+
+
+                if (retorno != null)
+                {
+
+                    return Request.CreateResponse(HttpStatusCode.OK, retorno);
+
+                }
+
+                else
+                {
+                    DadosLog dadosLog = new DadosLog
+                    {
+                        des_erro_tecnico = "Ocorreu um erro ao buscar as informações da YHUB no endpoint: Buscar data ultima atualizacao" + retorno.ToJson()
+                    };
+
+                    Log.InserirLogIzio(sNomeCliente, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
+
+                    listaErros.errors.Add(new Erros
+                    {
+                        code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(),
+                        message = "Ocorreu um erro ao buscar os dados."
+                    });
+                    return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
+                }
+
+  
+
+            }
+            catch (Exception ex)
+            {
+                DadosLog dadosLog = new DadosLog
+                {
+                    des_erro_tecnico = ex.ToString()
+                };
+
+                Log.InserirLogIzio(sNomeCliente, dadosLog, System.Reflection.MethodBase.GetCurrentMethod());
+
+                listaErros.errors.Add(
+                    new Erros
+                    {
+                        code = Convert.ToInt32(HttpStatusCode.InternalServerError).ToString(),
+                        message = ex.Message
+                    });
+
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
+            }
+        }
     }
 }
 

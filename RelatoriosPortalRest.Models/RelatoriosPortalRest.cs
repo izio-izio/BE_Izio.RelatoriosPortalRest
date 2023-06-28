@@ -279,4 +279,9 @@ namespace RelatoriosPortalRest.Models
         public double prata_ouro { get; set; }
     }
 
+    public class DataUltimaAtualizacao: Headers
+    {
+
+    }
+
 }
