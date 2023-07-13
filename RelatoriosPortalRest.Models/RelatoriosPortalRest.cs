@@ -259,6 +259,7 @@ namespace RelatoriosPortalRest.Models
         public double ticket_medio { get; set; }
         public double frequencia { get; set; }
         public double gasto_medio { get; set; }
+        public double pct_clube { get; set; }
     }
 
     public class SegmentacaoPessoasPeriodo: Headers
