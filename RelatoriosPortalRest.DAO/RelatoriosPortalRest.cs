@@ -335,10 +335,11 @@ namespace RelatoriosPortalRest.DAO
             return Tuple.Create(segmento, produto);
         }
 
-        public GastoPorGrupoAgregado GastoPorGrupo(string xApiKey, string codLoja = "", string primeiraData = "", string ultimaData = "")
+        public Tuple<GastoPorGrupoAgregado, GastoPorGrupo3090> GastoPorGrupo(string xApiKey, string codLoja = "", string primeiraData = "", string ultimaData = "", int periodo = 1)
         {
             string sFiltros = "";
             GastoPorGrupoAgregado data = new GastoPorGrupoAgregado();
+            GastoPorGrupo3090 dataAgregado = new GastoPorGrupo3090();
             List<Header> lstHeader = new List<Header>();
 
             if (!String.IsNullOrEmpty(codLoja))
@@ -354,6 +355,11 @@ namespace RelatoriosPortalRest.DAO
             if (!String.IsNullOrEmpty(ultimaData))
             {
                 sFiltros += $@"&ultimaData={ultimaData}";
+            }
+
+            if (periodo > 0)
+            {
+                sFiltros += $@"&periodo={periodo}";
             }
 
 
@@ -373,8 +379,16 @@ namespace RelatoriosPortalRest.DAO
 
                 if (response != null)
                 {
-                   data = JsonConvert.DeserializeObject<GastoPorGrupoAgregado>(response);
+                    if (periodo == 1)
+                    {
+                        dataAgregado = JsonConvert.DeserializeObject<GastoPorGrupo3090>(response);
+                    }
+                    else
+                    {
+                        data = JsonConvert.DeserializeObject<GastoPorGrupoAgregado>(response);
+                    }
                 }
+
             }
 
             catch (Exception ex)
@@ -382,7 +396,7 @@ namespace RelatoriosPortalRest.DAO
                 throw ex;
             }
 
-            return data;
+            return Tuple.Create(data, dataAgregado);
         }
 
         public LojaReceita LojaReceita(string xApiKey, string codLoja = "", string primeiraData = "", string ultimaData = "")

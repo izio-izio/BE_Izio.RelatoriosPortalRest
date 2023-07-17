@@ -1173,10 +1173,14 @@ namespace RelatoriosPortalRest.Controllers
         ///     A API de consulta no lambda as informações dos usuários no endpoint gasto-grupo.
         ///     
         ///     <para>
-        ///         Para cada tipo de filtro de entrada é retornado um objeto.
-        ///         Fluxo
+        ///         Fluxo 1
+        ///             periodo = 0: Retorna as informações de gasto por grupo com filtro de datas;
         ///             codLoja: É possível combinar com o filtro de lojas;
-        ///             primeiraData e ultimaData: obrigatórias para o período de análise;
+        ///             primeiraData e ultimaData: devem ser informadas as 2 datas para análise no formato YYYYMMDD;
+        ///         Fluxo 2
+        ///             arvore = 1: Retorna as informações de produtos mais vendidos por período de 30 e 90 dias agregado;
+        ///             codLoja = É possível combinar com o filtro de lojas;
+        ///             primeiraData e ultimaData: devem ser vazias;
         ///     </para>
         ///     
         ///     ### Filtros QueryParam ###
@@ -1196,13 +1200,14 @@ namespace RelatoriosPortalRest.Controllers
         /// <param name="codLoja">Código das lojas separados por vírgula</param>
         /// <param name="primeiraData">Data inicial (YYYYMMDD)</param>
         /// <param name="ultimaData">Data final (YYYYMMDD)</param>
+        /// <param name="periodo">Default = 1 (0 ou 1)</param>
         /// <returns></returns>
         [HttpGet, Utilidades.ValidaTokenAutenticacao]
         [Route("api/Relatorios/GastoPorGrupo")]
         [SwaggerResponse("200", typeof(GastoPorGrupoAgregado))]
         [SwaggerResponse("500", typeof(ApiErrors))]
         [SwaggerResponse("401", typeof(ApiErrors))]
-        public HttpResponseMessage GastoPorGrupo(string primeiraData, string ultimaData, string codLoja = "")
+        public HttpResponseMessage GastoPorGrupo(string primeiraData = "", string ultimaData = "", int periodo = 1, string codLoja = "")
         {
             #region variáveis e objetos usados no processamento           
             string sNomeCliente = null;
@@ -1216,49 +1221,68 @@ namespace RelatoriosPortalRest.Controllers
 
             #region Validação campos de entrada
 
-            if (!string.IsNullOrEmpty(primeiraData) && string.IsNullOrEmpty(ultimaData))
+            if(periodo == 0)
             {
-                listaErros.errors.Add(new Erros
-                {
-                    code = Convert.ToInt32(HttpStatusCode.BadRequest).ToString(),
-                    message = "Ultima data deve ser informada."
-                });
-                return Request.CreateResponse(HttpStatusCode.BadRequest, listaErros);
-            }
-
-            if (string.IsNullOrEmpty(primeiraData) && !string.IsNullOrEmpty(ultimaData))
-            {
-                listaErros.errors.Add(new Erros
-                {
-                    code = Convert.ToInt32(HttpStatusCode.BadRequest).ToString(),
-                    message = "Primeira data deve ser informada."
-                });
-                return Request.CreateResponse(HttpStatusCode.BadRequest, listaErros);
-            }
-
-            if (string.IsNullOrEmpty(primeiraData) && string.IsNullOrEmpty(ultimaData))
-            {
-                listaErros.errors.Add(new Erros
-                {
-                    code = Convert.ToInt32(HttpStatusCode.BadRequest).ToString(),
-                    message = "É necessário inserir a data para pesquisa."
-                });
-                return Request.CreateResponse(HttpStatusCode.BadRequest, listaErros);
-            }
-
-            if (!string.IsNullOrEmpty(primeiraData) && !string.IsNullOrEmpty(ultimaData))
-            {
-                DateTime primeira = DateTime.ParseExact(primeiraData, "yyyyMMdd", CultureInfo.InvariantCulture);
-                DateTime ultima = DateTime.ParseExact(ultimaData, "yyyyMMdd", CultureInfo.InvariantCulture);
-
-                if (ultima < primeira)
+                if (!string.IsNullOrEmpty(primeiraData) && string.IsNullOrEmpty(ultimaData))
                 {
                     listaErros.errors.Add(new Erros
                     {
                         code = Convert.ToInt32(HttpStatusCode.BadRequest).ToString(),
-                        message = "Primeira data deve ser menor que a última data para análise."
+                        message = "Ultima data deve ser informada."
                     });
                     return Request.CreateResponse(HttpStatusCode.BadRequest, listaErros);
+                }
+
+                if (string.IsNullOrEmpty(primeiraData) && !string.IsNullOrEmpty(ultimaData))
+                {
+                    listaErros.errors.Add(new Erros
+                    {
+                        code = Convert.ToInt32(HttpStatusCode.BadRequest).ToString(),
+                        message = "Primeira data deve ser informada."
+                    });
+                    return Request.CreateResponse(HttpStatusCode.BadRequest, listaErros);
+                }
+
+                if (string.IsNullOrEmpty(primeiraData) && string.IsNullOrEmpty(ultimaData))
+                {
+                    listaErros.errors.Add(new Erros
+                    {
+                        code = Convert.ToInt32(HttpStatusCode.BadRequest).ToString(),
+                        message = "É necessário inserir a data para pesquisa."
+                    });
+                    return Request.CreateResponse(HttpStatusCode.BadRequest, listaErros);
+                }
+
+                if (!string.IsNullOrEmpty(primeiraData) && !string.IsNullOrEmpty(ultimaData))
+                {
+                    DateTime primeira = DateTime.ParseExact(primeiraData, "yyyyMMdd", CultureInfo.InvariantCulture);
+                    DateTime ultima = DateTime.ParseExact(ultimaData, "yyyyMMdd", CultureInfo.InvariantCulture);
+
+                    if (ultima < primeira)
+                    {
+                        listaErros.errors.Add(new Erros
+                        {
+                            code = Convert.ToInt32(HttpStatusCode.BadRequest).ToString(),
+                            message = "Primeira data deve ser menor que a última data para análise."
+                        });
+                        return Request.CreateResponse(HttpStatusCode.BadRequest, listaErros);
+                    }
+                }
+            }
+
+
+
+            else
+            {
+                if (!string.IsNullOrEmpty(primeiraData) && !string.IsNullOrEmpty(ultimaData))
+                {
+
+                        listaErros.errors.Add(new Erros
+                        {
+                            code = Convert.ToInt32(HttpStatusCode.BadRequest).ToString(),
+                            message = "Periodo deve ser 0 para pesquisar por datas."
+                        });
+                        return Request.CreateResponse(HttpStatusCode.BadRequest, listaErros);
                 }
             }
 
@@ -1276,16 +1300,31 @@ namespace RelatoriosPortalRest.Controllers
                 string xApiKey = listParam["yhub-xapikey"];
 
                 GastoPorGrupoAgregado dataAgregado = new GastoPorGrupoAgregado();
+                GastoPorGrupo3090 data = new GastoPorGrupo3090();
 
                 RelatoriosPortalRestDAO dao = new RelatoriosPortalRestDAO(sNomeCliente, tokenAutenticacao);
-                GastoPorGrupoAgregado retorno = dao.GastoPorGrupo(xApiKey, codLoja, primeiraData, ultimaData);
+                Tuple<GastoPorGrupoAgregado, GastoPorGrupo3090> retorno = dao.GastoPorGrupo(xApiKey, codLoja, primeiraData, ultimaData, periodo);
+
+                dataAgregado = retorno.Item1;
+                data = retorno.Item2;
 
                 if (retorno != null)
                 {
-                    if(retorno.statusCode == 200)
+
+                    if (retorno.Item1.statusCode == 200 || retorno.Item2.statusCode == 200)
                     {
-                        return Request.CreateResponse(HttpStatusCode.OK, retorno);
+
+                        if (periodo == 0)
+                        {
+                            return Request.CreateResponse(HttpStatusCode.OK, dataAgregado);
+                        }
+
+                        else
+                        {
+                            return Request.CreateResponse(HttpStatusCode.OK, data);
+                        }
                     }
+
                     else
                     {
                         DadosLog dadosLog = new DadosLog
@@ -1302,6 +1341,7 @@ namespace RelatoriosPortalRest.Controllers
                         });
                         return Request.CreateResponse(HttpStatusCode.InternalServerError, listaErros);
                     }
+
                 }
 
                 else

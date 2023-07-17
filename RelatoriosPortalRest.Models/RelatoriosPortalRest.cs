@@ -198,6 +198,11 @@ namespace RelatoriosPortalRest.Models
         public double porcentagem_nao_identificada { get; set; }
     }
 
+    public class GastoPorGrupo3090 : Headers
+    {
+        public Dictionary<string, List<GastoPorGrupo>> dataAgregado { get; set; }
+    }
+
     public class SegmentoMaiVendidoAgregado: Headers
     {
         public List<SegmentoMaisVendido> dataAgregado { get; set; }
