@@ -26,7 +26,7 @@ namespace RelatoriosPortalRest.DAO
             TokenRest = _token;
         }
 
-        public PessoasDistintas BuscarTotalDeClientes(string xApiKey, string primeiraData, string ultimaData, string codLoja = "")
+        public PessoasDistintas BuscarTotalDeClientes(string xApiKey, string primeiraData, string ultimaData)
         {
             string sFiltros = "";
             PessoasDistintas data = new PessoasDistintas();
@@ -40,11 +40,6 @@ namespace RelatoriosPortalRest.DAO
             {
                 sFiltros += $@"&ultimaData={ultimaData}";
             }
-            if (!String.IsNullOrEmpty(codLoja))
-            {
-                sFiltros += $@"&codLoja={codLoja}"; 
-            }
-
 
 
             string url = $@"https://bmil5p9rj7.execute-api.us-east-1.amazonaws.com/prod/izio/progbeneficios/pessoa-distintas-vendas?varejo={NomeClienteWs.ToLower()}{sFiltros}";

@@ -56,7 +56,7 @@ namespace RelatoriosPortalRest.Controllers
         [SwaggerResponse("200", typeof(PessoasDistintas))]
         [SwaggerResponse("500", typeof(ApiErrors))]
         [SwaggerResponse("401", typeof(ApiErrors))]
-        public HttpResponseMessage TotalDeClientes(string primeiraData, string ultimaData, string codLoja = "")
+        public HttpResponseMessage TotalDeClientes(string primeiraData, string ultimaData)
         {
             #region variáveis e objetos usados no processamento           
             string sNomeCliente = null;
@@ -132,7 +132,7 @@ namespace RelatoriosPortalRest.Controllers
                 PessoasDistintas data = new PessoasDistintas();
 
                 ProgramaBeneficioDAO dao = new ProgramaBeneficioDAO(sNomeCliente, tokenAutenticacao);
-                PessoasDistintas retorno = dao.BuscarTotalDeClientes(xApiKey, primeiraData, ultimaData, codLoja);
+                PessoasDistintas retorno = dao.BuscarTotalDeClientes(xApiKey, primeiraData, ultimaData);
 
                 data = retorno;
 
